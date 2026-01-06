@@ -1,6 +1,8 @@
 {
-    "id": "",
     "email": "",
     "name": "",
-    "password": ""
+    "password": "",
+    "role": "admin || student",
+    "createdAt": "",
+    "updatedAt": ""
 }

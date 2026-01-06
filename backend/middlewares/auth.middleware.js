@@ -5,5 +5,5 @@ export function authenticateToken(token) {
 
   if (!token) return res.sendStatus(401);
   
-
+  
 }

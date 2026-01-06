@@ -10,8 +10,10 @@ const app = express()
 app.use(express.urlencoded())
 app.use(express.json())
 
+//for intial user.
 app.post('/login', login)
 app.post('/register', register)
+app.post('/logout', logout)
 
 app.listen(3000, () => {
     console.log("App is Running on the port 3000")
