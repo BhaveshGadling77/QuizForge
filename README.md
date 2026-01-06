@@ -69,4 +69,6 @@ Backend skills shown: Auth flow, middleware, security
 - Leaderboard sorted by score
 - Timestamp-based tie-breaker
 
- Backend skills shown: sorting, aggregation logic (manual)
+Backend skills shown: sorting, aggregation logic (manual)
+
+techstack :- Firebase, Nodejs, ExpressJs, Reactjs.
