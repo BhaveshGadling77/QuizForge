@@ -1,5 +1,6 @@
 import express from 'express'
 import bcrypt from 'bcrypt'
+import {authenticateToken} from './middlewares/auth.middleware.js'
 import { login } from './routes/login.js'
 import { logout } from './routes/logout.js'
 import { register } from './routes/register.js'
@@ -20,6 +21,11 @@ app.use(express.urlencoded())
 app.use(express.json())
 
 
+//User protected route
+
+app.post('/users', authenticateToken,(req, res) => {
+  console.log("Something is running.")
+})
 //for intial user login and register functionality.
 app.post('/login', login)
 app.post('/register', register)
