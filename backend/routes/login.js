@@ -22,7 +22,6 @@ export async function login(req, res) {
       const token = generateAccessToken({ id, role, name, email });
       return res.json({ token });
     }
-
     return res.json({ msg: "Password is Wrong" });
   } catch (e) {
     res.sendStatus(500);

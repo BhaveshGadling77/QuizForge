@@ -21,4 +21,16 @@ async function getUserList() {
     throw Error(e.message);
   }
 }
-export { createUser, getUserList };
+
+async function getUser(id) {
+  const docRef = doc(db, "cities", "SF");
+  const docSnap = await getDoc(docRef);
+
+  if (docSnap.exists()) {
+    console.log("Document data:", docSnap.data());
+  } else {
+    // docSnap.data() will be undefined in this case
+    console.log("No such document!");
+  }
+}
+export { createUser, getUserList, getUser };

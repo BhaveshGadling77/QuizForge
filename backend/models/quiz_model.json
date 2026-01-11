@@ -1,0 +1,26 @@
+{
+  "quizId": "string /* Unique identifier for the quiz */",
+  "accessToken": "string /* The access token for the quiz if private */",
+  "createdAt": "timestamp /* The ISO 8601 timestamp when the quiz was created */",
+  "questions": [
+    {
+      "question_id": {
+        "correctOptionIndex": 0,
+        "createdAt": "timestamp /* The ISO 8601 timestamp when the quiz was created */",
+        "options": [
+          "array of string /* An array of possible answer options */"
+        ],
+        "questionMd": "string /* The markdown content of the question */",
+        "order": 1,
+        "points": 10,
+        "questionType": "multiple-choice || true-false || short-answer"
+      }
+    }
+  ],
+  "description": "string /* A brief description of the quiz */",
+  "isActive": "boolean /* Indicates if the quiz is currently active */",
+  "title": "string /* The title of the quiz */",
+  "totalPoints": 100,
+  "totalQuestions": 10,
+  "visibility": "public || private"
+}
