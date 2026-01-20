@@ -1,4 +1,5 @@
 export function authorizeRoles(req, res, next) {
+  let allowedRoles = ["admin", "user"]
   if (!req.user)
     return res.status(401).json({ error: "User not authenticated" });
 
