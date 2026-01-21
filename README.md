@@ -24,14 +24,14 @@ Backend skills shown: Auth flow, middleware, security
 
 ## Student Features
 
-- [] View list of active quizzes
-- [] View quiz details
-- [] Attempt quiz (MCQ-based)
-- [] Submit quiz answers
-- [] Score calculated on backend
-- [] View quiz result immediately
-- [] View past quiz attempts
-- [] View leaderboard (per quiz)
+- [ ] View list of active quizzes
+- [ ] View quiz details
+- [ ] Attempt quiz (MCQ-based)
+- [ ] Submit quiz answers
+- [ ] Score calculated on backend
+- [ ] View quiz result immediately
+- [ ] View past quiz attempts
+- [ ] View leaderboard (per quiz)
 
  Backend logic shown: evaluation, validation, data filtering
 
