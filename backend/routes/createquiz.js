@@ -10,6 +10,7 @@ export async function createQuiz(req, res) {
     totalQuestions,
     questions,
     totalPoints,
+    isActive = true,
   } = req.body;
   // console.log(req)
   //validate the this fields
@@ -26,6 +27,7 @@ export async function createQuiz(req, res) {
       totalQuestions,
       questions,
       visibility,
+      isActive
     });
     res.json({ msg: "data saved Successfully." });
   }
@@ -38,6 +40,7 @@ export async function createQuiz(req, res) {
     totalQuestions,
     questions,
     visibility,
+    isActive
   });
   res.json({msg: "Data saved Successfully."})
 }

@@ -9,6 +9,7 @@ export async function uploadQuiz({
   totalQuestions,
   questions,
   visibility,
+  isActive
 }) {
   try {
     //get the ref of the quizzes collection
@@ -21,6 +22,7 @@ export async function uploadQuiz({
       visibility,
       totalPoints,
       totalQuestions,
+      isActive
     });
 
     console.log("Quiz doc id = ", quizDocRef.id);
@@ -35,3 +37,5 @@ export async function uploadQuiz({
     console.log(e.message);
   }
 }
+
+
