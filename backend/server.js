@@ -18,7 +18,7 @@ import {
 const app = express()
 
 //built in middlewares
-app.use(express.urlencoded())
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json())
 
 
@@ -36,8 +36,6 @@ app.post('/logout', logout)
 // Quiz functionality.
 // Create quiz
 app.post('/api/admin/quizzes', createQuiz)
-
-
 
 app.listen(3000, () => {
     console.log("App is Running on the port 3000")

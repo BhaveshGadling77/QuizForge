@@ -1,5 +1,8 @@
+import { uploadQuiz } from "../utils/quizzes.utils.js";
+
 export async function createQuiz(req, res) {
-  const {
+  console.log(req.body);
+  let {
     title,
     description,
     visibility,
@@ -8,5 +11,33 @@ export async function createQuiz(req, res) {
     questions,
     totalPoints,
   } = req.body;
-  
+  // console.log(req)
+  //validate the this fields
+
+  if (visibility == "private") {
+    if (!accessToken) {
+      return res.status(401).json({ msg: "access token is invalid" });
+    }
+    await uploadQuiz({
+      title,
+      description,
+      accessToken,
+      totalPoints,
+      totalQuestions,
+      questions,
+      visibility,
+    });
+    res.json({ msg: "data saved Successfully." });
+  }
+  accessToken = null
+  await uploadQuiz({
+    title,
+    description,
+    accessToken,
+    totalPoints,
+    totalQuestions,
+    questions,
+    visibility,
+  });
+  res.json({msg: "Data saved Successfully."})
 }
