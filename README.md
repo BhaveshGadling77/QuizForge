@@ -8,7 +8,7 @@ A Secure Online Quiz & Assessment Platform
 - [x] JWT token generation
 - [x] JWT verification middleware
 - [x] Role-based access control (admin, student)
-- [ ] Protected routes using middleware
+- [x] Protected routes using middleware
 - [ ] Logout (client-side token removal)
 
 Backend skills shown: Auth flow, middleware, security
