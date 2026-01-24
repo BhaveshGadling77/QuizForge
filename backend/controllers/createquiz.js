@@ -12,7 +12,7 @@ export async function createQuiz(req, res) {
     totalPoints,
     isActive = true,
   } = req.body;
-  // console.log(req)
+  console.log(req.body)
   //validate the this fields
 
   if (visibility == "private") {

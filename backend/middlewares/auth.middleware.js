@@ -9,18 +9,20 @@ export async function authenticateToken(req, res, next) {
   
   try {
     const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
-    req.user = await findById(decoded) //find the user in the firebase db.
+    const v = await findById(decoded) //find the user in the firebase db.
+    console.log(v)
 
+    req.user = v;
     //if user dosen't exist.
 
     if (!req.user) {
-      return res.status(401).json({error: "User Not Found"})
+      return res.status(403).json({error: "User Not Found"})
     }
     //if everything goes fine then call next()
-    
+    console.log(token)
     next()
   } catch(e) {
     console.log(e.message)
-    res.sendStatus(403).json({error : e.message})
+    return res.status(403).json({error : e.message})
   }
 }
