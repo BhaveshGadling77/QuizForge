@@ -1,42 +1,23 @@
+import authRoutes from './routes/auth.routes.js'
 import express from 'express'
-import bcrypt from 'bcrypt'
-import {authenticateToken} from './middlewares/auth.middleware.js'
-import { login } from './routes/login.js'
-import { logout } from './routes/logout.js'
-import { register } from './routes/register.js'
-import { db } from './config/firebase-config.js'
-import {createQuiz} from './routes/createquiz.js'
-import {
-  doc,
-  setDoc,
-  getDoc,
-  collection,
-  addDoc,
-} from "firebase/firestore";
+import adminRoutes from './routes/adminQuiz.routes.js'
+import userRoutes from './routes/user.routes.js' 
 
+const app = express();
 
-const app = express()
-
-//built in middlewares
-app.use(express.urlencoded({ extended: true }));
 app.use(express.json())
+app.use(express.urlencoded())
 
 
-//User protected route
+//auth routes
+app.use('/api/auth', authRoutes)
 
-app.post('/users', authenticateToken, (req, res) => {
-  console.log("Something is running.")
-})
-//for intial user login and register functionality.
-app.post('/login', login)
-app.post('/register', register)
-app.post('/logout', logout)
+//admin routes
+app.use('/api/admin/', adminRoutes);
 
+//user routes
+app.use('/users', userRoutes)
 
-// Quiz functionality.
-// Create quiz
-app.post('/api/admin/quizzes', createQuiz)
-
-app.listen(3000, () => {
-    console.log("App is Running on the port 3000")
+app.listen(process.env.PORT, () => {
+  console.log("Process is successfully running.")
 })
