@@ -5,6 +5,7 @@ export async function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(" ")[1];
   
+  // const token = req.cookies.quizforge_token //this is for production only.
   if (!token) return res.sendStatus(401);
   
   try {
