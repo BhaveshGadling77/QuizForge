@@ -1,5 +1,5 @@
-import { db } from "../config/firebase-config.js"; // your Firebase setup
-import { doc, getDoc, updateDoc, arrayUnion } from "firebase/firestore";
+import { db } from "../config/firebase-config.js";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 
 export async function updateQuiz(req, res) {
   try {
