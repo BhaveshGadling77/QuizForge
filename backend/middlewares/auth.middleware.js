@@ -1,29 +1,17 @@
-import  jwt  from 'jsonwebtoken'
-import { findById } from '../utils/users.utils.js'
+import { AuthenticationService } from "../services/authentication.service.js";
+
+const authService = new AuthenticationService();
 
 export async function authenticateToken(req, res, next) {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(" ")[1];
-  
-  // const token = req.cookies.quizforge_token //this is for production only.
-  if (!token) return res.sendStatus(401);
-  
   try {
-    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
-    const v = await findById(decoded) //find the user in the firebase db.
-    console.log(v)
+    const authHeader = req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1];
 
-    req.user = v;
-    //if user dosen't exist.
+    const user = await authService.verifyAccessToken(token);
 
-    if (!req.user) {
-      return res.status(403).json({error: "User Not Found"})
-    }
-    //if everything goes fine then call next()
-    console.log(token)
-    next()
-  } catch(e) {
-    console.log(e.message)
-    return res.status(403).json({error : e.message})
+    req.user = user;
+    next();
+  } catch (e) {
+    return res.status(401).json({ error: e.message });
   }
 }

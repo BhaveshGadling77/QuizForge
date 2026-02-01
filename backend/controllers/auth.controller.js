@@ -1,91 +1,62 @@
-import { getUserList, createUser } from "../utils/users.utils.js";
-import { serverTimestamp } from 'firebase/firestore'
-import { generateAccessToken } from "../services/token.service.js";
-import bcrypt from "bcrypt";
+import { AuthService } from "../services/auth.service.js";
 
-//register controller
+const authService = new AuthService();
+
+// REGISTER
 export async function register(req, res) {
-    try {
-        const hashPassword = await bcrypt.hash(req.body.password, 10)
-        console.log(hashPassword) // for debugging purpose.
-        console.log(req.body)
-        const user = {
-            name : req.body.name,
-            role: req.body.role,
-            password: hashPassword,
-            email : req.body.email,
-            updatedAt: serverTimestamp(),
-            createdAt: serverTimestamp(),
-        }
-        const doc = await createUser(user)
-        res.send({id : doc.id})
+  try {
+    const userId = await authService.registerUser(req.body);
 
-    } catch(e) {
-        console.log(e.message)
-        res.status(500).send({msg : e.message})
-    }
+    return res.status(201).json({
+      msg: "User registered successfully",
+      userId,
+    });
+  } catch (e) {
+    return res.status(400).json({
+      error: e.message,
+    });
+  }
 }
 
-//login controller
+// LOGIN
 export async function login(req, res) {
   try {
-    const data = await getUserList();
-    const { email, password } = req.body;
+    const { token } = await authService.loginUser(req.body);
 
-    // if Missing credentials
-    if (!email || !password) {
-      return res.status(400).json({ msg: "Missing credentials" });
-    }
-
-    // Find user
-    const user = data.find((u) => u.email === email);
-
-    if (!user) {
-      return res.status(404).json({ msg: "User not found" });
-    }
-
-    // Password check
-    const isMatch = await bcrypt.compare(password, user.password);
-
-    if (!isMatch) {
-      return res.status(401).json({ msg: "Incorrect password" });
-    }
-
-    // Generate token
-    const { id, role, name } = user;
-    const token = generateAccessToken({ id, role, name, email });
-
-    // Set cookie
+    // Cookie (for browser usage)
     res.cookie("quizforge_token", token, {
       httpOnly: true,
-      secure: false, // true in production (HTTPS)
+      secure: false, // true in production
       sameSite: "lax",
       maxAge: 24 * 60 * 60 * 1000,
     });
 
-    return res.status(200).json({ msg: "Login successful" });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ msg: "Internal Server Error" });
+    return res.status(200).json({
+      msg: "Login successful",
+      token, // optional (useful for mobile apps)
+    });
+  } catch (e) {
+    return res.status(401).json({
+      error: e.message,
+    });
   }
 }
 
-// logout controller
+// LOGOUT
 export async function logout(req, res) {
   try {
     res.clearCookie("quizforge_token", {
       httpOnly: true,
       sameSite: "lax",
-      secure: false, // true in production
+      secure: false,
     });
-    
+
     return res.status(200).json({
       msg: "Logout successful",
     });
   } catch (e) {
-    console.error("Logout Error:", e);
     return res.status(500).json({
-      msg: "Internal Server Error",
+      error: "Logout failed",
     });
   }
 }
