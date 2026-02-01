@@ -9,7 +9,7 @@ A Secure Online Quiz & Assessment Platform
 - [x] JWT verification middleware
 - [x] Role-based access control (admin, student)
 - [x] Protected routes using middleware
-- [ ] Logout (client-side token removal)
+- [x] Logout (client-side token removal)
 
 Backend skills shown: Auth flow, middleware, security
 
@@ -24,8 +24,8 @@ Backend skills shown: Auth flow, middleware, security
 
 ## Student Features
 
-- [ ] View list of active quizzes
-- [ ] View quiz details
+- [x] View list of active quizzes
+- [x] View quiz details
 - [ ] Attempt quiz (MCQ-based)
 - [ ] Submit quiz answers
 - [ ] Score calculated on backend
