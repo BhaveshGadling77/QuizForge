@@ -1,4 +1,4 @@
-import { db } from "../config/firebase-config.js";
+import { db } from "../config/firebase.config.js";
 import { addDoc, collection, doc, getDocs, getDoc } from "firebase/firestore";
 
 export async function uploadQuiz({
@@ -9,7 +9,7 @@ export async function uploadQuiz({
   totalQuestions,
   questions,
   visibility,
-  isActive
+  isActive,
 }) {
   try {
     //get the ref of the quizzes collection
@@ -22,12 +22,15 @@ export async function uploadQuiz({
       visibility,
       totalPoints,
       totalQuestions,
-      isActive
+      isActive,
     });
 
     console.log("Quiz doc id = ", quizDocRef.id);
     // logic behind adding questions in the
-    const questionsRef = collection(quizDocRef, process.env.COLLECTION_QUESTIONS);
+    const questionsRef = collection(
+      quizDocRef,
+      process.env.COLLECTION_QUESTIONS,
+    );
     // loop through each element and upload that in the doc
     for (let question of questions) {
       const questionDocRef = await addDoc(questionsRef, question);
@@ -37,5 +40,3 @@ export async function uploadQuiz({
     console.log(e.message);
   }
 }
-
-

@@ -1,6 +1,4 @@
-import { createQuiz } from "../controllers/createquiz.js";
-import { updateQuiz } from "../controllers/updatequiz.js";
-import { deleteQuiz } from "../controllers/deletequiz.js";
+import { createQuiz, updateQuiz, deleteQuiz } from '../controllers/quiz.controller.js'
 import { authenticateToken } from "../middlewares/auth.middleware.js";
 import { authorizeRoles } from "../middlewares/authRole.middleware.js";
 import express from "express";

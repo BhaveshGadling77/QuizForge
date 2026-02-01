@@ -1,4 +1,4 @@
-import { db } from "../config/firebase-config.js";
+import { db } from "../config/firebase.config.js";
 import { addDoc, collection, doc, getDocs, getDoc } from "firebase/firestore";
 
 //this is for the storing the users details in the database.
@@ -23,7 +23,7 @@ async function getUserList() {
 }
 
 async function findById(id) {
-  const docRef = doc(db, "users", id)
+  const docRef = doc(db, "users", id);
   const docSnap = await getDoc(docRef);
 
   if (docSnap.exists()) {

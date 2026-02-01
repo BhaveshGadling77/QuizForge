@@ -1,6 +1,6 @@
 import express from "express";
 import { authenticateToken } from "../middlewares/auth.middleware.js";
-import { getActiveQuizzes } from "../controllers/getactivequizzes.js";
+import { getActiveQuizzes } from "../controllers/quiz.controller.js";
 const router = express.Router();
 
 router.post("/", authenticateToken, (req, res) => {
