@@ -1,7 +1,9 @@
-export function authorizeRoles(req, res, next) {
+export function authorizeAdminRole(req, res, next) {
   if (req.user.role != 'admin') {
     return res.status(403).json({msg: "Admin Access Required."})
   }
 
   next()
 }
+
+

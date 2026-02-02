@@ -26,7 +26,7 @@ Backend skills shown: Auth flow, middleware, security
 
 - [x] View list of active quizzes
 - [x] View quiz details
-- [ ] Attempt quiz (MCQ-based)
+- [x] Attempt quiz (MCQ-based)
 - [ ] Submit quiz answers
 - [ ] Score calculated on backend
 - [ ] View quiz result immediately
@@ -58,7 +58,7 @@ Backend skills shown: Auth flow, middleware, security
 - [x] Multiple options per question
 - [x] Single correct answer
 - [ ] Quiz status (active / inactive)
-- [ ] One attempt per user (optional but good)
+- [x] One attempt per user (optional but good)
 
 ---
 

@@ -1,11 +1,8 @@
 import jwt from "jsonwebtoken";
 import { findById } from "../utils/users.utils.js";
 
-export class AuthenticationService {
+export class AuthService {
   
-  constructor() {
-
-  }
   //verify 
   async verifyAccessToken(token) {
     if (!token) {

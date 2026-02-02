@@ -1,6 +1,6 @@
-import { AuthenticationService } from "../services/authentication.service.js";
+import { AuthService } from "../services/auth.service.js";
 
-const authService = new AuthenticationService();
+const authService = new AuthService();
 
 export async function authenticateToken(req, res, next) {
   try {

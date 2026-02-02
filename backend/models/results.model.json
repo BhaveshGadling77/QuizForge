@@ -1,0 +1,30 @@
+{
+  "quizId": "quiz123",
+  "userId": "user456",
+
+  "score": 80,
+  "totalPoints": 100,
+  "percentage": 80,
+
+  "correctCount": 8,
+  "totalQuestions": 10,
+
+  "answers": [
+    {
+      "questionId": "q1",
+      "selectedOptionIndex": 0,
+      "isCorrect": true,
+      "pointsEarned": 10
+    },
+    {
+      "questionId": "q2",
+      "selectedOptionIndex": 2,
+      "isCorrect": false,
+      "pointsEarned": 0
+    }
+  ],
+
+  "attemptNumber": 1,
+  "submittedAt": "timestamp",
+  "timeTakenSeconds": 320
+}

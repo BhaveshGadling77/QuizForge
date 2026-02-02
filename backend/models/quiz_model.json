@@ -4,7 +4,7 @@
   "createdAt": "timestamp /* The ISO 8601 timestamp when the quiz was created */",
   "questions": [
     {
-      "question_id": {
+        "questionId": "string /* Unique identifier for the question */",
         "correctOptionIndex": 0,
         "createdAt": "timestamp /* The ISO 8601 timestamp when the quiz was created */",
         "options": [
@@ -14,7 +14,6 @@
         "order": 1,
         "points": 10,
         "questionType": "multiple-choice || true-false || short-answer"
-      }
     }
   ],
   "description": "string /* A brief description of the quiz */",

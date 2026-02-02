@@ -11,8 +11,10 @@ import {
   getDocs,
 } from "firebase/firestore";
 
+
 export class QuizService {
   constructor(db) {
+    this.db = db
     this.quizCollection = collection(db, process.env.COLLECTION_QUIZZES);
   }
   //admin specific methods 
@@ -90,5 +92,48 @@ export class QuizService {
       quizId: doc.id,
       ...doc.data(),
     }));
+  }
+
+  async getQuizData(quizId, userId) {
+    //get the quiz reference
+    const quizRef = this.db.collection(this.quizCollection).doc(quizId)
+
+    const quizSnap = await quizRef.get();
+
+    //get the snapshot of the quiz
+    if (!quizSnap) {
+      throw new Error("Quiz not Found")
+    }
+
+    //get the quiz data from the snapshot
+    const quiz = quizSnap.data();
+
+    if (!quiz.isActive) {
+      throw new Error("Quiz is not active")
+    }
+
+    //check if the the user already attempted the quiz
+    const attemptSnap = await this.db
+    .collection(this.quizCollection)
+    .where("quizId", "==", quizId)
+    .where("userId", "==", userId)
+    .get()
+
+    if (!attemptSnap.empty())
+      throw new Error("Quiz is already attempted.")
+
+    return {
+      id: quizId,
+      title: quiz.title,
+      description: quiz.description,
+      questions: quiz.questions
+                  .map((q) => ({
+                    id: q.questionId,
+                    question:q.questionMd,
+                    options: q.options,
+                    questionType: q.questionType,
+                    order: q.order
+                  }))
+    }
   }
 }

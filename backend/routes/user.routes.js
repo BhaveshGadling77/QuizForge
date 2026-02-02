@@ -9,5 +9,6 @@ router.post("/", authenticateToken, (req, res) => {
 
 router.get("/api/quizzes", authenticateToken, getActiveQuizzes)
 
+router.post("/api/quizzes/:quizId/attempt", authenticateToken, )
 
 export default router;
