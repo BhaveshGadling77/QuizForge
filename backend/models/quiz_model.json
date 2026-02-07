@@ -1,25 +1,27 @@
 {
-  "quizId": "string /* Unique identifier for the quiz */",
-  "accessToken": "string /* The access token for the quiz if private */",
-  "createdAt": "timestamp /* The ISO 8601 timestamp when the quiz was created */",
+  "quizId": "string /*firbase documentId*/",
+  "title": "string", 
+  "description": "string", 
+  "createdAt": "timestamp",
+  "isActive": true,
+  "visibility": "public | private",
+  "accessToken": "string | null",
+  "durationSeconds": 900,
+  "timerEnabled": true,
+  "autoSubmit": true,
+  "totalQuestions": 10,
+  "totalPoints": 100,
   "questions": [
     {
-        "questionId": "string /* Unique identifier for the question */",
-        "correctOptionIndex": 0,
-        "createdAt": "timestamp /* The ISO 8601 timestamp when the quiz was created */",
-        "options": [
-          "array of string /* An array of possible answer options */"
-        ],
-        "questionMd": "string /* The markdown content of the question */",
-        "order": 1,
-        "points": 10,
-        "questionType": "multiple-choice || true-false || short-answer"
+      "questionId": "string", 
+      "questionType": "mcq | true-false | short-integer | short-subjective",
+      "questionMd": "string// Markdown question content", 
+      "options": ["string // Only for mcq/true-false"], 
+      "correctOptionIndex": 0, 
+      "correctAnswer": 42, 
+      "points": 10,
+      "order": 1,
+      "createdAt": "timestamp"
     }
-  ],
-  "description": "string /* A brief description of the quiz */",
-  "isActive": "boolean /* Indicates if the quiz is currently active */",
-  "title": "string /* The title of the quiz */",
-  "totalPoints": 100,
-  "totalQuestions": 10,
-  "visibility": "public || private"
+  ]
 }

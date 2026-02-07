@@ -1,11 +1,11 @@
 {
-  "quizId": "quiz123",
-  "userId": "user456",
+  "resultId": "string",
+  "quizId": "string",
+  "userId": "string",
 
   "score": 80,
   "totalPoints": 100,
   "percentage": 80,
-
   "correctCount": 8,
   "totalQuestions": 10,
 
@@ -13,18 +13,17 @@
     {
       "questionId": "q1",
       "selectedOptionIndex": 0,
-      "isCorrect": true,
-      "pointsEarned": 10
-    },
-    {
-      "questionId": "q2",
-      "selectedOptionIndex": 2,
-      "isCorrect": false,
-      "pointsEarned": 0
+      "submittedAnswer": null,
+      "isCorrect":" true | false | null",
+      "pointsEarned": "10 | null",
+      "maxPoints": 10
     }
   ],
 
+  "evaluationStatus": "pending | evaluated",
+  "evaluatedBy": "adminId | null",
+  "evaluatedAt": "timestamp | null",
   "attemptNumber": 1,
-  "submittedAt": "timestamp",
-  "timeTakenSeconds": 320
+  "timeTakenSeconds": 320,
+  "submittedAt": "timestamp"
 }

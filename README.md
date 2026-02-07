@@ -27,8 +27,8 @@ Backend skills shown: Auth flow, middleware, security
 - [x] View list of active quizzes
 - [x] View quiz details
 - [x] Attempt quiz (MCQ-based)
-- [ ] Submit quiz answers
-- [ ] Score calculated on backend
+- [x] Submit quiz answers
+- [x] Score calculated on backend
 - [ ] View quiz result immediately
 - [ ] View past quiz attempts
 - [ ] View leaderboard (per quiz)
