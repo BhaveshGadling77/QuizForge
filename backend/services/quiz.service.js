@@ -79,6 +79,54 @@ export class QuizService {
     await deleteDoc(quizRef);
   }
 
+  async getQuizzesWithPendingResults() {
+    const resultsRef = collection(this.db, process.env.COLLECTION_RESULTS);
+
+    // Query all results that are pending
+    const q = query(resultsRef, where("evaluationStatus", "==", "pending"));
+    const snapshot = await getDocs(q);
+
+    // get the quiz which is pending.
+    const quizIds = new Set();
+    snapshot.docs.forEach((doc) => {
+      quizIds.add(doc.data().quizId);
+    });
+
+    // fetch the title and description.
+    const quizzes = [];
+    for (const quizId of quizIds) {
+      const quizRef = doc(req.db, process.env.COLLECTION_QUIZZES, quizId);
+      const quizSnap = await getDoc(quizRef);
+      if (quizSnap.exists()) {
+        quizzes.push({
+          quizId,
+          title: quizSnap.data().title,
+          description: quizSnap.data().description
+        });
+      }
+    }
+    return quizzes
+  }
+
+  async getPendingResults(quizId) {
+    const resultsRef = collection(this.db, process.env.COLLECTION_RESULTS);
+    const q = query(
+      resultsRef,
+      where("quizId", "==", quizId),
+      where("evaluationStatus", "==", "pending")
+    );
+
+    const snapshot = await getDocs(q);
+
+    const pendingResults = snapshot.docs.map((doc) => ({
+      resultId: doc.id,
+      userId: doc.data().userId,
+      submittedAt: doc.data().submittedAt,
+      timeTakenSeconds: doc.data().timeTakenSeconds,
+      answers: doc.data().answers, // to show short-subjective answers
+    }));
+    return pendingResults
+  }
   //user specific methods
   async getActivePublicQuizzes() {
     const q = query(
@@ -163,7 +211,6 @@ export class QuizService {
         }
       }
 
-
       //check for the previous attempt of the user.
 
       const attemptQuery = query(
@@ -246,41 +293,42 @@ export class QuizService {
           pointsEarned,
           maxPoints: question.points,
         };
-
-        //determine evaluation status
-        const evaluationStatus = hasManual ? "pending" : "evaluated";
-        //build the result doc
-
-        const resultDoc = {
-          quizId,
-          userId,
-          score: totalScore,
-          totalPoints: quiz.totalPoints,
-          percentage: (totalScore / quiz.totalPoints) * 100,
-          correctCount,
-          totalQuestions: quiz.totalQuestions,
-          answers: evaluatedAnswers,
-          evaluationStatus,
-          evaluatedBy: null,
-          evaluatedAt: null,
-          timeTakenSeconds,
-          submittedAt: Timestamp.now(),
-        };
-
-        //write result in transaction
-        const resultRef = doc(this.resultCollection);
-        tx.set(resultRef, resultDoc)
-        
-        //summary for frontend.
-        
-        return {
-          score: totalScore,
-          totalPoints: quiz.totalPoints,
-          percentage: (totalScore / quiz.totalPoints) * 100,
-          correctCount,
-          evaluationStatus
-        }
       });
+      //determine evaluation status
+      const evaluationStatus = hasManual ? "pending" : "evaluated";
+      //build the result doc
+
+      const resultDoc = {
+        quizId,
+        userId,
+        score: totalScore,
+        totalPoints: quiz.totalPoints,
+        percentage: (totalScore / quiz.totalPoints) * 100,
+        correctCount,
+        totalQuestions: quiz.totalQuestions,
+        answers: evaluatedAnswers,
+        evaluationStatus,
+        evaluatedBy: null,
+        evaluatedAt: null,
+        timeTakenSeconds,
+        submittedAt: Timestamp.now(),
+      };
+
+      //write result in transaction
+      const resultRef = doc(this.resultCollection);
+      tx.set(resultRef, resultDoc);
+
+      //summary for frontend.
+
+      return {
+        score: totalScore,
+        totalPoints: quiz.totalPoints,
+        percentage: (totalScore / quiz.totalPoints) * 100,
+        correctCount,
+        evaluationStatus,
+      };
     });
   }
+
+
 }

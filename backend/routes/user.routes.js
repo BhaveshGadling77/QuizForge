@@ -1,6 +1,6 @@
 import express from "express";
 import { authenticateToken } from "../middlewares/auth.middleware.js";
-import { getActiveQuizzes } from "../controllers/quiz.controller.js";
+import { getActiveQuizzes, submitQuiz } from "../controllers/quiz.controller.js";
 const router = express.Router();
 
 router.post("/", authenticateToken, (req, res) => {
@@ -9,6 +9,7 @@ router.post("/", authenticateToken, (req, res) => {
 
 router.get("/api/quizzes", authenticateToken, getActiveQuizzes)
 
-router.post("/api/quizzes/:quizId/attempt", authenticateToken, )
+router.post("/api/quizzes/:quizId/submit", authenticateToken, submitQuiz)
+
 
 export default router;
