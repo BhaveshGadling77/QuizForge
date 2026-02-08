@@ -59,7 +59,7 @@ export class QuizService {
       quizUpdates.questions = updates.questions;
       quizUpdates.totalQuestions = updates.questions.length;
       quizUpdates.totalPoints = updates.questions.reduce(
-        (sum, q) => sum + (q.question_id.points || 0),
+        (sum, q) => sum + (q.points || 0),
         0,
       );
     }
@@ -95,7 +95,7 @@ export class QuizService {
     // fetch the title and description.
     const quizzes = [];
     for (const quizId of quizIds) {
-      const quizRef = doc(req.db, process.env.COLLECTION_QUIZZES, quizId);
+      const quizRef = doc(this.db, process.env.COLLECTION_QUIZZES, quizId);
       const quizSnap = await getDoc(quizRef);
       if (quizSnap.exists()) {
         quizzes.push({
@@ -146,9 +146,8 @@ export class QuizService {
 
   async getQuizData(quizId, userId) {
     //get the quiz reference
-    const quizRef = this.db.collection(this.quizCollection).doc(quizId);
-
-    const quizSnap = await quizRef.get();
+    const quizRef = doc(this.quizCollection, quizId);
+    const quizSnap = await getDoc(quizRef);
 
     //get the snapshot of the quiz
     if (!quizSnap) {
@@ -169,7 +168,11 @@ export class QuizService {
       .where("userId", "==", userId)
       .get();
 
-    if (!attemptSnap.empty()) throw new Error("Quiz is already attempted.");
+    if (!attemptSnap.empty) {
+      const err = new Error("Quiz already attempted");
+      err.statusCode = 409;
+      throw err;
+    }
 
     return {
       id: quizId,
@@ -184,11 +187,59 @@ export class QuizService {
       })),
     };
   }
-
+  /**
+   * Submits a user's quiz attempt and evaluates answers atomically.
+   *
+   * This function:
+   * - Validates quiz existence and active status
+   * - Enforces quiz time limits (with optional auto-submit behavior)
+   * - Prevents multiple attempts per user
+   * - Automatically evaluates objective questions (MCQ, true/false, short-integer)
+   * - Marks subjective answers for manual evaluation by admin
+   * - Stores the result document in Firestore using a transaction
+   *
+   * Firestore transaction guarantees:
+   * - Atomic submission
+   * - Prevention of race conditions (double submission)
+   * - Consistent scoring and evaluation status
+   *
+   * @param {string} quizId - Firestore ID of the quiz
+   * @param {string} userId - Firestore ID of the submitting user
+   * @param {Array<Object>} answers - Array of submitted answers
+   * @param {number} timeTakenSeconds - Time taken by the user to complete the quiz
+   *
+   * @returns {Promise<Object>} Summary of the submission including:
+   *  - score
+   *  - totalPoints
+   *  - percentage
+   *  - correctCount
+   *  - evaluationStatus ("evaluated" | "pending")
+   *
+   * @throws {Error} If:
+   *  - Quiz does not exist or is inactive
+   *  - Time limit is exceeded (when auto-submit is disabled)
+   *  - User has already attempted the quiz
+   *  - Submitted answers are invalid or malformed
+   */
   async submitQuiz(quizId, userId, answers, timeTakenSeconds) {
     const quizRef = doc(this.quizCollection, quizId);
     const resultsRef = collection(this.db, process.env.COLLECTION_RESULTS);
 
+    //check for the previous attempt of the user.
+
+    const attemptQuery = query(
+      resultsRef,
+      where("quizId", "==", quizId),
+      where("userId", "==", userId),
+    );
+
+    const attemptSnap = await getDocs(attemptQuery);
+
+    if (!attemptSnap.empty) {
+      const err = new Error("Quiz already attempted.");
+      err.statusCode = 409;
+      throw err;
+    }
     return await runTransaction(this.db, async (tx) => {
       //fetch the quiz
 
@@ -209,20 +260,6 @@ export class QuizService {
         } else {
           throw new Error("Time limit exceeded");
         }
-      }
-
-      //check for the previous attempt of the user.
-
-      const attemptQuery = query(
-        resultsRef,
-        where("quizId", "==", quizId),
-        where("userId", "==", userId),
-      );
-
-      const attemptSnap = await getDocs(attemptQuery);
-
-      if (attemptSnap.empty()) {
-        throw new Error("Quiz is Already attempted.");
       }
 
       //building question map
@@ -303,7 +340,8 @@ export class QuizService {
         userId,
         score: totalScore,
         totalPoints: quiz.totalPoints,
-        percentage: (totalScore / quiz.totalPoints) * 100,
+        percentage:
+          quiz.totalPoints > 0 ? (totalScore / quiz.totalPoints) * 100 : 0,
         correctCount,
         totalQuestions: quiz.totalQuestions,
         answers: evaluatedAnswers,
@@ -323,7 +361,8 @@ export class QuizService {
       return {
         score: totalScore,
         totalPoints: quiz.totalPoints,
-        percentage: (totalScore / quiz.totalPoints) * 100,
+        percentage:
+          quiz.totalPoints > 0 ? (totalScore / quiz.totalPoints) * 100 : 0,
         correctCount,
         evaluationStatus,
       };

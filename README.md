@@ -46,6 +46,7 @@ Backend skills shown: Auth flow, middleware, security
 - [x] Delete quiz
 - [ ] Publish / unpublish quiz
 - [ ] View all student results for a quiz
+- [x] Manual evaluation for the short-subjective questions.
 
  Backend skills shown: CRUD APIs, access control
 
@@ -58,13 +59,13 @@ Backend skills shown: Auth flow, middleware, security
 - [x] Multiple options per question
 - [x] Single correct answer
 - [ ] Quiz status (active / inactive)
-- [x] One attempt per user (optional but good)
+- [x] One attempt per user
 
 ---
 
 ##  Results & Leaderboard
 
-- [ ] Store quiz results in `Firestore`
+- [x] Store quiz results in `Firestore`
 - [ ] Score calculation on backend
 - [ ] Leaderboard sorted by score
 - [ ] Timestamp-based tie-breaker
