@@ -368,4 +368,19 @@ export class QuizService {
       };
     });
   }
+
+  async getAllQuizzesForAdmin() {
+    const snapshot = await getDocs(
+      query(this.quizCollection, orderBy("createdAt", "desc")),
+    );
+
+    return snapshot.docs.map((doc) => ({
+      quizId: doc.id,
+      title: doc.data().title,
+      isActive: doc.data().isActive,
+      totalQuestions: doc.data().totalQuestions,
+      totalPoints: doc.data().totalPoints,
+    }));
+  }
+  
 }

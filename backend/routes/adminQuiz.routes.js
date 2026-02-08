@@ -5,6 +5,9 @@ import {
   deleteQuiz,
   getQuizzesWithPendingResults,
   getPendingResults,
+  getAllQuizzesForAdmin,
+  unpublishQuiz,
+  publishQuiz
 } from "../controllers/quiz.controller.js";
 import { authenticateToken } from "../middlewares/auth.middleware.js";
 import { authorizeAdminRole } from "../middlewares/authRole.middleware.js";
@@ -12,7 +15,6 @@ import { AdminService } from "../services/admin.service.js";
 import express from "express";
 
 const router = express.Router();
-const adminService = AdminService(db);
 //quiz routes
 router.post("/admin/quiz", authenticateToken, authorizeAdminRole, createQuiz);
 router.put(
@@ -43,13 +45,36 @@ router.get(
   authorizeAdminRole,
   getPendingResults,
 );
-
+// send the evaluated answers on this route
 router.post(
   "/admin/results/:resultId/evaluate",
   authenticateToken,
   authorizeAdminRole,
-  adminService.evaluateResult
+  evaluateResult,
 );
 
+//workflow for the publish and unpublish quiz.
+//for frontend we fetch the quizzes.
+router.get(
+  "/admin/quizzes/",
+  authenticateToken,
+  authorizeAdminRole,
+  getAllQuizzesForAdmin
+);
+//for publishing a quiz
+router.post(
+  "/admin/quiz/:quizId/publish",
+  authenticateToken,
+  authorizeAdminRole,
+  publishQuiz
+)
 
+//for unpublishing a quiz.
+
+router.post(
+  "/admin/quiz/:quizId/unpublish",
+  authenticateToken, 
+  authorizeAdminRole,
+  unpublishQuiz
+)
 export default router;

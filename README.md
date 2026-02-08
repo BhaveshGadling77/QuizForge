@@ -66,7 +66,7 @@ Backend skills shown: Auth flow, middleware, security
 ##  Results & Leaderboard
 
 - [x] Store quiz results in `Firestore`
-- [ ] Score calculation on backend
+- [x] Score calculation on backend
 - [ ] Leaderboard sorted by score
 - [ ] Timestamp-based tie-breaker
 

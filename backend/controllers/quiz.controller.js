@@ -1,8 +1,10 @@
 import { QuizService } from "../services/quiz.service.js";
 import { db } from "../config/firebase.config.js";
 import { canTextBeChildOfNode } from "html-react-parser/lib/utilities";
+import { AdminService } from "../services/admin.service.js";
 
 const quizService = new QuizService(db);
+const adminService = AdminService(db);
 
 //admin specific controllers
 export async function createQuiz(req, res) {
@@ -98,7 +100,7 @@ export async function submitQuiz(req, res) {
 
 export async function getQuizzesWithPendingResults(req, res) {
   try {
-    const quizzes = quizService.getQuizzesWithPendingResults();
+    const quizzes = await quizService.getQuizzesWithPendingResults();
     return res.status(200).json({
       success: true,
       quizzes,
@@ -114,7 +116,7 @@ export async function getQuizzesWithPendingResults(req, res) {
 export async function getPendingResults(req, req) {
   try {
     const quizId = req.params.quizId;
-    const resultDocs = quizService.getPendingResults(quizId);
+    const resultDocs = await quizService.getPendingResults(quizId);
     return res.status(200).json({
       success: true,
       resultDocs,
@@ -124,5 +126,77 @@ export async function getPendingResults(req, req) {
       success: false,
       msg: e.message,
     });
+  }
+}
+
+export async function getAllQuizzesForAdmin(req, res) {
+  try {
+    const quizzes = await quizService.getAllQuizzesForAdmin()
+    return res.status(200).json({
+      success: true,
+      quizzes
+    })
+  } catch(e) {
+    return res.status(500).json({
+      success: true,
+      msg: e.message
+    })
+  }
+}
+
+export async function evaluateResult(req, res) {
+  try {
+    const adminUserId = req.user.userId;
+    const { resultId } = req.params 
+    const { scores } = req.body;
+    const result = adminService.evaluateResult(resultId, adminUserId, scores)
+    
+    return res.status(200).json({
+      success: true,
+      message: "Data Saved Successfully.",
+      data: result
+    })
+  } catch(e) {
+    return res.status(500).json({
+      success: false,
+      message: e.message      
+    })
+  }
+}
+
+export async function publishQuiz(req, res) {
+  try {
+    const { quizId } = req.params;
+
+    const result = await adminService.publishQuiz(quizId)
+
+    return res.status(200).json({
+      success: true,
+      message: "Quiz Published Successfully.",
+      data: result
+    })
+  } catch(e) {
+    return res.status(400).json({
+      success: false,
+      message: e.message
+    })
+  }
+}
+
+export async function unpublishQuiz(res, res) {
+  
+  try {
+    const { quizId } = req.params;
+    const result = await adminService.unpublishQuiz(quizId)
+    return res.status(200).json({
+      success: true,
+      message: "Quiz Unpublished Successfully.",
+      data: result,
+    })
+  } catch(e) {
+    return res.status(400).json({
+      success:false,
+      message: e.message
+    })
   }
 }
