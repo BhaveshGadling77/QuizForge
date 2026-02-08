@@ -101,11 +101,11 @@ export class QuizService {
         quizzes.push({
           quizId,
           title: quizSnap.data().title,
-          description: quizSnap.data().description
+          description: quizSnap.data().description,
         });
       }
     }
-    return quizzes
+    return quizzes;
   }
 
   async getPendingResults(quizId) {
@@ -113,7 +113,7 @@ export class QuizService {
     const q = query(
       resultsRef,
       where("quizId", "==", quizId),
-      where("evaluationStatus", "==", "pending")
+      where("evaluationStatus", "==", "pending"), // we can remove this line if we want to show the result that are pending and not evaluated.
     );
 
     const snapshot = await getDocs(q);
@@ -125,7 +125,7 @@ export class QuizService {
       timeTakenSeconds: doc.data().timeTakenSeconds,
       answers: doc.data().answers, // to show short-subjective answers
     }));
-    return pendingResults
+    return pendingResults;
   }
   //user specific methods
   async getActivePublicQuizzes() {
@@ -329,6 +329,4 @@ export class QuizService {
       };
     });
   }
-
-
 }
