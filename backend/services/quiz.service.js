@@ -353,7 +353,7 @@ export class QuizService {
       };
 
       //write result in transaction
-      const resultRef = doc(this.resultCollection);
+      const resultRef = doc(this.resultCollection, `result_${quizId}_${userId}`); //storing in the particular fashion for fast access.
       tx.set(resultRef, resultDoc);
 
       //summary for frontend.
@@ -382,5 +382,62 @@ export class QuizService {
       totalPoints: doc.data().totalPoints,
     }));
   }
-  
+
+  async getAllResultsForQuiz(quizId) {
+    const resultsRef = collection(this.db, process.env.COLLECTION_RESULTS);
+
+    const q = query(
+      resultsRef,
+      where("quizId", "==", quizId),
+      orderBy("submittedAt", "desc"),
+    );
+
+    const snapshot = await getDocs(q);
+    const quizData = doc.data();
+    return snapshot.docs.map((doc) => ({
+      resultId: doc.id,
+      userId: quizData.userId,
+      score: quizData.score,
+      totalPoints: quizData.totalPoints,
+      percentage: quizData.percentage,
+      evaluationStatus: quizData.evaluationStatus,
+      submittedAt: quizData.submittedAt,
+      timeTakenSeconds: quizData.timeTakenSeconds,
+    }));
+  }
+
+  async getResultForStudent(quizId, userId) {
+    const resultId = `result_${quizId}_${userId}`;
+    const resultRef = doc(this.resultCollection, resultId);
+
+    const snap = await getDoc(resultRef);
+
+    if (!snap.exists()) {
+      throw new Error("Result not found");
+    }
+
+    const result = snap.data();
+
+    return {
+      resultId: snap.id,
+      quizId: result.quizId,
+      userId: result.userId,
+
+      score: result.score,
+      totalPoints: result.totalPoints,
+      percentage: result.percentage,
+      correctCount: result.correctCount,
+      totalQuestions: result.totalQuestions,
+
+      evaluationStatus: result.evaluationStatus,
+      evaluatedBy: result.evaluatedBy,
+      evaluatedAt: result.evaluatedAt,
+
+      timeTakenSeconds: result.timeTakenSeconds,
+      submittedAt: result.submittedAt,
+
+      answers: result.answers,
+    };
+  }
+
 }

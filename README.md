@@ -29,7 +29,7 @@ Backend skills shown: Auth flow, middleware, security
 - [x] Attempt quiz (MCQ-based)
 - [x] Submit quiz answers
 - [x] Score calculated on backend
-- [ ] View quiz result immediately
+- [x] View quiz result immediately
 - [ ] View past quiz attempts
 - [ ] View leaderboard (per quiz)
 
@@ -44,8 +44,9 @@ Backend skills shown: Auth flow, middleware, security
 - [x] Add questions to quiz
 - [x] Edit quiz
 - [x] Delete quiz
-- [ ] Publish / unpublish quiz
-- [ ] View all student results for a quiz
+- [x] Publish / unpublish quiz
+- [x] View all student results for a quiz
+- [x] view result of a particular student.
 - [x] Manual evaluation for the short-subjective questions.
 
  Backend skills shown: CRUD APIs, access control

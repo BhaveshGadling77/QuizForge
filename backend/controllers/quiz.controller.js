@@ -200,3 +200,58 @@ export async function unpublishQuiz(res, res) {
     })
   }
 }
+
+export async function getAllResultsForQuiz(req, res) {
+  try {
+    const { quizId } = req.params;
+
+    const results = await adminService.getAllResultsForQuiz(quizId);
+
+    res.status(200).json({
+      success: true,
+      data: results,
+    });
+  } catch (err) {
+    res.status(400).json({
+      success: false,
+      message: err.message,
+    });
+  }
+}
+
+export async function getStudentForResult(req, res) {
+  try {
+    const { quizId, userId } = req.params;
+
+    const result = await adminService.getResultForStudent(quizId, userId);
+
+    res.status(200).json({
+      success: true,
+      data: result,
+    });
+  } catch (err) {
+    res.status(404).json({
+      success: false,
+      message: err.message,
+    });
+  }
+}
+
+export async function getMyResult(req, res) {
+  try {
+    const { quizId } = req.params;
+    const userId = req.user.uid;
+
+    const result = await studentService.getMyResult(quizId, userId);
+
+    res.status(200).json({
+      success: true,
+      data: result,
+    });
+  } catch (err) {
+    res.status(404).json({
+      success: false,
+      message: err.message,
+    });
+  }
+}

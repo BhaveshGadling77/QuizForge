@@ -7,11 +7,12 @@ import {
   getPendingResults,
   getAllQuizzesForAdmin,
   unpublishQuiz,
-  publishQuiz
+  publishQuiz,
+  getResultForStudent,
+  getAllResultsForQuiz
 } from "../controllers/quiz.controller.js";
 import { authenticateToken } from "../middlewares/auth.middleware.js";
 import { authorizeAdminRole } from "../middlewares/authRole.middleware.js";
-import { AdminService } from "../services/admin.service.js";
 import express from "express";
 
 const router = express.Router();
@@ -77,4 +78,25 @@ router.post(
   authorizeAdminRole,
   unpublishQuiz
 )
+
+//workflow for the viewing all the result docs of students
+
+//for fetching the all results for the particular quiz
+
+router.get(
+  "/admin/quizzes/:quizId/results",
+  authenticateToken,
+  authorizeAdminRole,
+  getAllResultsForQuiz
+);
+
+// get the particular doc
+
+router.get(
+  "/admin/quizzes/:quizId/results/:userId",
+  authenticateToken,
+  authorizeAdminRole,
+  getResultForStudent
+)
+
 export default router;
