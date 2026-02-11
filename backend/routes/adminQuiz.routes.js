@@ -1,16 +1,18 @@
-import { db } from "../config/firebase.config.js";
 import {
   createQuiz,
   updateQuiz,
   deleteQuiz,
+  getAllQuizzesForAdmin,
+} from "../controllers/quiz.controller.js";
+import {
   getQuizzesWithPendingResults,
   getPendingResults,
-  getAllQuizzesForAdmin,
+  evaluateResult,
   unpublishQuiz,
   publishQuiz,
+  getAllResultsForQuiz,
   getResultForStudent,
-  getAllResultsForQuiz
-} from "../controllers/quiz.controller.js";
+} from "../controllers/admin.controller.js";
 import { authenticateToken } from "../middlewares/auth.middleware.js";
 import { authorizeAdminRole } from "../middlewares/authRole.middleware.js";
 import express from "express";
@@ -60,24 +62,24 @@ router.get(
   "/admin/quizzes/",
   authenticateToken,
   authorizeAdminRole,
-  getAllQuizzesForAdmin
+  getAllQuizzesForAdmin,
 );
 //for publishing a quiz
 router.post(
   "/admin/quiz/:quizId/publish",
   authenticateToken,
   authorizeAdminRole,
-  publishQuiz
-)
+  publishQuiz,
+);
 
 //for unpublishing a quiz.
 
 router.post(
   "/admin/quiz/:quizId/unpublish",
-  authenticateToken, 
+  authenticateToken,
   authorizeAdminRole,
-  unpublishQuiz
-)
+  unpublishQuiz,
+);
 
 //workflow for the viewing all the result docs of students
 
@@ -87,7 +89,7 @@ router.get(
   "/admin/quizzes/:quizId/results",
   authenticateToken,
   authorizeAdminRole,
-  getAllResultsForQuiz
+  getAllResultsForQuiz,
 );
 
 // get the particular doc
@@ -96,7 +98,7 @@ router.get(
   "/admin/quizzes/:quizId/results/:userId",
   authenticateToken,
   authorizeAdminRole,
-  getResultForStudent
-)
+  getResultForStudent,
+);
 
 export default router;

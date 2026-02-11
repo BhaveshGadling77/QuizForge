@@ -1,11 +1,11 @@
-import { transactionExpiredError } from "@google-cloud/datastore/build/src/request";
+
 import { collection, doc, runTransaction, Timestamp } from "firebase/firestore";
 
 export class AdminService {
   constructor(db) {
     this.db = db;
     this.quizCollection = collection(db, process.env.COLLECTION_QUIZZES);
-    this.resultCollection = collection(db.process.env.COLLECTION_RESULTS);
+    this.resultCollection = collection(db, process.env.COLLECTION_RESULTS);
   }
   /**
    * Evaluate a pending result (manual grading)
@@ -167,5 +167,114 @@ export class AdminService {
         status: "unpublished",
       };
     });
+  }
+
+  async getQuizzesWithPendingResults() {
+    const resultsRef = collection(this.db, process.env.COLLECTION_RESULTS);
+
+    // Query all results that are pending
+    const q = query(resultsRef, where("evaluationStatus", "==", "pending"));
+    const snapshot = await getDocs(q);
+
+    // get the quiz which is pending.
+    const quizIds = new Set();
+    snapshot.docs.forEach((doc) => {
+      quizIds.add(doc.data().quizId);
+    });
+
+    // fetch the title and description.
+    const quizzes = [];
+    for (const quizId of quizIds) {
+      const quizRef = doc(this.db, process.env.COLLECTION_QUIZZES, quizId);
+      const quizSnap = await getDoc(quizRef);
+      if (quizSnap.exists()) {
+        quizzes.push({
+          quizId,
+          title: quizSnap.data().title,
+          description: quizSnap.data().description,
+        });
+      }
+    }
+    return quizzes;
+  }
+
+  async getPendingResults(quizId) {
+    const resultsRef = collection(this.db, process.env.COLLECTION_RESULTS);
+    const q = query(
+      resultsRef,
+      where("quizId", "==", quizId),
+      where("evaluationStatus", "==", "pending"), // we can remove this line if we want to show the result that are pending and not evaluated.
+    );
+
+    const snapshot = await getDocs(q);
+
+    const pendingResults = snapshot.docs.map((doc) => ({
+      resultId: doc.id,
+      userId: doc.data().userId,
+      submittedAt: doc.data().submittedAt,
+      timeTakenSeconds: doc.data().timeTakenSeconds,
+      answers: doc.data().answers, // to show short-subjective answers
+    }));
+    return pendingResults;
+  }
+
+  async getAllResultsForQuiz(quizId) {
+    const resultsRef = collection(this.db, process.env.COLLECTION_RESULTS);
+
+    const q = query(
+      resultsRef,
+      where("quizId", "==", quizId),
+      orderBy("submittedAt", "desc"),
+    );
+
+    const snapshot = await getDocs(q);
+
+    return snapshot.docs.map((resultDoc) => {
+      const data = resultDoc.data();
+      return {
+        resultId: resultDoc.id,
+        userId: data.userId,
+        score: data.score,
+        totalPoints: data.totalPoints,
+        percentage: data.percentage,
+        evaluationStatus: data.evaluationStatus,
+        submittedAt: data.submittedAt,
+        timeTakenSeconds: data.timeTakenSeconds,
+      };
+    });
+  }
+
+  async getResultForStudent(quizId, userId) {
+    const resultId = `result_${quizId}_${userId}`;
+    const resultRef = doc(this.resultCollection, resultId);
+
+    const snap = await getDoc(resultRef);
+
+    if (!snap.exists()) {
+      throw new Error("Result not found");
+    }
+
+    const result = snap.data();
+
+    return {
+      resultId: snap.id,
+      quizId: result.quizId,
+      userId: result.userId,
+
+      score: result.score,
+      totalPoints: result.totalPoints,
+      percentage: result.percentage,
+      correctCount: result.correctCount,
+      totalQuestions: result.totalQuestions,
+
+      evaluationStatus: result.evaluationStatus,
+      evaluatedBy: result.evaluatedBy,
+      evaluatedAt: result.evaluatedAt,
+
+      timeTakenSeconds: result.timeTakenSeconds,
+      submittedAt: result.submittedAt,
+
+      answers: result.answers,
+    };
   }
 }

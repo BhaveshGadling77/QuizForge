@@ -4,7 +4,7 @@ import {
   getActiveQuizzes,
   submitQuiz,
   getMyResult,
-} from "../controllers/quiz.controller.js";
+} from "../controllers/student.controller.js";
 
 const router = express.Router();
 
