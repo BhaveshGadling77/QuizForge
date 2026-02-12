@@ -4,6 +4,7 @@ import {
   getActiveQuizzes,
   submitQuiz,
   getMyResult,
+  getLeaderboard
 } from "../controllers/student.controller.js";
 
 const router = express.Router();
@@ -17,5 +18,7 @@ router.get("/api/quizzes", authenticateToken, getActiveQuizzes);
 router.post("/api/quizzes/:quizId/submit", authenticateToken, submitQuiz);
 
 router.get("/api/quizzes/:quizId/my-result", authenticateToken, getMyResult);
+
+router.get("/api/quizzes/:quizId/leaderboard", authenticateToken, getLeaderboard);
 
 export default router;

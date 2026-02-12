@@ -2,7 +2,8 @@
   "resultId": "string",
   "quizId": "string",
   "userId": "string",
-
+  "userName": "string",
+  "email": "string",
   "score": 80,
   "totalPoints": 100,
   "percentage": 80,

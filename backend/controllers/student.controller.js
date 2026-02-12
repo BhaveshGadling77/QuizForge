@@ -74,14 +74,32 @@ export async function getMyResult(req, res) {
 
     const result = await studentService.getMyResult(quizId, userId);
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: result,
     });
   } catch (err) {
-    res.status(404).json({
+    return res.status(404).json({
       success: false,
       message: err.message,
     });
+  }
+}
+
+export async function getLeaderboard(req, res) {
+  try {
+    const { quizId } = req.params;
+    const data = await studentService.getLeaderboard(quizId)
+    return res.status(200).json({
+      success: true,
+      data
+    })
+  } catch(e) {
+    return res.status(404).json(
+      {
+        success: true,
+        message: e.message
+      }
+    )
   }
 }

@@ -1,18 +1,9 @@
-import {
-  doc,
-  getDoc,
-  getDocs,
-  collection,
-} from "firebase/firestore";
+import { doc, getDoc, getDocs, collection } from "firebase/firestore";
 
 export class StudentService {
-    
   constructor(db) {
     this.db = db;
-    this.resultCollection = collection(
-      db,
-      process.env.COLLECTION_RESULTS
-    );
+    this.resultCollection = collection(db, process.env.COLLECTION_RESULTS);
   }
 
   /**
@@ -286,7 +277,10 @@ export class StudentService {
       };
 
       //write result in transaction
-      const resultRef = doc(this.resultCollection, `result_${quizId}_${userId}`); //storing in the particular fashion for fast access.
+      const resultRef = doc(
+        this.resultCollection,
+        `result_${quizId}_${userId}`,
+      ); //storing in the particular fashion for fast access.
       tx.set(resultRef, resultDoc);
 
       //summary for frontend.
@@ -300,5 +294,31 @@ export class StudentService {
         evaluationStatus,
       };
     });
+  }
+
+  async getLeaderboard(quizId) {
+    const snapshot = await this.db
+      .collection(process.env.COLLECTION_RESULTS)
+      .where("quizId", "==", quizId)
+      .orderBy("score", "desc")
+      .orderBy("timeTakenSeconds", "asc")
+      .orderBy("submittedAt", "asc")
+      .limit(15)
+      .get();
+    if (!snapshot) throw Error("data base error.");
+    const leaderboard = {};
+
+    snapshot.forEach((doc, index) => {
+      const data = doc.data();
+
+      leaderboard.push({
+        rank: index + 1,
+        userId: data.userId,
+        studentName: data.userName,
+        score: data.score,
+        submittedAt: data.submittedAt,
+      });
+    });
+    return leaderboard;
   }
 }
