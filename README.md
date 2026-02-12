@@ -10,6 +10,7 @@ A Secure Online Quiz & Assessment Platform
 - [x] Role-based access control (admin, student)
 - [x] Protected routes using middleware
 - [x] Logout (client-side token removal)
+- [ ] Private Quizzes with Access Token.
 
 Backend skills shown: Auth flow, middleware, security
 
@@ -31,7 +32,7 @@ Backend skills shown: Auth flow, middleware, security
 - [x] Score calculated on backend
 - [x] View quiz result immediately
 - [ ] View past quiz attempts
-- [ ] View leaderboard (per quiz)
+- [x] View leaderboard (per quiz)
 
  Backend logic shown: evaluation, validation, data filtering
 
@@ -59,7 +60,7 @@ Backend skills shown: Auth flow, middleware, security
 - [x] Multiple questions per quiz
 - [x] Multiple options per question
 - [x] Single correct answer
-- [ ] Quiz status (active / inactive)
+- [x] Quiz status (active / inactive)
 - [x] One attempt per user
 
 ---
@@ -68,8 +69,8 @@ Backend skills shown: Auth flow, middleware, security
 
 - [x] Store quiz results in `Firestore`
 - [x] Score calculation on backend
-- [ ] Leaderboard sorted by score
-- [ ] Timestamp-based tie-breaker
+- [x] Leaderboard sorted by score
+- [x] Timestamp-based tie-breaker
 
 Backend skills shown: sorting, aggregation logic (manual)
 
