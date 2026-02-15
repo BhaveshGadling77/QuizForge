@@ -1,4 +1,3 @@
-
 import { collection, doc, runTransaction, Timestamp } from "firebase/firestore";
 
 export class AdminService {
@@ -198,6 +197,11 @@ export class AdminService {
     return quizzes;
   }
 
+  /**
+   * 
+   * @param {string} quizId - Firestore ID of Quiz.
+   * @returns {Array{result}}  docs
+   */
   async getPendingResults(quizId) {
     const resultsRef = collection(this.db, process.env.COLLECTION_RESULTS);
     const q = query(
@@ -218,6 +222,11 @@ export class AdminService {
     return pendingResults;
   }
 
+  /**
+   * 
+   * @param {string} quizId - Firestore QuizId
+   * @returns {Array<{results}>} docs
+   */
   async getAllResultsForQuiz(quizId) {
     const resultsRef = collection(this.db, process.env.COLLECTION_RESULTS);
 
@@ -243,7 +252,12 @@ export class AdminService {
       };
     });
   }
-
+  /**
+   * get result doc for the particular student
+   * @param {string} quizId - Firestore QuizId
+   * @param {string} userId - particular doc of student that admin wants to view.
+   * @returns result doc  
+   */
   async getResultForStudent(quizId, userId) {
     const resultId = `result_${quizId}_${userId}`;
     const resultRef = doc(this.resultCollection, resultId);

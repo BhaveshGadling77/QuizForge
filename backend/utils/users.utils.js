@@ -1,5 +1,6 @@
+import { query } from "express";
 import { db } from "../config/firebase.config.js";
-import { addDoc, collection, doc, getDocs, getDoc } from "firebase/firestore";
+import { addDoc, collection, doc, getDocs, getDoc, where } from "firebase/firestore";
 
 //this is for the storing the users details in the database.
 async function createUser(user) {
@@ -13,7 +14,6 @@ async function createUser(user) {
 async function getUserList() {
   try {
     const usersRef = collection(db, process.env.COLLECTION_USERS);
-    const snapshot = await getDocs(usersRef);
     const users = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     return users;
   } catch (e) {

@@ -321,4 +321,29 @@ export class StudentService {
     });
     return leaderboard;
   }
+
+  async getAllResultOfStudent(studentId) {
+    const q = query(
+      this.resultCollection,
+      where("userId", "==", studentId),
+      orderBy("submittedAt", "desc"),
+    );
+
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map((doc) => {
+      const result = doc.data();
+
+      return {
+        resultId: doc.id,
+        quizId: result.quizId,
+        score: result.score,
+        totalPoints: result.totalPoints,
+        percentage: result.percentage,
+        correctCount: result.correctCount,
+        totalQuestions: result.totalQuestions,
+        submittedAt: result.submittedAt,
+        timeTakenSeconds: result.timeTakenSeconds,
+      };
+    });
+  }
 }

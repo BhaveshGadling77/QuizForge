@@ -31,7 +31,7 @@ Backend skills shown: Auth flow, middleware, security
 - [x] Submit quiz answers
 - [x] Score calculated on backend
 - [x] View quiz result immediately
-- [ ] View past quiz attempts
+- [x] View past quiz attempts
 - [x] View leaderboard (per quiz)
 
  Backend logic shown: evaluation, validation, data filtering

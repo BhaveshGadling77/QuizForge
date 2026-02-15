@@ -1,9 +1,8 @@
 import jwt from "jsonwebtoken";
-import { findById } from "../utils/users.utils.js";
-
+import { findById, createUser, getUserList } from "../utils/users.utils.js";
+import { generateAccessToken } from "./token.service.js";
 export class AuthService {
-  
-  //verify 
+  //verify
   async verifyAccessToken(token) {
     if (!token) {
       throw new Error("Access token missing");
@@ -23,5 +22,38 @@ export class AuthService {
     }
 
     return user;
+  }
+  //register user.
+
+  async registerUser(data) {
+    try {
+      return await createUser(data);
+    } catch (e) {
+      throw new Error(e.message);
+    }
+  }
+
+  async loginUser(data) {
+    try {
+      const q = query(collection(db, "users"), where("email", "==", email));
+
+      const snapshot = await getDocs(q);
+
+      if (snapshot.empty) {
+        throw new Error("User not found");
+      }
+
+      const userDoc = snapshot.docs[0];
+      const user = userDoc.data();
+
+      const isMatch = await bcrypt.compare(password, user.password);
+
+      if (!isMatch) {
+        throw new Error("Invalid password");
+      }
+      return generateAccessToken(data);
+    } catch (e) {
+      throw new Error(e.message);
+    }
   }
 }
