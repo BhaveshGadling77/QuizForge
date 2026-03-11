@@ -1,3 +1,5 @@
+import { serverTimestamp } from "firebase/firestore";
+import { hashPassword } from "../services/encrytion.service.js";
 import { AuthService } from "../services/auth.service.js";
 
 const authService = new AuthService();
@@ -5,8 +7,13 @@ const authService = new AuthService();
 // REGISTER
 export async function register(req, res) {
   try {
-    const userId = await authService.registerUser(req.body);
-
+    let { email, name, password, role } = req.body
+    const createdAt = serverTimestamp()
+    const updatedAt = serverTimestamp()
+    password = await hashPassword(password)
+    const user = {email, name, password, role, createdAt, updatedAt}
+  
+    const userId = await authService.registerUser(user);
     return res.status(201).json({
       msg: "User registered successfully",
       userId,
@@ -33,7 +40,7 @@ export async function login(req, res) {
 
     return res.status(200).json({
       msg: "Login successful",
-      token, // optional (useful for mobile apps)
+      token,
     });
   } catch (e) {
     return res.status(401).json({

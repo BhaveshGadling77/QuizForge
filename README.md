@@ -74,4 +74,7 @@ Backend skills shown: Auth flow, middleware, security
 
 Backend skills shown: sorting, aggregation logic (manual)
 
+## DataBase indexes we have to make.
+
+
 techstack :- Firebase, Nodejs, ExpressJs, Reactjs.

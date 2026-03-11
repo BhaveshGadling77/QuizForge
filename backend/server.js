@@ -30,5 +30,5 @@ app.use('/api/admin/', adminRoutes);
 app.use('/users', userRoutes)
 
 app.listen(process.env.PORT, () => {
-  console.log("Process is successfully running.")
+  console.log(`Server is successfully running on Port ${process.env.PORT}`)
 })
