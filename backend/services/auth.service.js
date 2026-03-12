@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import { findById, createUser, getUserList } from "../utils/users.utils.js";
 import { generateAccessToken } from "./token.service.js";
+import { comparePassword } from "./encrytion.service.js";
 export class AuthService {
   //verify
   async verifyAccessToken(token) {
@@ -45,8 +46,8 @@ export class AuthService {
 
       const userDoc = snapshot.docs[0];
       const user = userDoc.data();
-
-      const isMatch = await bcrypt.compare(password, user.password);
+      const password = data.password;
+      const isMatch = await comparePassword(password, user.password);
 
       if (!isMatch) {
         throw new Error("Invalid password");

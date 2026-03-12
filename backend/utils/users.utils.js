@@ -1,4 +1,3 @@
-import { query } from "express";
 import { db } from "../config/firebase.config.js";
 import { addDoc, collection, doc, getDocs, getDoc, where } from "firebase/firestore";
 
@@ -13,7 +12,7 @@ async function createUser(user) {
 
 async function getUserList() {
   try {
-    const usersRef = collection(db, process.env.COLLECTION_USERS);
+    const snapshot = collection(db, process.env.COLLECTION_USERS);
     const users = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     return users;
   } catch (e) {
