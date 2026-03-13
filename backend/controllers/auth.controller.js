@@ -28,8 +28,9 @@ export async function register(req, res) {
 // LOGIN
 export async function login(req, res) {
   try {
-    const { token } = await authService.loginUser(req.body);
-
+    console.log(req.body)
+    const token  = await authService.loginUser(req.body);
+    console.log("access Token for the user: ", token)
     // Cookie (for browser usage)
     res.cookie("quizforge_token", token, {
       httpOnly: true,
@@ -43,6 +44,7 @@ export async function login(req, res) {
       token,
     });
   } catch (e) {
+    console.log(e.message)
     return res.status(401).json({
       error: e.message,
     });

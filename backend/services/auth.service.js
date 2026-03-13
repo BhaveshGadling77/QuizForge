@@ -1,6 +1,7 @@
-import jwt from "jsonwebtoken";
 import { findById, createUser, getUserList } from "../utils/users.utils.js";
-import { generateAccessToken } from "./token.service.js";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { generateAccessToken, decodeToken } from "./token.service.js";
+import { db } from "../config/firebase.config.js";
 import { comparePassword } from "./encrytion.service.js";
 export class AuthService {
   //verify
@@ -11,7 +12,7 @@ export class AuthService {
 
     let decoded;
     try {
-      decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+      decoded = decodeToken(token)
     } catch (e) {
       throw new Error("Invalid or expired token");
     }
@@ -36,6 +37,7 @@ export class AuthService {
 
   async loginUser(data) {
     try {
+      const { email, password } = data
       const q = query(collection(db, "users"), where("email", "==", email));
 
       const snapshot = await getDocs(q);
@@ -46,7 +48,6 @@ export class AuthService {
 
       const userDoc = snapshot.docs[0];
       const user = userDoc.data();
-      const password = data.password;
       const isMatch = await comparePassword(password, user.password);
 
       if (!isMatch) {
@@ -54,6 +55,7 @@ export class AuthService {
       }
       return generateAccessToken(data);
     } catch (e) {
+      console.log(e.message)
       throw new Error(e.message);
     }
   }

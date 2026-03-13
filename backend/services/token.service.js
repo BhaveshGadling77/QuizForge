@@ -5,3 +5,7 @@ export const generateAccessToken = (payload) => {
     expiresIn: "15d",
   });
 };
+
+export function decodeToken(token) {
+  return jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+}

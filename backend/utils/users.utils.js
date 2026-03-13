@@ -1,5 +1,5 @@
 import { db } from "../config/firebase.config.js";
-import { addDoc, collection, doc, getDocs, getDoc, where } from "firebase/firestore";
+import { addDoc, collection, doc,  getDoc, } from "firebase/firestore";
 
 //this is for the storing the users details in the database.
 async function createUser(user) {
@@ -31,5 +31,6 @@ async function findById(id) {
     // docSnap.data() will be undefined in this case
     console.log("No such document!");
   }
+  return docSnap
 }
 export { createUser, getUserList, findById };

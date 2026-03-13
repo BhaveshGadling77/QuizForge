@@ -9,7 +9,7 @@ import {
 
 const router = express.Router();
 
-router.post("/", authenticateToken, (req, res) => {
+router.post("/login", authenticateToken, (req, res) => {
   res.json({ msg: "User authenticated successfully.", user: req.user });
 });
 
@@ -20,5 +20,7 @@ router.post("/api/quizzes/:quizId/submit", authenticateToken, submitQuiz);
 router.get("/api/quizzes/:quizId/my-result", authenticateToken, getMyResult);
 
 router.get("/api/quizzes/:quizId/leaderboard", authenticateToken, getLeaderboard);
+
+// router.post("/api/quiz/:quizId/start")
 
 export default router;
