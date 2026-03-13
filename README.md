@@ -45,6 +45,7 @@ Backend skills shown: Auth flow, middleware, security
 - [x] Add questions to quiz
 - [x] Edit quiz
 - [x] Delete quiz
+- [ ] Upload Image of Quiz.
 - [x] Publish / unpublish quiz
 - [x] View all student results for a quiz
 - [x] view result of a particular student.

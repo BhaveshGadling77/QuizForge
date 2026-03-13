@@ -19,15 +19,15 @@ import express from "express";
 
 const router = express.Router();
 //quiz routes
-router.post("/admin/quiz", authenticateToken, authorizeAdminRole, createQuiz);
+router.post("/quiz", authenticateToken, authorizeAdminRole, createQuiz);
 router.put(
-  "/admin/quiz/:quizId",
+  "/quiz/:quizId",
   authenticateToken,
   authorizeAdminRole,
   updateQuiz,
 );
 router.delete(
-  "/admin/quiz/:quizId",
+  "/quiz/:quizId",
   authenticateToken,
   authorizeAdminRole,
   deleteQuiz,
@@ -36,21 +36,21 @@ router.delete(
 //for pending results that has to be done by admin
 //get the all pending quizzes
 router.get(
-  "/admin/quizzes/pending",
+  "/quizzes/pending",
   authenticateToken,
   authorizeAdminRole,
   getQuizzesWithPendingResults,
 );
 //get the docs for the pending-results.
 router.get(
-  "/admin/quizzes/:quizId/pending-results",
+  "/quizzes/:quizId/pending-results",
   authenticateToken,
   authorizeAdminRole,
   getPendingResults,
 );
 // send the evaluated answers on this route
 router.post(
-  "/admin/results/:resultId/evaluate",
+  "/results/:resultId/evaluate",
   authenticateToken,
   authorizeAdminRole,
   evaluateResult,
@@ -59,14 +59,14 @@ router.post(
 //workflow for the publish and unpublish quiz.
 //for frontend we fetch the quizzes.
 router.get(
-  "/admin/quizzes/",
+  "/quizzes/",
   authenticateToken,
   authorizeAdminRole,
   getAllQuizzesForAdmin,
 );
 //for publishing a quiz
 router.post(
-  "/admin/quiz/:quizId/publish",
+  "/quiz/:quizId/publish",
   authenticateToken,
   authorizeAdminRole,
   publishQuiz,
@@ -75,7 +75,7 @@ router.post(
 //for unpublishing a quiz.
 
 router.post(
-  "/admin/quiz/:quizId/unpublish",
+  "/quiz/:quizId/unpublish",
   authenticateToken,
   authorizeAdminRole,
   unpublishQuiz,
@@ -86,7 +86,7 @@ router.post(
 //for fetching the all results for the particular quiz
 
 router.get(
-  "/admin/quizzes/:quizId/results",
+  "/quizzes/:quizId/results",
   authenticateToken,
   authorizeAdminRole,
   getAllResultsForQuiz,
@@ -95,7 +95,7 @@ router.get(
 // get the particular doc
 
 router.get(
-  "/admin/quizzes/:quizId/results/:userId",
+  "/quizzes/:quizId/results/:userId",
   authenticateToken,
   authorizeAdminRole,
   getResultForStudent,

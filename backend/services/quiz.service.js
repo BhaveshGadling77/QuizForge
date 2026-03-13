@@ -12,6 +12,7 @@ import {
   runTransaction,
   Timestamp,
 } from "firebase/firestore";
+import { hashPassword } from "./encrytion.service.js";
 
 export class QuizService {
   constructor(db) {
@@ -24,7 +25,9 @@ export class QuizService {
     if (quizData.visibility === "private" && !quizData.accessToken) {
       throw new Error("Access token required for private quiz");
     }
-
+    if (quizData.visibility == "private") {
+      quizData.accessToken = hashPassword(quizData.accessToken)
+    }
     await addDoc(this.quizCollection, {
       ...quizData,
       createdAt: new Date(),

@@ -27,7 +27,7 @@ app.use('/api/admin/', adminRoutes);
 // console.log("userRoutes:", userRoutes)
 
 //user routes
-app.use('/users', userRoutes)
+app.use('/', userRoutes)
 
 app.listen(process.env.PORT, () => {
   console.log(`Server is successfully running on Port ${process.env.PORT}`)

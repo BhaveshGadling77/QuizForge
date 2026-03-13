@@ -5,13 +5,28 @@ const authService = new AuthService();
 export async function authenticateToken(req, res, next) {
   try {
     const authHeader = req.headers["authorization"];
-    const token = authHeader && authHeader.split(" ")[1];
+
+    if (!authHeader) {
+      return res.status(401).json({
+        error: "Authorization header missing",
+      });
+    }
+
+    const token = authHeader.split(" ")[1];
+
+    if (!token) {
+      return res.status(401).json({
+        error: "Token missing",
+      });
+    }
 
     const user = await authService.verifyAccessToken(token);
-
+    // console.log(user)
     req.user = user;
     next();
+
   } catch (e) {
+    console.log(e.message)
     return res.status(401).json({ error: e.message });
   }
 }
