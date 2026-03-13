@@ -4,6 +4,7 @@ import { register } from "@/services/authService";
 import { useAuth } from "@/hooks/useAuth";
 import { ROLES } from "@/utils/constants";
 
+
 export default function Register() {
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -17,8 +18,9 @@ export default function Register() {
     setLoading(true);
     try {
       const res = await register(form);
+      console.log(res)
       login(res.data.token, res.data.user);
-      navigate(res.data.user.role === "admin" ? "/admin" : "/dashboard");
+      navigate(e.role === "admin" ? "/admin" : "/dashboard");
     } catch (err) {
       setError(err.response?.data?.message ?? "Registration failed");
     } finally {

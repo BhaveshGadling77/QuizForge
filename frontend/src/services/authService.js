@@ -1,4 +1,4 @@
-import api from "./api";
+import api from "./api.js";
 
 /**
  * Register a new user

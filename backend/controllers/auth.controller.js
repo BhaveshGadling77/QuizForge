@@ -11,9 +11,9 @@ export async function register(req, res) {
     const createdAt = serverTimestamp()
     const updatedAt = serverTimestamp()
     password = await hashPassword(password)
-    const user = {email, name, password, role, createdAt, updatedAt}
-  
+    const user = { email, name, password, role, createdAt, updatedAt }
     const userId = await authService.registerUser(user);
+    console.log(user)
     return res.status(201).json({
       msg: "User registered successfully",
       userId,
