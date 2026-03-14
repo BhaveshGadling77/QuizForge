@@ -21,16 +21,24 @@ async function getUserList() {
   }
 }
 
-async function findById(id) {
-  const docRef = doc(db, "users", id);
-  const docSnap = await getDoc(docRef);
+// async function findById(id) {
+//   const docRef = doc(db, "users", id);
+//   const docSnap = await getDoc(docRef);
 
-  if (docSnap.exists()) {
-    console.log("Document data:", docSnap.data());
-  } else {
-    // docSnap.data() will be undefined in this case
-    console.log("No such document!");
-  }
-  return docSnap
+//   if (docSnap.exists()) {
+//     console.log("Document data:", docSnap.data());
+//   } else {
+//     // docSnap.data() will be undefined in this case
+//     console.log("No such document!");
+//   }
+//   return docSnap
+// }
+// users.utils.js - fix findById to return plain object
+export async function findById(id) {
+  const docRef = doc(db, process.env.COLLECTION_USERS, id);
+  const docSnap = await getDoc(docRef);
+  if (!docSnap.exists()) return null;
+  return { id: docSnap.id, ...docSnap.data() };
 }
-export { createUser, getUserList, findById };
+
+export { createUser, getUserList };

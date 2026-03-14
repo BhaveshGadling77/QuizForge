@@ -35,27 +35,37 @@ export class AuthService {
     }
   }
 
+  // auth.service.js - replace loginUser method
   async loginUser(data) {
     try {
-      const { email, password } = data
+      const { email, password } = data;
       const q = query(collection(db, "users"), where("email", "==", email));
-
       const snapshot = await getDocs(q);
 
-      if (snapshot.empty) {
-        throw new Error("User not found");
-      }
+      if (snapshot.empty) throw new Error("User not found");
 
       const userDoc = snapshot.docs[0];
-      const user = userDoc.data();
-      const isMatch = await comparePassword(password, user.password);
+      const user = { id: userDoc.id, ...userDoc.data() };
 
-      if (!isMatch) {
-        throw new Error("Invalid password");
-      }
-      return generateAccessToken(data);
+      const isMatch = await comparePassword(password, user.password);
+      if (!isMatch) throw new Error("Invalid password");
+
+      const token = generateAccessToken({
+        id: user.id,
+        email: user.email,
+        role: user.role,
+      });
+
+      return {
+        token,
+        user: {
+          _id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        },
+      };
     } catch (e) {
-      console.log(e.message)
       throw new Error(e.message);
     }
   }
