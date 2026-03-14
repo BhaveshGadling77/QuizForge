@@ -4,7 +4,8 @@ import {
   getActiveQuizzes,
   submitQuiz,
   getMyResult,
-  getLeaderboard
+  getLeaderboard,
+  getPrivateQuiz
 } from "../controllers/student.controller.js";
 
 const router = express.Router();
@@ -20,6 +21,13 @@ router.post("/api/quizzes/:quizId/submit", authenticateToken, submitQuiz);
 router.get("/api/quizzes/:quizId/my-result", authenticateToken, getMyResult);
 
 router.get("/api/quizzes/:quizId/leaderboard", authenticateToken, getLeaderboard);
+
+// workflow for the private quizzes.
+//user click on the quiz which is private
+//new dialogue title will open and that will used enter the input
+//then if the accesstoken is right it will open the quiz.
+
+router.post("/api/quizzes/:quizId/start", authenticateToken, getPrivateQuiz);
 
 // router.post("/api/quiz/:quizId/start")
 

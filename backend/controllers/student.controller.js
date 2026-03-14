@@ -1,7 +1,8 @@
 import { db } from "../config/firebase.config.js";
+import { comparePassword } from "../services/encrytion.service.js";
 import { StudentService } from "../services/student.service.js";
 
-const studentService = new StudentService(db)
+const studentService = new StudentService(db);
 
 //Student Specific Controllers.
 export async function getActiveQuizzes(req, res) {
@@ -70,7 +71,7 @@ export async function submitQuiz(req, res) {
 export async function getMyResult(req, res) {
   try {
     const { quizId } = req.params;
-    const userId = req.user.uid;
+    const userId = req.user.userid;
 
     const result = await studentService.getMyResult(quizId, userId);
 
@@ -89,17 +90,42 @@ export async function getMyResult(req, res) {
 export async function getLeaderboard(req, res) {
   try {
     const { quizId } = req.params;
-    const data = await studentService.getLeaderboard(quizId)
+    const data = await studentService.getLeaderboard(quizId);
     return res.status(200).json({
       success: true,
-      data
+      data,
+    });
+  } catch (e) {
+    return res.status(404).json({
+      success: true,
+      message: e.message,
+    });
+  }
+}
+// req.body = {accessToken: "..."}
+export async function getPrivateQuiz(req, res) {
+  try {
+    const { quizId } = req.params;
+    const { accessToken } = req.body;
+    const { userId } = req.user.userId;
+    const quizData = await studentService.getQuizData(quizId, userId);
+    
+    const isMatch = await comparePassword(quizData.accessToken, accessToken);
+    if (!isMatch) {
+
+      return res.json({
+        success: false,
+        msg: "Wrong Access Token.",
+      });
+    }
+    return res.json({
+      success: true,
+      quiz: quizData
     })
-  } catch(e) {
-    return res.status(404).json(
-      {
-        success: true,
-        message: e.message
-      }
-    )
+  } catch (e) {
+    return res.json({
+      success: true,
+      message: e.message
+    })
   }
 }
