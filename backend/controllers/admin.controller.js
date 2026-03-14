@@ -1,5 +1,7 @@
 import { AdminService } from "../services/admin.service.js";
 import { db } from "../config/firebase.config.js";
+import { QuizService } from "../services/quiz.service.js";
+const quizService = new QuizService(db);
 
 const adminService = new AdminService(db);
 

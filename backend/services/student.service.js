@@ -1,9 +1,11 @@
-import { doc, getDoc, getDocs, collection } from "firebase/firestore";
+import { doc, getDoc, getDocs, collection, query, where, orderBy, limit } from "firebase/firestore";
 
 export class StudentService {
+  c// Add to StudentService constructor
   constructor(db) {
     this.db = db;
     this.resultCollection = collection(db, process.env.COLLECTION_RESULTS);
+    this.quizCollection = collection(db, process.env.COLLECTION_QUIZZES);
   }
 
   /**
@@ -69,28 +71,29 @@ export class StudentService {
   }
 
   async getQuizData(quizId, userId) {
-    //get the quiz reference
+    // get the quiz reference
     const quizRef = doc(this.quizCollection, quizId);
     const quizSnap = await getDoc(quizRef);
 
-    //get the snapshot of the quiz
-    if (!quizSnap) {
+    // check if quiz exists
+    if (!quizSnap.exists()) {
       throw new Error("Quiz not Found");
     }
 
-    //get the quiz data from the snapshot
+    // get the quiz data from the snapshot
     const quiz = quizSnap.data();
 
     if (!quiz.isActive) {
       throw new Error("Quiz is not active");
     }
 
-    //check if the the user already attempted the quiz
-    const attemptSnap = await this.db
-      .collection(this.quizCollection)
-      .where("quizId", "==", quizId)
-      .where("userId", "==", userId)
-      .get();
+    // check if the user already attempted the quiz (v9 syntax)
+    const attemptQuery = query(
+      collection(this.db, process.env.COLLECTION_RESULTS),
+      where("quizId", "==", quizId),
+      where("userId", "==", userId)
+    );
+    const attemptSnap = await getDocs(attemptQuery);
 
     if (!attemptSnap.empty) {
       const err = new Error("Quiz already attempted");
@@ -296,30 +299,27 @@ export class StudentService {
     });
   }
 
+  // Replace getLeaderboard in student.service.js
   async getLeaderboard(quizId) {
-    const snapshot = await this.db
-      .collection(process.env.COLLECTION_RESULTS)
-      .where("quizId", "==", quizId)
-      .orderBy("score", "desc")
-      .orderBy("timeTakenSeconds", "asc")
-      .orderBy("submittedAt", "asc")
-      .limit(15)
-      .get();
-    if (!snapshot) throw Error("data base error.");
-    const leaderboard = {};
-
-    snapshot.forEach((doc, index) => {
+    const resultsRef = collection(this.db, process.env.COLLECTION_RESULTS);
+    const q = query(
+      resultsRef,
+      where("quizId", "==", quizId),
+      orderBy("score", "desc"),
+      orderBy("timeTakenSeconds", "asc"),
+      limit(15)
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map((doc, index) => {
       const data = doc.data();
-
-      leaderboard.push({
+      return {
         rank: index + 1,
         userId: data.userId,
         studentName: data.userName,
         score: data.score,
         submittedAt: data.submittedAt,
-      });
+      };
     });
-    return leaderboard;
   }
 
   async getAllResultOfStudent(studentId) {
@@ -346,5 +346,5 @@ export class StudentService {
       };
     });
   }
-  
+
 }
