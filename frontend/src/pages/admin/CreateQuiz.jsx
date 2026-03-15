@@ -10,18 +10,19 @@ export default function CreateQuiz() {
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-    try {
-      const res = await createQuiz(form);
-      navigate(`/admin/quiz/${res.data.quiz._id}/questions`);
-    } catch (err) {
-      setError(err.response?.data?.message ?? "Failed to create quiz");
-    } finally {
-      setLoading(false);
-    }
-  };
+  e.preventDefault();
+  setError("");
+  setLoading(true);
+  try {
+    const res = await createQuiz(form);
+    console.log("CREATE QUIZ RESPONSE:", res.data); //new
+    navigate(`/admin/quiz/${res.data.quiz._id}/questions`);
+  } catch (err) {
+    setError(err.response?.data?.message ?? "Failed to create quiz");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-forge-bg">

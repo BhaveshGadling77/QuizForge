@@ -6,11 +6,8 @@ import {
   deleteDoc,
   addDoc,
   query,
-  where,
   orderBy,
   getDocs,
-  runTransaction,
-  Timestamp,
 } from "firebase/firestore";
 import { hashPassword } from "./encrytion.service.js";
 
@@ -20,18 +17,19 @@ export class QuizService {
     this.quizCollection = collection(db, process.env.COLLECTION_QUIZZES);
     this.resultCollection = collection(db, process.env.COLLECTION_RESULTS);
   }
-  //admin specific methods
+
   async createQuiz(quizData) {
     if (quizData.visibility === "private" && !quizData.accessToken) {
       throw new Error("Access token required for private quiz");
     }
-    if (quizData.visibility == "private") {
-      quizData.accessToken = hashPassword(quizData.accessToken)
+    if (quizData.visibility === "private") {
+      quizData.accessToken = await hashPassword(quizData.accessToken);
     }
-    await addDoc(this.quizCollection, {
+    const docRef = await addDoc(this.quizCollection, {
       ...quizData,
       createdAt: new Date(),
     });
+    return docRef;
   }
 
   async updateQuiz(quizId, updates) {
@@ -51,7 +49,6 @@ export class QuizService {
     ];
 
     const quizUpdates = {};
-
     allowedFields.forEach((field) => {
       if (updates[field] !== undefined) {
         quizUpdates[field] = updates[field];
@@ -63,7 +60,7 @@ export class QuizService {
       quizUpdates.totalQuestions = updates.questions.length;
       quizUpdates.totalPoints = updates.questions.reduce(
         (sum, q) => sum + (q.points || 0),
-        0,
+        0
       );
     }
 
@@ -74,19 +71,14 @@ export class QuizService {
   async deleteQuiz(quizId) {
     const quizRef = doc(this.quizCollection, quizId);
     const quizSnap = await getDoc(quizRef);
-
-    if (!quizSnap.exists()) {
-      throw new Error("Quiz not found");
-    }
-
+    if (!quizSnap.exists()) throw new Error("Quiz not found");
     await deleteDoc(quizRef);
   }
 
   async getAllQuizzesForAdmin() {
     const snapshot = await getDocs(
-      query(this.quizCollection, orderBy("createdAt", "desc")),
+      query(this.quizCollection, orderBy("createdAt", "desc"))
     );
-
     return snapshot.docs.map((doc) => ({
       quizId: doc.id,
       title: doc.data().title,
@@ -96,4 +88,64 @@ export class QuizService {
     }));
   }
 
+  async getQuizById(quizId) {
+    const quizRef = doc(this.quizCollection, quizId);
+    const quizSnap = await getDoc(quizRef);
+    if (!quizSnap.exists()) throw new Error("Quiz not found");
+    return { quizId: quizSnap.id, ...quizSnap.data() };
+  }
+
+  async getQuestions(quizId) {
+    const quizRef = doc(this.quizCollection, quizId);
+    const quizSnap = await getDoc(quizRef);
+    if (!quizSnap.exists()) throw new Error("Quiz not found");
+    return quizSnap.data().questions ?? [];
+  }
+
+  async addQuestion(quizId, questionData) {
+    const quizRef = doc(this.quizCollection, quizId);
+    const quizSnap = await getDoc(quizRef);
+    if (!quizSnap.exists()) throw new Error("Quiz not found");
+
+    const quiz = quizSnap.data();
+    const questions = quiz.questions ?? [];
+
+    const newQuestion = {
+      questionId: `q_${Date.now()}`,
+      questionType: questionData.type ?? "mcq",
+      questionMd: questionData.text,
+      options: questionData.options,
+      correctOptionIndex: questionData.correctOption,
+      points: questionData.points ?? 10,
+      order: questions.length + 1,
+      createdAt: new Date(),
+    };
+
+    questions.push(newQuestion);
+
+    await updateDoc(quizRef, {
+      questions,
+      totalQuestions: questions.length,
+      totalPoints: questions.reduce((sum, q) => sum + (q.points ?? 0), 0),
+    });
+
+    return newQuestion.questionId;
+  }
+
+  async deleteQuestion(quizId, questionId) {
+    const quizRef = doc(this.quizCollection, quizId);
+    const quizSnap = await getDoc(quizRef);
+    if (!quizSnap.exists()) throw new Error("Quiz not found");
+
+    const quiz = quizSnap.data();
+    const questions = (quiz.questions ?? []).filter(
+      (q) => q.questionId !== questionId
+    );
+
+    await updateDoc(quizRef, {
+      questions,
+      totalQuestions: questions.length,
+      totalPoints: questions.reduce((sum, q) => sum + (q.points ?? 0), 0),
+    });
+  }
 }
