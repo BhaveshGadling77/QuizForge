@@ -29,16 +29,21 @@ export default function AddQuestions() {
       await addQuestion(id, form);
       qc.invalidateQueries(["questions", id]);
       setForm(emptyForm());
+      setError("");
     } catch (err) {
-      setError(err.response?.data?.message ?? "Failed to add question");
+      setError(err.response?.data?.msg ?? err.response?.data?.message ?? "Failed to add question");
     } finally {
       setSaving(false);
     }
   };
 
-  const handleDelete = async (qId) => {
-    await deleteQuestion(id, qId);
-    qc.invalidateQueries(["questions", id]);
+  const handleDelete = async (questionId) => {
+    try {
+      await deleteQuestion(id, questionId);
+      qc.invalidateQueries(["questions", id]);
+    } catch (err) {
+      console.error("Delete failed:", err);
+    }
   };
 
   return (
@@ -64,9 +69,13 @@ export default function AddQuestions() {
             {form.options.map((opt, i) => (
               <div key={i}>
                 <label className="label">Option {String.fromCharCode(65 + i)}</label>
-                <input className={`input ${form.correctOption === i ? "border-forge-green" : ""}`}
+                <input
+                  className={`input ${form.correctOption === i ? "border-forge-green" : ""}`}
                   placeholder={`Option ${String.fromCharCode(65 + i)}`}
-                  value={opt} onChange={(e) => setOption(i, e.target.value)} required />
+                  value={opt}
+                  onChange={(e) => setOption(i, e.target.value)}
+                  required
+                />
               </div>
             ))}
           </div>
@@ -91,19 +100,32 @@ export default function AddQuestions() {
         ) : (
           <div className="flex flex-col gap-3">
             {questions.map((q, i) => (
-              <div key={q._id} className="card flex items-start justify-between gap-4">
+              <div key={q.questionId} className="card flex items-start justify-between gap-4">
                 <div>
                   <p className="text-forge-muted font-mono text-xs mb-1">Q{i + 1}</p>
-                  <p className="text-forge-text text-sm">{q.text}</p>
+                  <p className="text-forge-text text-sm">{q.questionMd}</p>
                 </div>
-                <button onClick={() => handleDelete(q._id)}
-                  className="text-forge-red hover:text-forge-red/70 text-xs font-mono shrink-0">
+                <button
+                  onClick={() => handleDelete(q.questionId)}
+                  className="text-forge-red hover:text-forge-red/70 text-xs font-mono shrink-0"
+                >
                   Delete
                 </button>
               </div>
             ))}
           </div>
         )}
+
+        {/* Done button */}
+        <div className="flex gap-3 mt-6">
+          <Link to="/admin" className="btn-primary block text-center flex-1">
+            ✓ Done — Back to Dashboard
+          </Link>
+          <Link to={`/admin/edit/${id}`} className="btn-ghost block text-center flex-1">
+            Edit Quiz Details
+          </Link>
+        </div>
+
       </main>
     </div>
   );

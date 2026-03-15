@@ -3,6 +3,10 @@ import {
   updateQuiz,
   deleteQuiz,
   getAllQuizzesForAdmin,
+  getQuizById,
+  addQuestion,      //new
+  deleteQuestion,   //new
+  getQuestions,     //new
 } from "../controllers/quiz.controller.js";
 import {
   getQuizzesWithPendingResults,
@@ -64,6 +68,14 @@ router.get(
   authorizeAdminRole,
   getAllQuizzesForAdmin,
 );
+
+router.get(
+  "/quizzes/:quizId",
+  authenticateToken,
+  authorizeAdminRole,
+  getQuizById,
+);
+
 //for publishing a quiz
 router.post(
   "/quiz/:quizId/publish",
@@ -99,6 +111,28 @@ router.get(
   authenticateToken,
   authorizeAdminRole,
   getResultForStudent,
+);
+
+// by ADP
+router.post(
+  "/quizzes/:quizId/questions",
+  authenticateToken,
+  authorizeAdminRole,
+  addQuestion
+);
+// by ADP
+router.delete(
+  "/quizzes/:quizId/questions/:questionId",
+  authenticateToken,
+  authorizeAdminRole,
+  deleteQuestion
+);
+// by ADP
+router.get(
+  "/quizzes/:quizId/questions",
+  authenticateToken,
+  authorizeAdminRole,
+  getQuestions
 );
 
 export default router;
