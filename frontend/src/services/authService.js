@@ -13,9 +13,15 @@ export const login = (email, password) =>
   api.post("/auth/login", { email, password });
 
 /**
+ * Login with token
+ * @returns 
+ */
+export const loginWithToken = () => api.post("/")
+
+/**
  * Fetch the currently authenticated user's profile
  */
-export const getMe = () => api.get("/auth/me");
+export const getMe = () => api.post("/auth/login");
 
 /**
  * Logout (clears local token)

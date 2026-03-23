@@ -10,7 +10,7 @@ import {
 
 const router = express.Router();
 
-router.post("/login", authenticateToken, (req, res) => {
+router.post("/", authenticateToken, (req, res) => {
   res.json({ msg: "User authenticated successfully.", user: req.user });
 });
 

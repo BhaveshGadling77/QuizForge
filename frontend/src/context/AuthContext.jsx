@@ -1,5 +1,5 @@
 import { createContext, useState, useEffect, useCallback } from "react";
-import { getMe, logout as logoutService } from "@/services/authService";
+import { loginWithToken, logout as logoutService } from "@/services/authService";
 
 export const AuthContext = createContext(null);
 
@@ -14,9 +14,13 @@ export function AuthProvider({ children }) {
       setLoading(false);
       return;
     }
-    getMe()
-      .then((res) => setUser(res.data.user))
-      .catch(() => localStorage.removeItem("token"))
+    loginWithToken()
+      .then((res) => {
+        setUser(res.data.user);
+      })
+      .catch(() => {
+        localStorage.removeItem("token");
+      })
       .finally(() => setLoading(false));
   }, []);
 
