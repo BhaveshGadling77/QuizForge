@@ -1,77 +1,164 @@
-import { useQuery } from "react-query";
+import { useQuery, useMutation, useQueryClient } from "react-query";
 import { Link } from "react-router-dom";
-import { getQuizzes } from "@/services/quizService";
+import {
+  getQuizzes,
+  publishQuiz,
+  unpublishQuiz,
+} from "@/services/quizService";
 import Navbar from "@/components/Navbar";
-import { QUIZ_STATUS } from "@/utils/constants";
 import { formatDate, truncate } from "@/utils/helpers";
 
+const getStatus = (quiz) => {
+  if (!quiz.isActive) return "DRAFT";
+  if ((quiz.totalQuestions ?? 0) === 0) return "EMPTY";
+  return "PUBLISHED";
+};
+
 const statusStyles = {
-  [QUIZ_STATUS.PUBLISHED]: "bg-forge-green/10 text-forge-green",
-  [QUIZ_STATUS.DRAFT]: "bg-forge-yellow/10 text-forge-yellow",
-  [QUIZ_STATUS.CLOSED]: "bg-forge-red/10 text-forge-red",
+  PUBLISHED: "bg-forge-green/10 text-forge-green",
+  DRAFT: "bg-forge-yellow/10 text-forge-yellow",
+  EMPTY: "bg-forge-gray/10 text-forge-muted",
 };
 
 export default function AdminDashboard() {
-  const { data: quizzes = [], isLoading } = useQuery("admin-quizzes", () =>
-    getQuizzes().then((r) => r.data.quizzes)
+  const qc = useQueryClient();
+
+  // Fetch quizzes
+  const { data, isLoading } = useQuery(
+  "admin-quizzes",
+  () => getQuizzes()
+);
+
+const quizzes = data?.data?.quizzes ?? [];
+// console.log("API RESPONSE:", quizzes); //debug
+  // Publish mutation
+  const publishMutation = useMutation(
+    (quizId) => publishQuiz(quizId),
+    {
+      onSuccess: () => qc.invalidateQueries("admin-quizzes"),
+    }
   );
+
+  // Unpublish mutation
+  const unpublishMutation = useMutation(
+    (quizId) => unpublishQuiz(quizId),
+    {
+      onSuccess: () => qc.invalidateQueries("admin-quizzes"),
+    }
+  );
+
+  // Normalize
+  const normalizedQuizzes = quizzes.map((q) => ({
+    ...q,
+    id: q.quizId,
+    status: getStatus(q),
+  }));
 
   return (
     <div className="min-h-screen bg-forge-bg">
       <Navbar />
+
       <main className="max-w-6xl mx-auto px-6 py-10">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        {/* HEADER */}
+        <div className="flex justify-between mb-8">
           <div>
-            <h1 className="font-display font-bold text-2xl text-forge-text">Admin Dashboard</h1>
-            <p className="text-forge-muted text-sm mt-1">{quizzes.length} total quiz{quizzes.length !== 1 ? "zes" : ""}</p>
+            <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+            <p className="text-sm text-forge-muted">
+              {normalizedQuizzes.length} quizzes
+            </p>
           </div>
-          <Link to="/admin/create" className="btn-primary">+ Create Quiz</Link>
+
+          <Link to="/admin/create" className="btn-primary">
+            + Create Quiz
+          </Link>
         </div>
 
-        {/* Stats row */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
-          {[
-            { label: "Published", val: quizzes.filter((q) => q.status === QUIZ_STATUS.PUBLISHED).length, color: "text-forge-green" },
-            { label: "Drafts", val: quizzes.filter((q) => q.status === QUIZ_STATUS.DRAFT).length, color: "text-forge-yellow" },
-            { label: "Closed", val: quizzes.filter((q) => q.status === QUIZ_STATUS.CLOSED).length, color: "text-forge-red" },
-          ].map(({ label, val, color }) => (
-            <div key={label} className="card">
-              <p className="label">{label}</p>
-              <p className={`font-display font-bold text-3xl ${color}`}>{val}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* Quiz table */}
+        {/* TABLE */}
         {isLoading ? (
           <div className="card h-64 animate-pulse" />
         ) : (
-          <div className="overflow-hidden rounded-xl border border-forge-border">
+          <div className="border rounded-xl overflow-hidden">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-forge-border bg-forge-surface">
-                  {["Title", "Status", "Questions", "Created", "Actions"].map((h) => (
-                    <th key={h} className="px-4 py-3 text-left font-mono text-xs text-forge-muted uppercase tracking-wider">
-                      {h}
-                    </th>
-                  ))}
+                <tr className="bg-forge-surface border-b">
+                  {["Title", "Status", "Questions", "Created", "Actions"].map(
+                    (h) => (
+                      <th key={h} className="px-4 py-3 text-left text-xs">
+                        {h}
+                      </th>
+                    )
+                  )}
                 </tr>
               </thead>
+
               <tbody>
-                {quizzes.map((quiz) => (
-                  <tr key={quiz._id} className="border-b border-forge-border last:border-0 hover:bg-forge-surface/60 transition-colors">
-                    <td className="px-4 py-3 text-forge-text font-medium">{truncate(quiz.title, 40)}</td>
+                {normalizedQuizzes.map((quiz) => (
+                  <tr key={quiz.id} className="border-b">
+                    {/* TITLE */}
                     <td className="px-4 py-3">
-                      <span className={`badge ${statusStyles[quiz.status]}`}>{quiz.status}</span>
+                      {truncate(quiz.title, 40)}
                     </td>
-                    <td className="px-4 py-3 font-mono text-forge-muted">{quiz.questionCount}</td>
-                    <td className="px-4 py-3 font-mono text-forge-muted text-xs">{formatDate(quiz.createdAt)}</td>
+
+                    {/* STATUS */}
                     <td className="px-4 py-3">
-                      <div className="flex items-center gap-3">
-                        <Link to={`/admin/edit/${quiz._id}`} className="text-forge-accent hover:underline text-xs">Edit</Link>
-                        <Link to={`/admin/quiz/${quiz._id}/questions`} className="text-forge-muted hover:text-forge-text text-xs">Questions</Link>
-                        <Link to={`/admin/quiz/${quiz._id}/results`} className="text-forge-muted hover:text-forge-text text-xs">Results</Link>
+                      <span
+                        className={`px-2 py-1 text-xs rounded ${
+                          statusStyles[quiz.status]
+                        }`}
+                      >
+                        {quiz.status}
+                      </span>
+                    </td>
+
+                    {/* QUESTIONS */}
+                    <td className="px-4 py-3">
+                      {quiz.totalQuestions ?? 0}
+                    </td>
+
+                    {/* CREATED */}
+                    <td className="px-4 py-3 text-xs">
+                      {formatDate(quiz.createdAt)}
+                    </td>
+
+                    {/* ACTIONS */}
+                    <td className="px-4 py-3">
+                      <div className="flex gap-3 items-center">
+                        {/* Publish / Unpublish */}
+                        {quiz.isActive ? (
+                          <button
+                            onClick={() =>
+                              unpublishMutation.mutate(quiz.id)
+                            }
+                            className="text-forge-red text-xs"
+                          >
+                            Unpublish
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() =>
+                              publishMutation.mutate(quiz.id)
+                            }
+                            className="text-forge-green text-xs"
+                          >
+                            Publish
+                          </button>
+                        )}
+
+                        {/* Questions */}
+                        <Link
+                          to={`/admin/quiz/${quiz.id}/questions`}
+                          className="text-xs text-forge-muted"
+                        >
+                          Questions
+                        </Link>
+
+                        {/* Results */}
+                        <Link
+                          to={`/admin/quiz/${quiz.id}/results`}
+                          className="text-xs text-forge-muted"
+                        >
+                          Results
+                        </Link>
                       </div>
                     </td>
                   </tr>

@@ -1,17 +1,37 @@
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "react-query";
-import { getQuestions, addQuestion, deleteQuestion } from "@/services/quizService";
+import {
+  getQuestions,
+  addQuestion,
+  deleteQuestion,
+} from "@/services/quizService";
 import Navbar from "@/components/Navbar";
 
-const emptyForm = () => ({ text: "", options: ["", "", "", ""], correctOption: 0 });
+// remove undefined if any
+const cleanData = (obj) =>
+  Object.fromEntries(
+    Object.entries(obj).filter(([_, v]) => v !== undefined)
+  );
+
+const emptyForm = () => ({
+  questionMd: "",
+  questionType: "mcq",
+  options: ["", "", "", ""],
+  correctOptionIndex: 0,
+  correctAnswer: null,
+  points: 10,
+});
 
 export default function AddQuestions() {
   const { id } = useParams();
   const qc = useQueryClient();
-  const { data: questions = [], isLoading } = useQuery(["questions", id], () =>
-    getQuestions(id).then((r) => r.data.questions)
+
+  const { data: questions = [], isLoading } = useQuery(
+    ["questions", id],
+    () => getQuestions(id).then((r) => r.data.questions)
   );
+
   const [form, setForm] = useState(emptyForm());
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -22,110 +42,194 @@ export default function AddQuestions() {
     setForm({ ...form, options: opts });
   };
 
+  const handleTypeChange = (type) => {
+    if (type === "true-false") {
+      setForm({
+        ...form,
+        questionType: type,
+        options: ["True", "False"],
+        correctOptionIndex: 0,
+        correctAnswer: null,
+      });
+    } else if (type === "mcq") {
+      setForm({
+        ...form,
+        questionType: type,
+        options: ["", "", "", ""],
+        correctOptionIndex: 0,
+        correctAnswer: null,
+      });
+    } else {
+      // short answer types
+      setForm({
+        ...form,
+        questionType: type,
+        options: null,
+        correctOptionIndex: null,
+        correctAnswer: "",
+      });
+    }
+  };
+
   const handleAdd = async (e) => {
     e.preventDefault();
     setSaving(true);
+
     try {
-      await addQuestion(id, form);
+      let payload = {
+        ...form,
+        order: questions.length + 1,
+        createdAt: new Date().toISOString(),
+      };
+
+      if (
+        form.questionType === "short-integer" ||
+        form.questionType === "short-subjective"
+      ) {
+        payload.options = null;
+        payload.correctOptionIndex = null;
+      }
+
+      payload = cleanData(payload);
+
+      // console.log("FINAL PAYLOAD:", payload); // debug
+
+      await addQuestion(id, payload);
+
       qc.invalidateQueries(["questions", id]);
       setForm(emptyForm());
       setError("");
     } catch (err) {
-      setError(err.response?.data?.msg ?? err.response?.data?.message ?? "Failed to add question");
+      setError(
+        err.response?.data?.message ?? "Failed to add question"
+      );
     } finally {
       setSaving(false);
     }
   };
 
-  const handleDelete = async (questionId) => {
-    try {
-      await deleteQuestion(id, questionId);
-      qc.invalidateQueries(["questions", id]);
-    } catch (err) {
-      console.error("Delete failed:", err);
-    }
+  const handleDelete = async (qid) => {
+    await deleteQuestion(id, qid);
+    qc.invalidateQueries(["questions", id]);
   };
 
   return (
     <div className="min-h-screen bg-forge-bg">
       <Navbar />
-      <main className="max-w-2xl mx-auto px-6 py-10">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <Link to="/admin" className="text-forge-muted hover:text-forge-text text-sm">← Dashboard</Link>
-            <h1 className="font-display font-bold text-2xl text-forge-text mt-1">Add Questions</h1>
-          </div>
-          <span className="badge bg-forge-border text-forge-muted font-mono">{questions.length} questions</span>
-        </div>
 
-        {/* Add form */}
-        <form onSubmit={handleAdd} className="card mb-8 flex flex-col gap-4">
-          <div>
-            <label className="label">Question Text</label>
-            <textarea className="input h-20 resize-none" placeholder="Enter the question…"
-              value={form.text} onChange={(e) => setForm({ ...form, text: e.target.value })} required />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            {form.options.map((opt, i) => (
-              <div key={i}>
-                <label className="label">Option {String.fromCharCode(65 + i)}</label>
+      <main className="max-w-2xl mx-auto px-6 py-10">
+        <h1 className="text-2xl mb-6">Add Questions</h1>
+
+        {/* FORM */}
+        <form onSubmit={handleAdd} className="card flex flex-col gap-4 mb-8">
+          <textarea
+            className="input"
+            placeholder="Question"
+            value={form.questionMd}
+            onChange={(e) =>
+              setForm({ ...form, questionMd: e.target.value })
+            }
+            required
+          />
+
+          <select
+            className="input"
+            value={form.questionType}
+            onChange={(e) => handleTypeChange(e.target.value)}
+          >
+            <option value="mcq">MCQ</option>
+            <option value="true-false">True / False</option>
+            <option value="short-integer">Short Integer</option>
+            <option value="short-subjective">Subjective</option>
+          </select>
+
+          {(form.questionType === "mcq" ||
+            form.questionType === "true-false") && (
+            <>
+              {form.options.map((opt, i) => (
                 <input
-                  className={`input ${form.correctOption === i ? "border-forge-green" : ""}`}
-                  placeholder={`Option ${String.fromCharCode(65 + i)}`}
+                  key={i}
+                  className="input"
                   value={opt}
-                  onChange={(e) => setOption(i, e.target.value)}
+                  onChange={(e) =>
+                    setOption(i, e.target.value)
+                  }
+                  placeholder={`Option ${i + 1}`}
                   required
                 />
-              </div>
-            ))}
-          </div>
-          <div>
-            <label className="label">Correct Answer</label>
-            <select className="input" value={form.correctOption}
-              onChange={(e) => setForm({ ...form, correctOption: +e.target.value })}>
-              {form.options.map((_, i) => (
-                <option key={i} value={i}>Option {String.fromCharCode(65 + i)}</option>
               ))}
-            </select>
-          </div>
-          {error && <p className="text-forge-red text-xs font-mono">{error}</p>}
-          <button type="submit" disabled={saving} className="btn-primary disabled:opacity-50">
-            {saving ? "Adding…" : "+ Add Question"}
+
+              <select
+                className="input"
+                value={form.correctOptionIndex}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    correctOptionIndex: +e.target.value,
+                  })
+                }
+              >
+                {form.options.map((_, i) => (
+                  <option key={i} value={i}>
+                    Option {i + 1}
+                  </option>
+                ))}
+              </select>
+            </>
+          )}
+
+          {(form.questionType === "short-integer" ||
+            form.questionType === "short-subjective") && (
+            <input
+              className="input"
+              placeholder="Correct Answer"
+              value={form.correctAnswer}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  correctAnswer: e.target.value,
+                })
+              }
+            />
+          )}
+
+          <input
+            type="number"
+            className="input"
+            value={form.points}
+            min={1}
+            onChange={(e) =>
+              setForm({ ...form, points: +e.target.value })
+            }
+          />
+
+          {error && <p className="text-red-500 text-xs">{error}</p>}
+
+          <button className="btn-primary" disabled={saving}>
+            {saving ? "Adding..." : "Add Question"}
           </button>
         </form>
 
-        {/* Existing questions */}
+        {/* LIST */}
         {isLoading ? (
-          <div className="card h-32 animate-pulse" />
+          <p>Loading...</p>
         ) : (
-          <div className="flex flex-col gap-3">
-            {questions.map((q, i) => (
-              <div key={q.questionId} className="card flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-forge-muted font-mono text-xs mb-1">Q{i + 1}</p>
-                  <p className="text-forge-text text-sm">{q.questionMd}</p>
-                </div>
-                <button
-                  onClick={() => handleDelete(q.questionId)}
-                  className="text-forge-red hover:text-forge-red/70 text-xs font-mono shrink-0"
-                >
-                  Delete
-                </button>
+          questions.map((q, i) => (
+            <div key={q.questionId} className="card mb-2 flex justify-between">
+              <div>
+                <p>Q{i + 1}</p>
+                <p>{q.questionMd}</p>
               </div>
-            ))}
-          </div>
+              <button onClick={() => handleDelete(q.questionId)}>
+                Delete
+              </button>
+            </div>
+          ))
         )}
 
-        {/* Done button */}
-        <div className="flex gap-3 mt-6">
-          <Link to="/admin" className="btn-primary block text-center flex-1">
-            ✓ Done — Back to Dashboard
-          </Link>
-          <Link to={`/admin/edit/${id}`} className="btn-ghost block text-center flex-1">
-            Edit Quiz Details
-          </Link>
-        </div>
-
+        <Link to="/admin" className="btn-primary mt-4 block text-center">
+          Done
+        </Link>
       </main>
     </div>
   );
