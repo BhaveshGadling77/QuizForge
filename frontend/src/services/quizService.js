@@ -19,10 +19,10 @@ export const deleteQuiz = (id) =>
 /* PUBLISH  */
 
 export const publishQuiz = (id) =>
-  api.post(`/admin/quizzes/${id}/publish`);
+  api.post(`/admin/quizzes/${id}/publish`, {});
 
 export const unpublishQuiz = (id) =>
-  api.post(`/admin/quizzes/${id}/unpublish`);
+  api.post(`/admin/quizzes/${id}/unpublish`, {});
 
 /*  QUESTIONS  */
 

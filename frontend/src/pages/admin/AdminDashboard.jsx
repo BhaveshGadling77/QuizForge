@@ -30,8 +30,37 @@ export default function AdminDashboard() {
   () => getQuizzes()
 );
 
+const handleDeleteQuiz = async (quizId) => {
+  const confirmDelete = window.confirm(
+    "Are you sure you want to delete this quiz?"
+  );
+  if (!confirmDelete) return;
+
+  try {
+    //set query with correct quizId 
+    qc.setQueryData("admin-quizzes", (oldData) => {
+      if (!oldData) return oldData;
+
+      return {
+        ...oldData,
+        data: {
+          ...oldData.data,
+          quizzes: oldData.data.quizzes.filter(
+            (q) => q.quizId !== quizId 
+          ),
+        },
+      };
+    });
+
+    await deleteQuiz(quizId);
+
+    qc.invalidateQueries("admin-quizzes");
+  } catch (err) {
+    console.error("Delete failed", err);
+  }
+};
 const quizzes = data?.data?.quizzes ?? [];
-console.log("API RESPONSE:", quizzes); //debug
+// console.log("API RESPONSE:", quizzes); //debug
   // Publish mutation
   const publishMutation = useMutation(
     (quizId) => publishQuiz(quizId),
@@ -54,7 +83,7 @@ console.log("API RESPONSE:", quizzes); //debug
     id: q.quizId,
     status: getStatus(q),
   }));
-  console.log("Normalized Quizzes:", normalizedQuizzes); //debug
+  
   return (
     <div className="min-h-screen bg-forge-bg">
       <Navbar />
@@ -69,7 +98,7 @@ console.log("API RESPONSE:", quizzes); //debug
             </p>
           </div>
 
-          <Link to="/admin/create" className="btn-primary">
+          <Link to="/admin/create" className="btn-primary p-4">
             + Create Quiz
           </Link>
         </div>
@@ -145,6 +174,12 @@ console.log("API RESPONSE:", quizzes); //debug
                           </button>
                         )}
 
+                      {/* Delete */} 
+                      <button 
+                        onClick={() => handleDeleteQuiz(quiz.id)} 
+                        className="text-forge-red text-xs" > 
+                        Delete 
+                      </button>
                         {/* Questions */}
                         <Link
                           to={`/admin/quiz/${quiz.id}/questions`}

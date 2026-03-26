@@ -69,7 +69,7 @@ router.get(
 
 /*  QUESTIONS  */
 
-// ✅ Add question
+// Add question
 router.post(
   "/quizzes/:quizId/questions",
   authenticateToken,
