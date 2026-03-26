@@ -121,90 +121,120 @@ export default function AddQuestions() {
         <h1 className="text-2xl mb-6">Add Questions</h1>
 
         {/* FORM */}
-        <form onSubmit={handleAdd} className="card flex flex-col gap-4 mb-8">
-          <textarea
-            className="input"
-            placeholder="Question"
-            value={form.questionMd}
-            onChange={(e) =>
-              setForm({ ...form, questionMd: e.target.value })
-            }
-            required
-          />
+        <form onSubmit={handleAdd} className="card flex flex-col gap-5 mb-8">
+          {/* QUESTION */}
+          <div>
+            <label className="text-sm font-medium mb-1 block">
+              Question
+            </label>
+            <textarea
+              className="input"
+              placeholder="Enter your question..."
+              value={form.questionMd}
+              onChange={(e) =>
+                setForm({ ...form, questionMd: e.target.value })
+              }
+              required
+            />
+          </div>
 
-          <select
-            className="input"
-            value={form.questionType}
-            onChange={(e) => handleTypeChange(e.target.value)}
-          >
-            <option value="mcq">MCQ</option>
-            <option value="true-false">True / False</option>
-            <option value="short-integer">Short Integer</option>
-            <option value="short-subjective">Subjective</option>
-          </select>
+          {/* TYPE */}
+          <div>
+            <label className="text-sm font-medium mb-1 block">
+              Question Type
+            </label>
+            <select
+              className="input"
+              value={form.questionType}
+              onChange={(e) => handleTypeChange(e.target.value)}
+            >
+              <option value="mcq">Multiple Choice (MCQ)</option>
+              <option value="true-false">True / False</option>
+              <option value="short-integer">Short Integer</option>
+              <option value="short-subjective">Subjective</option>
+            </select>
+          </div>
 
+          {/* OPTIONS */}
           {(form.questionType === "mcq" ||
             form.questionType === "true-false") && (
-            <>
-              {form.options.map((opt, i) => (
-                <input
-                  key={i}
-                  className="input"
-                  value={opt}
-                  onChange={(e) =>
-                    setOption(i, e.target.value)
-                  }
-                  placeholder={`Option ${i + 1}`}
-                  required
-                />
-              ))}
+            <div>
+              <label className="text-sm font-medium mb-2 block">
+                Options
+              </label>
 
-              <select
+              <div className="flex flex-col gap-2">
+                {form.options.map((opt, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="correctOption"
+                      checked={form.correctOptionIndex === i}
+                      onChange={() =>
+                        setForm({ ...form, correctOptionIndex: i })
+                      }
+                    />
+
+                    <input
+                      className="input flex-1"
+                      value={opt}
+                      onChange={(e) =>
+                        setOption(i, e.target.value)
+                      }
+                      placeholder={`Option ${i + 1}`}
+                      required
+                    />
+                  </div>
+                ))}
+              </div>
+
+              <p className="text-xs text-gray-400 mt-1">
+                Select the correct answer using the radio button
+              </p>
+            </div>
+          )}
+
+          {/* SHORT ANSWER */}
+          {(form.questionType === "short-integer" ||
+            form.questionType === "short-subjective") && (
+            <div>
+              <label className="text-sm font-medium mb-1 block">
+                Correct Answer
+              </label>
+              <input
                 className="input"
-                value={form.correctOptionIndex}
+                placeholder="Enter correct answer..."
+                value={form.correctAnswer}
                 onChange={(e) =>
                   setForm({
                     ...form,
-                    correctOptionIndex: +e.target.value,
+                    correctAnswer: e.target.value,
                   })
                 }
-              >
-                {form.options.map((_, i) => (
-                  <option key={i} value={i}>
-                    Option {i + 1}
-                  </option>
-                ))}
-              </select>
-            </>
+              />
+            </div>
           )}
 
-          {(form.questionType === "short-integer" ||
-            form.questionType === "short-subjective") && (
+          {/* POINTS */}
+          <div>
+            <label className="text-sm font-medium mb-1 block">
+              Points
+            </label>
             <input
+              type="number"
               className="input"
-              placeholder="Correct Answer"
-              value={form.correctAnswer}
+              value={form.points}
+              min={1}
               onChange={(e) =>
-                setForm({
-                  ...form,
-                  correctAnswer: e.target.value,
-                })
+                setForm({ ...form, points: +e.target.value })
               }
             />
-          )}
+          </div>
 
-          <input
-            type="number"
-            className="input"
-            value={form.points}
-            min={1}
-            onChange={(e) =>
-              setForm({ ...form, points: +e.target.value })
-            }
-          />
-
+          {/* ERROR */}
           {error && <p className="text-red-500 text-xs">{error}</p>}
 
+          {/* SUBMIT */}
           <button className="btn-primary" disabled={saving}>
             {saving ? "Adding..." : "Add Question"}
           </button>

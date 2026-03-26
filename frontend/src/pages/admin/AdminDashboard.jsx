@@ -4,6 +4,7 @@ import {
   getQuizzes,
   publishQuiz,
   unpublishQuiz,
+  deleteQuiz,
 } from "@/services/quizService";
 import Navbar from "@/components/Navbar";
 import { formatDate, truncate } from "@/utils/helpers";
@@ -30,7 +31,7 @@ export default function AdminDashboard() {
 );
 
 const quizzes = data?.data?.quizzes ?? [];
-// console.log("API RESPONSE:", quizzes); //debug
+console.log("API RESPONSE:", quizzes); //debug
   // Publish mutation
   const publishMutation = useMutation(
     (quizId) => publishQuiz(quizId),
@@ -53,7 +54,7 @@ const quizzes = data?.data?.quizzes ?? [];
     id: q.quizId,
     status: getStatus(q),
   }));
-
+  console.log("Normalized Quizzes:", normalizedQuizzes); //debug
   return (
     <div className="min-h-screen bg-forge-bg">
       <Navbar />

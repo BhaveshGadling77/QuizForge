@@ -104,6 +104,7 @@ export class QuizService {
       isActive: doc.data().isActive,
       totalQuestions: doc.data().totalQuestions,
       totalPoints: doc.data().totalPoints,
+      createdAt: doc.data().createdAt
     }));
   }
 

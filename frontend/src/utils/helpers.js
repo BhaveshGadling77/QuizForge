@@ -34,7 +34,28 @@ export const truncate = (str, maxLen = 80) =>
  * Format a Firestore/ISO timestamp for display
  */
 export const formatDate = (timestamp) => {
-  const date = timestamp?.toDate ? timestamp.toDate() : new Date(timestamp);
+  if (!timestamp) return "";
+
+  let date;
+
+  // Firestore Timestamp (preferred case)
+  if (typeof timestamp.toDate === "function") {
+    date = timestamp.toDate();
+  }
+  // Firestore-like object { seconds, nanoseconds }
+  else if (timestamp.seconds) {
+    date = new Date(
+      timestamp.seconds * 1000 + (timestamp.nanoseconds || 0) / 1e6
+    );
+  }
+  // Normal JS date / string / number
+  else {
+    date = new Date(timestamp);
+  }
+
+  // Invalid date check
+  if (isNaN(date.getTime())) return "";
+
   return date.toLocaleDateString("en-IN", {
     day: "numeric",
     month: "short",
