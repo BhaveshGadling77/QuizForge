@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { createQuiz } from "@/services/quizService";
+import { useAuth } from "@/hooks/useAuth"
 import Navbar from "@/components/Navbar";
 
 export default function CreateQuiz() {
   const navigate = useNavigate();
-
+  const { user } = useAuth();
+  // console.log("Current user:", user); // Debug log to check user data
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -37,6 +39,7 @@ const handleSubmit = async (e) => {
       isActive: false,
       totalQuestions: 0,
       totalPoints: 0,
+      createdBy: user.id
     };
 
     const res = await createQuiz(payload);

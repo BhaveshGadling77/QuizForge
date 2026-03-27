@@ -35,14 +35,15 @@ export async function deleteQuiz(req, res) {
 
 export async function getAllQuizzesForAdmin(req, res) {
   try {
-    const quizzes = await quizService.getAllQuizzesForAdmin()
+    console.log(req.user)
+    const quizzes = await quizService.getAllQuizzesForAdmin(req.user.id)
     return res.status(200).json({
       success: true,
       quizzes
     })
   } catch(e) {
     return res.status(500).json({
-      success: true,
+      success: false,
       msg: e.message
     })
   }

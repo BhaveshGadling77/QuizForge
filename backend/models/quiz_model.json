@@ -11,6 +11,7 @@
   "autoSubmit": true,
   "totalQuestions": 10,
   "totalPoints": 100,
+  "createdBy": "docId",
   "questions": [
     {
       "questionId": "string", 

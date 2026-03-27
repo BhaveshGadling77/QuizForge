@@ -8,6 +8,7 @@ import {
   query,
   orderBy,
   getDocs,
+  where,
 } from "firebase/firestore";
 import { hashPassword } from "./encrytion.service.js";
 
@@ -93,11 +94,13 @@ export class QuizService {
   }
 
   // get all quizzes
-  async getAllQuizzesForAdmin() {
-    const snapshot = await getDocs(
-      query(this.quizCollection, orderBy("createdAt", "desc"))
-    );
-
+  async getAllQuizzesForAdmin(adminId) {
+      const q = query(
+        this.quizCollection,
+        where("createdBy", "==", adminId),
+        orderBy("createdAt", "desc")
+      );
+    const snapshot = await getDocs(q);
     return snapshot.docs.map((doc) => ({
       quizId: doc.id,
       title: doc.data().title,
