@@ -7,7 +7,8 @@ import Navbar from "@/components/Navbar";
 export default function CreateQuiz() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  // console.log("Current user:", user); // Debug log to check user data
+  
+  console.log("Current user:", user); // Debug log to check user data
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -39,11 +40,11 @@ const handleSubmit = async (e) => {
       isActive: false,
       totalQuestions: 0,
       totalPoints: 0,
-      createdBy: user.id
+      createdBy: user._id || user.id || user.userId, // Adjust based on actual user object structure
     };
-
+    // console.log("Creating quiz with payload:", payload); // Debug log to check payload
     const res = await createQuiz(payload);
-    console.log(res.data);
+    // console.log(res.data); //debug
     // fix
     const quizId = res.data.quiz.quizId || res.data.quiz.id || res.data.quiz._id;
 
