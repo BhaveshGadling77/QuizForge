@@ -8,6 +8,7 @@ import {
   query,
   orderBy,
   getDocs,
+  where,
 } from "firebase/firestore";
 import { hashPassword } from "./encrytion.service.js";
 
@@ -93,11 +94,13 @@ export class QuizService {
   }
 
   // get all quizzes
-  async getAllQuizzesForAdmin() {
-    const snapshot = await getDocs(
-      query(this.quizCollection, orderBy("createdAt", "desc"))
-    );
-
+  async getAllQuizzesForAdmin(adminId) {
+      const q = query(
+        this.quizCollection,
+        where("createdBy", "==", adminId),
+        orderBy("createdAt", "desc")
+      );
+    const snapshot = await getDocs(q);
     return snapshot.docs.map((doc) => ({
       quizId: doc.id,
       title: doc.data().title,
@@ -120,109 +123,61 @@ export class QuizService {
 
   // get questions
   async getQuestions(quizId) {
-    const quizRef = doc(this.quizCollection, quizId);
-    const quizSnap = await getDoc(quizRef);
+    const questionsRef = collection(this.quizCollection, quizId, "questions");
 
-    if (!quizSnap.exists()) throw new Error("Quiz not found");
+    const snapshot = await getDocs(questionsRef);
 
-    return quizSnap.data().questions ?? [];
+    return snapshot.docs.map((doc) => ({
+      questionId: doc.id,
+      ...doc.data(),
+    }));
   }
 
   // add question
   async addQuestion(quizId, questionData) {
     const quizRef = doc(this.quizCollection, quizId);
-    const quizSnap = await getDoc(quizRef);
 
-    if (!quizSnap.exists()) throw new Error("Quiz not found");
+    // create a collection inside collection.
+    const questionsRef = collection(quizRef, "questions");
 
-    const quiz = quizSnap.data();
-    const questions = quiz.questions ?? [];
-
-    let newQuestionRaw = {
-      questionId: `q_${Date.now()}`,
-
-      questionType:
-        questionData.questionType ??
-        questionData.type ??
-        "mcq",
-
-      questionMd:
-        questionData.questionMd ??
-        questionData.text ??
-        "",
-
-      options:
-        questionData.options ?? null,
-
+    const newQuestion = this.cleanData({
+      questionType: questionData.questionType ?? questionData.type ?? "mcq",
+      questionMd: questionData.questionMd ?? questionData.text ?? "",
+      options: questionData.options ?? null,
       correctOptionIndex:
-        questionData.correctOptionIndex ??
-        questionData.correctOption ??
-        null,
-
-      correctAnswer:
-        questionData.correctAnswer ?? null,
-
+        questionData.correctOptionIndex ?? questionData.correctOption ?? null,
+      correctAnswer: questionData.correctAnswer ?? null,
       points:
         typeof questionData.points === "number"
           ? questionData.points
           : 10,
-
-      order: questions.length + 1,
       createdAt: new Date(),
-    };
-
-    // handle short type
-    if (
-      newQuestionRaw.questionType === "short-integer" ||
-      newQuestionRaw.questionType === "short-subjective"
-    ) {
-      newQuestionRaw.options = null;
-      newQuestionRaw.correctOptionIndex = null;
-    }
-
-    const newQuestion = this.cleanData(newQuestionRaw);
-
-    console.log("Incoming:", questionData);
-    console.log("Processed:", newQuestion);
-
-    questions.push(newQuestion);
-
-    const updatePayload = this.cleanData({
-      questions,
-      totalQuestions: questions.length,
-      totalPoints: questions.reduce(
-        (sum, q) => sum + (q.points ?? 0),
-        0
-      ),
     });
 
-    await updateDoc(quizRef, updatePayload);
+    // this creates a NEW DOCUMENT inside subcollection
+    const docRef = await addDoc(questionsRef, newQuestion);
 
-    return newQuestion.questionId;
+    // optional: update quiz stats
+    const quizSnap = await getDoc(quizRef);
+    const quiz = quizSnap.data();
+
+    await updateDoc(quizRef, {
+      totalQuestions: (quiz.totalQuestions ?? 0) + 1,
+      totalPoints: (quiz.totalPoints ?? 0) + (newQuestion.points ?? 0),
+    });
+
+    return docRef.id;
   }
 
   // delete questions
   async deleteQuestion(quizId, questionId) {
-    const quizRef = doc(this.quizCollection, quizId);
-    const quizSnap = await getDoc(quizRef);
-
-    if (!quizSnap.exists()) throw new Error("Quiz not found");
-
-    const quiz = quizSnap.data();
-
-    const questions = (quiz.questions ?? []).filter(
-      (q) => q.questionId !== questionId
+    const questionRef = doc(
+      this.quizCollection,
+      quizId,
+      "questions",
+      questionId
     );
 
-    const updatePayload = this.cleanData({
-      questions,
-      totalQuestions: questions.length,
-      totalPoints: questions.reduce(
-        (sum, q) => sum + (q.points ?? 0),
-        0
-      ),
-    });
-
-    await updateDoc(quizRef, updatePayload);
+    await deleteDoc(questionRef);
   }
 }
