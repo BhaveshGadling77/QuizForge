@@ -39,6 +39,17 @@
     background: #6c63ff;
   }
 }
+.w-md-editor {
+  background-color: transparent !important;
+}
+
+.w-md-editor-text {
+  border: none !important;
+}
+
+.w-md-editor-toolbar {
+  border-bottom: 1px solid #2a2a2a !important;
+}
 
 @layer components {
   .btn-primary {
@@ -64,4 +75,31 @@
   .badge {
     @apply inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-mono font-medium;
   }
+}
+.prose {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.prose h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.prose h2 {
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.prose code {
+  background: #1e293b;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.prose pre {
+  background: #0b1220;
+  padding: 10px;
+  border-radius: 8px;
+  overflow-x: auto;
 }

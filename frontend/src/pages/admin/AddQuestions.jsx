@@ -1,6 +1,11 @@
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "react-query";
+import MDEditor from "@uiw/react-md-editor";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeHighlight from "rehype-highlight";
+import "highlight.js/styles/github-dark.css";
 import {
   getQuestions,
   addQuestion,
@@ -8,7 +13,7 @@ import {
 } from "@/services/quizService";
 import Navbar from "@/components/Navbar";
 
-// remove undefined if any
+// remove undefined fields
 const cleanData = (obj) =>
   Object.fromEntries(
     Object.entries(obj).filter(([_, v]) => v !== undefined)
@@ -22,6 +27,53 @@ const emptyForm = () => ({
   correctAnswer: null,
   points: 10,
 });
+
+// Question Card Component
+function QuestionCard({ q, index, onDelete }) {
+  const [expanded, setExpanded] = useState(false);
+
+  const MAX_LENGTH = 140;
+  const isLong = q.questionMd?.length > MAX_LENGTH;
+
+  const displayText =
+    !expanded && isLong
+      ? q.questionMd.slice(0, MAX_LENGTH) + "..."
+      : q.questionMd;
+
+  return (
+    <div className="card mb-3 p-5 rounded-2xl border border-forge-border hover:shadow-xl transition bg-forge-surface">
+      <div className="flex justify-between items-start gap-4">
+        <div className="flex-1">
+          <p className="text-lg font-bold text-forge-accent mb-2">
+            Question {index + 1}
+          </p>
+
+          <div className="prose prose-invert max-w-none text-sm">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}
+              rehypePlugins={[rehypeHighlight]}
+            >{displayText}</ReactMarkdown>
+          </div>
+
+          {isLong && (
+            <button
+              onClick={() => setExpanded(!expanded)}
+              className="text-forge-accent text-xs mt-2 hover:underline"
+            >
+              {expanded ? "Show less" : "Show more"}
+            </button>
+          )}
+        </div>
+
+        <button
+          onClick={onDelete}
+          className="text-red-500 text-xs hover:opacity-70"
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export default function AddQuestions() {
   const { id } = useParams();
@@ -60,7 +112,6 @@ export default function AddQuestions() {
         correctAnswer: null,
       });
     } else {
-      // short answer types
       setForm({
         ...form,
         questionType: type,
@@ -92,8 +143,6 @@ export default function AddQuestions() {
 
       payload = cleanData(payload);
 
-      // console.log("FINAL PAYLOAD:", payload); // debug
-
       await addQuestion(id, payload);
 
       qc.invalidateQueries(["questions", id]);
@@ -124,18 +173,24 @@ export default function AddQuestions() {
         <form onSubmit={handleAdd} className="card flex flex-col gap-5 mb-8">
           {/* QUESTION */}
           <div>
-            <label className="text-sm font-medium mb-1 block">
+            <label className="text-sm font-medium mb-2 block">
               Question
             </label>
-            <textarea
-              className="input"
-              placeholder="Enter your question..."
-              value={form.questionMd}
-              onChange={(e) =>
-                setForm({ ...form, questionMd: e.target.value })
-              }
-              required
-            />
+
+            <div className="rounded-xl overflow-hidden border border-forge-border bg-forge-surface">
+              <MDEditor
+  value={form.questionMd}
+  onChange={(val) =>
+    setForm({ ...form, questionMd: val || "" })
+  }
+  preview="edit"
+  height={200}
+  data-color-mode="dark"
+  style={{
+    backgroundColor: "#0f172a",
+  }}
+/>
+            </div>
           </div>
 
           {/* TYPE */}
@@ -187,10 +242,6 @@ export default function AddQuestions() {
                   </div>
                 ))}
               </div>
-
-              <p className="text-xs text-gray-400 mt-1">
-                Select the correct answer using the radio button
-              </p>
             </div>
           )}
 
@@ -203,7 +254,6 @@ export default function AddQuestions() {
               </label>
               <input
                 className="input"
-                placeholder="Enter correct answer..."
                 value={form.correctAnswer}
                 onChange={(e) =>
                   setForm({
@@ -231,10 +281,8 @@ export default function AddQuestions() {
             />
           </div>
 
-          {/* ERROR */}
           {error && <p className="text-red-500 text-xs">{error}</p>}
 
-          {/* SUBMIT */}
           <button className="btn-primary" disabled={saving}>
             {saving ? "Adding..." : "Add Question"}
           </button>
@@ -245,15 +293,12 @@ export default function AddQuestions() {
           <p>Loading...</p>
         ) : (
           questions.map((q, i) => (
-            <div key={q.questionId} className="card mb-2 flex justify-between">
-              <div>
-                <p>Q{i + 1}</p>
-                <p>{q.questionMd}</p>
-              </div>
-              <button onClick={() => handleDelete(q.questionId)}>
-                Delete
-              </button>
-            </div>
+            <QuestionCard
+              key={q.questionId}
+              q={q}
+              index={i}
+              onDelete={() => handleDelete(q.questionId)}
+            />
           ))
         )}
 
