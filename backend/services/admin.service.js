@@ -1,10 +1,11 @@
-import { collection, doc, runTransaction, Timestamp } from "firebase/firestore";
-
+import { collection, doc, runTransaction, Timestamp, updateDoc } from "firebase/firestore";
+import { QuizService } from "./quiz.service.js";
 export class AdminService {
   constructor(db) {
     this.db = db;
     this.quizCollection = collection(db, process.env.COLLECTION_QUIZZES);
     this.resultCollection = collection(db, process.env.COLLECTION_RESULTS);
+    this.quizService = new QuizService(db);
   }
   /**
    * Evaluate a pending result (manual grading)
@@ -102,42 +103,17 @@ export class AdminService {
   async publishQuiz(quizId) {
     const quizRef = doc(this.quizCollection, quizId);
 
-    return await runTransaction(this.db, async (tx) => {
-      const quizSnap = await tx.get(quizRef);
+    const questions = await this.quizService.getQuestions(quizId);
 
-      if (!quizSnap.exists()) {
-        throw new Error("Quiz not found");
-      }
+    if (!questions.length) {
+      throw new Error("Cannot publish quiz without questions");
+    }
 
-      const quiz = quizSnap.data();
-
-      // validations before publishing
-      if (quiz.isActive) {
-        throw new Error("Quiz is already published");
-      }
-
-      if (!quiz.questions || quiz.questions.length === 0) {
-        throw new Error("Cannot publish quiz without questions");
-      }
-
-      if (quiz.totalPoints <= 0) {
-        throw new Error("Quiz total points must be greater than zero");
-      }
-
-      if (quiz.visibility === "private" && !quiz.accessToken) {
-        throw new Error("Private quiz must have an access token");
-      }
-
-      tx.update(quizRef, {
-        isActive: true,
-        publishedAt: Timestamp.now(),
-      });
-
-      return {
-        quizId,
-        status: "published",
-      };
+    await updateDoc(quizRef, {
+      isActive: true
     });
+
+    return { success: true, message: "Quiz Published Successfully." };
   }
 
   async unpublishQuiz(quizId) {

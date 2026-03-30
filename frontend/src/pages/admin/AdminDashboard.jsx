@@ -262,8 +262,14 @@ export default function AdminDashboard() {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("ALL");
 
-  const { data, isLoading } = useQuery("admin-quizzes", () => getQuizzes());
-
+const { data, isLoading } = useQuery(
+  "admin-quizzes",
+  () => getQuizzes(),
+  {
+    retry: false,
+    refetchOnWindowFocus: false,
+  }
+);
   const handleDeleteQuiz = async (quizId) => {
     qc.setQueryData("admin-quizzes", (oldData) => {
       if (!oldData) return oldData;
