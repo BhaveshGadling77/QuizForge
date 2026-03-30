@@ -59,7 +59,7 @@ export async function evaluateResult(req, res) {
 export async function publishQuiz(req, res) {
   try {
     const { quizId } = req.params;
-
+    // console.log(quizId)
     const result = await adminService.publishQuiz(quizId)
 
     return res.status(200).json({

@@ -178,6 +178,21 @@ export class QuizService {
       questionId
     );
 
+    const questionSnap = await getDoc(questionRef);
+    const question = questionSnap.data();
+
     await deleteDoc(questionRef);
+
+    const quizRef = doc(this.quizCollection, quizId);
+    const quizSnap = await getDoc(quizRef);
+    const quiz = quizSnap.data();
+
+    await updateDoc(quizRef, {
+      totalQuestions: Math.max((quiz.totalQuestions ?? 1) - 1, 0),
+      totalPoints: Math.max(
+        (quiz.totalPoints ?? 0) - (question.points ?? 0),
+        0
+      ),
+    });
   }
 }
