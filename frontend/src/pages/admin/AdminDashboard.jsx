@@ -9,7 +9,7 @@ import {
 } from "@/services/quizService";
 import Navbar from "@/components/Navbar";
 import { formatDate, truncate } from "@/utils/helpers";
-
+import toast from "react-hot-toast";
 // ─── utils ────────────────────────────────────────────────────────────────────
 const getStatus = (quiz) => {
   if (!quiz.isActive) return "DRAFT";
@@ -148,6 +148,7 @@ function QuizRow({ quiz, onPublish, onUnpublish, onDelete, style }) {
   const handleDelete = async () => {
     setDeleting(true);
     await onDelete();
+    toast.success("Quiz deleted");
   };
 
   return (
@@ -283,13 +284,20 @@ const { data, isLoading } = useQuery(
     });
     await deleteQuiz(quizId);
     qc.invalidateQueries("admin-quizzes");
+  toast.success("Quiz deleted successfully.")
   };
 
   const publishMutation = useMutation((quizId) => publishQuiz(quizId), {
-    onSuccess: () => qc.invalidateQueries("admin-quizzes"),
+    onSuccess: () => {
+      toast.success("Quiz published successfully.");
+      return qc.invalidateQueries("admin-quizzes")},
   });
   const unpublishMutation = useMutation((quizId) => unpublishQuiz(quizId), {
-    onSuccess: () => qc.invalidateQueries("admin-quizzes"),
+    onSuccess: () => { 
+       toast.success("Quiz unpublished successfully.");
+      return qc.invalidateQueries("admin-quizzes")
+    },
+    // onSuccess: () =>,
   });
 
   const raw = data?.data?.quizzes ?? [];

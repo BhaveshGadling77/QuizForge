@@ -10,6 +10,7 @@ import {
   addQuestion,
   deleteQuestion,
 } from "@/services/quizService";
+import toast from "react-hot-toast";
 import Navbar from "@/components/Navbar";
 
 // ─── utils ─────────────────────────────────────────────────────────────────
@@ -530,6 +531,7 @@ function QuestionCard({ q, index, onDelete }) {
   useEffect(() => {
     if (!confirmDelete) return;
     const t = setTimeout(() => setConfirmDelete(false), 3000);
+
     return () => clearTimeout(t);
   }, [confirmDelete]);
 
@@ -666,7 +668,12 @@ export default function AddQuestions() {
         payload.correctOptionIndex = null;
       }
       payload = cleanData(payload);
-      await addQuestion(id, payload);
+      const response = await addQuestion(id, payload);
+      if (response.data.success) {
+        toast.success("Question added successfully!");
+      } else {
+        toast.error("Failed to add question: " + (response.data.message || "Unknown error"));
+      }
       qc.invalidateQueries(["questions", id]);
       setForm(emptyForm());
       setError("");
@@ -681,11 +688,16 @@ export default function AddQuestions() {
   };
 
   const handleDelete = async (qid) => {
-    await deleteQuestion(id, qid);
+    const response = await deleteQuestion(id, qid);
+    if (response.data.success) {
+      toast.success("Question deleted successfully!");
+    } else {
+      toast.error("Failed to delete question: " + (response.data.message || "Unknown error"));
+    }
     qc.invalidateQueries(["questions", id]);
   };
 
-  const isMdEmpty      = !form.questionMd.trim();
+  const isMdEmpty = !form.questionMd.trim();
 
   return (
     <div className="add-questions-root min-h-screen" style={{ background: "#080a12" }}>

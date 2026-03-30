@@ -3,81 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { createQuiz } from "@/services/quizService";
 import { useAuth } from "@/hooks/useAuth";
 import Navbar from "@/components/Navbar";
-
-// ─── inline styles ────────────────────────────────────────────────────────────
-const styles = `
-  @keyframes fadeSlideUp {
-    from { opacity: 0; transform: translateY(12px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes popIn {
-    0%   { opacity: 0; transform: scale(0.93); }
-    60%  { transform: scale(1.02); }
-    100% { opacity: 1; transform: scale(1); }
-  }
-  @keyframes slideDown {
-    from { opacity: 0; transform: translateY(-6px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .form-section { animation: fadeSlideUp .24s ease both; }
-  .animate-slide-down { animation: slideDown .2s ease both; }
-  .animate-pop-in { animation: popIn .25s cubic-bezier(.34,1.56,.64,1) both; }
-
-  .input:focus { outline: none; box-shadow: 0 0 0 2px rgba(99,102,241,.4); }
-  .input-field {
-    width: 100%;
-    padding: .625rem .875rem;
-    border-radius: .75rem;
-    border: 1px solid var(--forge-border, #1e293b);
-    background: var(--forge-surface, #0f172a);
-    font-size: .875rem;
-    transition: border-color .15s, box-shadow .15s;
-  }
-  .input-field:focus {
-    outline: none;
-    border-color: rgba(99,102,241,.5);
-    box-shadow: 0 0 0 2px rgba(99,102,241,.18);
-  }
-  .input-field::placeholder { opacity: .4; }
-
-  .toggle-track {
-    width: 40px; height: 22px; border-radius: 999px;
-    transition: background .2s;
-    position: relative; cursor: pointer; border: none;
-    flex-shrink: 0;
-  }
-  .toggle-thumb {
-    position: absolute; top: 3px; left: 3px;
-    width: 16px; height: 16px; border-radius: 50%;
-    background: white; transition: transform .2s cubic-bezier(.34,1.56,.64,1);
-  }
-  .toggle-track.on  { background: var(--forge-accent, #6366f1); }
-  .toggle-track.off { background: rgba(255,255,255,.12); }
-  .toggle-track.on .toggle-thumb  { transform: translateX(18px); }
-
-  .vis-card { transition: border-color .15s, background .15s; cursor: pointer; }
-  .vis-card:hover { border-color: rgba(99,102,241,.4); }
-  .vis-card.active {
-    border-color: var(--forge-accent, #6366f1);
-    background: rgba(99,102,241,.08);
-  }
-
-  .duration-btn { transition: background .15s, border-color .15s, color .15s; }
-  .duration-btn.active {
-    border-color: rgba(99,102,241,.5);
-    background: rgba(99,102,241,.1);
-    color: var(--forge-accent, #6366f1);
-  }
-  .duration-btn:not(.active):hover { border-color: rgba(99,102,241,.25); }
-
-  .stepper-btn { transition: background .15s; border-radius: .5rem; }
-  .stepper-btn:hover { background: rgba(99,102,241,.15); }
-
-  .spinner { animation: spin .7s linear infinite; }
-`;
-
+import toast from "react-hot-toast";
 // ─── Toggle ───────────────────────────────────────────────────────────────────
 function Toggle({ checked, onChange, label, desc }) {
   return (
@@ -239,10 +165,13 @@ export default function CreateQuiz() {
         createdBy: user._id || user.id || user.userId,
       };
       const res = await createQuiz(payload);
+      // console.log(res)
       const quizId = res.data.quiz.quizId || res.data.quiz.id || res.data.quiz._id;
+      toast.success(res.data.msg)
       navigate(`/admin/quiz/${quizId}/questions`);
     } catch (err) {
       setError(err.response?.data?.message ?? "Failed to create quiz");
+      toast.error("Failed to create quiz");
     } finally {
       setLoading(false);
     }
@@ -252,7 +181,7 @@ export default function CreateQuiz() {
 
   return (
     <div className="min-h-screen bg-forge-bg">
-      <style>{styles}</style>
+      {/* <style>{styles}</style> */}
       <Navbar />
 
       <main className="max-w-xl mx-auto px-6 py-10">
