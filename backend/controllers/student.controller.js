@@ -7,7 +7,7 @@ const studentService = new StudentService(db);
 //Student Specific Controllers.
 export async function getActiveQuizzes(req, res) {
   try {
-    console.log("student hit this route.")
+    // console.log("student hit this route.") //debug
     const quizzes = await studentService.getActivePublicQuizzes();
     return res.status(200).json({ quizzes });
   } catch (e) {

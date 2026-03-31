@@ -87,10 +87,10 @@ export default function AttemptQuiz() {
         ) : (
           questions.map((q, i) => (
             <QuestionCard
-              key={q._id}
+              key={q.id || q.questionId || i}
               question={q}
               index={i}
-              selected={answers[q._id] ?? null}
+              selected={answers[q.id] ?? null}
               onChange={handleAnswer}
             />
           ))

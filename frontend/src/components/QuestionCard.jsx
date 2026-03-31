@@ -13,7 +13,7 @@ export default function QuestionCard({ question, index, selected, onChange }) {
       {/* Question text */}
       <p className="font-display font-semibold text-forge-text mb-5 leading-relaxed">
         <span className="text-forge-accent font-mono mr-2">Q{index + 1}.</span>
-        {question.text}
+        {question.question }
       </p>
 
       {/* Options */}
@@ -23,7 +23,7 @@ export default function QuestionCard({ question, index, selected, onChange }) {
           return (
             <button
               key={i}
-              onClick={() => onChange(question._id, i)}
+              onClick={() => onChange(question.id, i)}
               className={`text-left px-4 py-3 rounded-lg border text-sm transition-all duration-150 ${
                 isSelected
                   ? "border-forge-accent bg-forge-accent/10 text-forge-accent"
