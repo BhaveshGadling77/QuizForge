@@ -35,70 +35,7 @@ const STATUS_CFG = {
   },
 };
 
-// ─── inline styles ────────────────────────────────────────────────────────────
-const styles = `
-  @keyframes fadeSlideUp {
-    from { opacity: 0; transform: translateY(10px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes popIn {
-    0%   { opacity: 0; transform: scale(0.94); }
-    60%  { transform: scale(1.02); }
-    100% { opacity: 1; transform: scale(1); }
-  }
-  @keyframes shimmer {
-    0%   { background-position: -200% center; }
-    100% { background-position:  200% center; }
-  }
-  @keyframes pulseDot {
-    0%, 100% { opacity: 1; }
-    50%       { opacity: .35; }
-  }
 
-  .row-enter { animation: fadeSlideUp .22s ease both; }
-  .stat-card { animation: popIn .28s cubic-bezier(.34,1.56,.64,1) both; }
-
-  .quiz-row {
-    transition: background .15s, box-shadow .15s;
-  }
-  .quiz-row:hover {
-    background: rgba(99,102,241,.04);
-  }
-  .quiz-row.deleting {
-    opacity: .4;
-    pointer-events: none;
-    transition: opacity .3s;
-  }
-
-  .action-btn {
-    transition: color .15s, background .15s, transform .12s;
-    border-radius: .5rem;
-    padding: .25rem .5rem;
-  }
-  .action-btn:hover { transform: translateY(-1px); }
-
-  .skel {
-    background: linear-gradient(90deg,
-      rgba(255,255,255,.04) 25%,
-      rgba(255,255,255,.09) 50%,
-      rgba(255,255,255,.04) 75%);
-    background-size: 200% auto;
-    animation: shimmer 1.6s linear infinite;
-    border-radius: .75rem;
-  }
-
-  .pub-dot {
-    width: 7px; height: 7px; border-radius: 50%;
-    animation: pulseDot 2s ease-in-out infinite;
-  }
-
-  .delete-confirm {
-    animation: popIn .18s cubic-bezier(.34,1.56,.64,1) both;
-  }
-
-  /* search input */
-  .search-input:focus { outline: none; box-shadow: 0 0 0 2px rgba(99,102,241,.4); }
-`;
 
 // ─── Stat Card ────────────────────────────────────────────────────────────────
 function StatCard({ label, value, icon, delay = 0 }) {
@@ -140,6 +77,8 @@ function DeleteConfirm({ onConfirm, onCancel }) {
 }
 
 // ─── Quiz Row ─────────────────────────────────────────────────────────────────
+
+
 function QuizRow({ quiz, onPublish, onUnpublish, onDelete, style }) {
   const [confirming, setConfirming] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -215,9 +154,17 @@ function QuizRow({ quiz, onPublish, onUnpublish, onDelete, style }) {
 
             <span className="text-forge-border/60 text-xs select-none">·</span>
 
+            {/* ── NEW: Edit button ── */}
+            <Link
+              to={`/admin/edit/${quiz.id}`}
+              className="action-btn text-xs text-forge-accent hover:bg-forge-accent/10 font-medium"
+            >
+              Edit
+            </Link>
+
             <Link
               to={`/admin/quiz/${quiz.id}/questions`}
-              className="action-btn text-xs text-forge-accent hover:bg-forge-accent/10 font-medium"
+              className="action-btn text-xs text-forge-muted hover:bg-forge-border/50"
             >
               Questions
             </Link>
@@ -307,7 +254,7 @@ const { data, isLoading } = useQuery(
     status: getStatus(q),
     
   }));
-  console.log("Normalized quizzes:", normalized);
+  // console.log("Normalized quizzes:", normalized);
   // Stats
   const total = normalized.length;
   const published = normalized.filter((q) => q.status === "PUBLISHED").length;
@@ -325,7 +272,6 @@ const { data, isLoading } = useQuery(
 
   return (
     <div className="min-h-screen bg-forge-bg">
-      <style>{styles}</style>
       <Navbar />
 
       <main className="max-w-6xl mx-auto px-6 py-10">

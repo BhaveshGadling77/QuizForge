@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "react-query";
 import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import remarkGfm from "remark-gfm"
 import rehypeHighlight from "rehype-highlight";
 import "highlight.js/styles/github-dark.css";
 import {
@@ -513,6 +514,8 @@ function QuestionCard({ q, index, onDelete }) {
   const [expanded,      setExpanded]      = useState(false);
   const [deleting,      setDeleting]      = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const navigate = useNavigate();
+  const { id } = useParams();
 
   const MAX_LENGTH = 160;
   const isLong     = (q.questionMd?.length || 0) > MAX_LENGTH;
@@ -531,9 +534,10 @@ function QuestionCard({ q, index, onDelete }) {
   useEffect(() => {
     if (!confirmDelete) return;
     const t = setTimeout(() => setConfirmDelete(false), 3000);
-
     return () => clearTimeout(t);
   }, [confirmDelete]);
+
+  const handleEdit = () => navigate(`/admin/quiz/${id}/questions/${q.questionId}/edit`);
 
   return (
     <div
@@ -567,32 +571,50 @@ function QuestionCard({ q, index, onDelete }) {
           </span>
         </div>
 
-        <button
-          onClick={handleDeleteClick}
-          disabled={deleting}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-semibold transition-all duration-200"
-          style={{
-            background: confirmDelete ? "rgba(239,68,68,0.15)" : "transparent",
-            color:      confirmDelete ? "#f87171" : "rgba(255,255,255,0.25)",
-            border:     confirmDelete ? "1px solid rgba(239,68,68,0.3)" : "1px solid transparent",
-          }}
-        >
-          {confirmDelete ? (
-            <>
-              <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd"/>
-              </svg>
-              Confirm?
-            </>
-          ) : (
-            <>
-              <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9z" clipRule="evenodd"/>
-              </svg>
-              Delete
-            </>
-          )}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleEdit}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-semibold transition-all duration-200"
+            style={{
+              background: "rgba(99,102,241,0.15)",
+              color:      "#818cf8",
+              border:     "1px solid rgba(99,102,241,0.3)",
+            }}
+          >
+            <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586z"/>
+              <path fillRule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clipRule="evenodd"/>
+            </svg>
+            Edit
+          </button>
+
+          <button
+            onClick={handleDeleteClick}
+            disabled={deleting}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-semibold transition-all duration-200"
+            style={{
+              background: confirmDelete ? "rgba(239,68,68,0.15)" : "transparent",
+              color:      confirmDelete ? "#f87171" : "rgba(255,255,255,0.25)",
+              border:     confirmDelete ? "1px solid rgba(239,68,68,0.3)" : "1px solid transparent",
+            }}
+          >
+            {confirmDelete ? (
+              <>
+                <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd"/>
+                </svg>
+                Confirm?
+              </>
+            ) : (
+              <>
+                <svg className="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9z" clipRule="evenodd"/>
+                </svg>
+                Delete
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
       <div className="prose prose-invert prose-sm max-w-none text-white/70 leading-relaxed text-sm">
@@ -669,6 +691,7 @@ export default function AddQuestions() {
       }
       payload = cleanData(payload);
       const response = await addQuestion(id, payload);
+      // console.log(response) //debug
       if (response.data.success) {
         toast.success("Question added successfully!");
       } else {
@@ -908,6 +931,7 @@ export default function AddQuestions() {
                   q={q}
                   index={i}
                   onDelete={() => handleDelete(q.questionId)}
+                  onEdit={() => handleEdit(q.questionId)}
                 />
               ))}
             </div>

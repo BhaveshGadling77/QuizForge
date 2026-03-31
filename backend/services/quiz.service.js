@@ -195,4 +195,50 @@ export class QuizService {
       ),
     });
   }
+
+  //update question.
+  async updateQuestion(quizId, questionId, updates) {
+    const questionRef = doc(this.quizCollection, quizId, "questions", questionId);
+    const questionSnap = await getDoc(questionRef);
+
+    if (!questionSnap.exists()) throw new Error("Question not found");
+
+    const allowedFields = [
+      "questionType",
+      "questionMd",
+      "options",
+      "correctOptionIndex",
+      "correctAnswer",
+      "points",
+    ];
+
+    let questionUpdates = {};
+    allowedFields.forEach((field) => {
+      if (updates[field] !== undefined) {
+        questionUpdates[field] = updates[field];
+      }
+    });
+
+    questionUpdates = this.cleanData(questionUpdates);
+
+    const oldPoints = questionSnap.data().points ?? 0;
+    const newPoints = questionUpdates.points ?? oldPoints;
+
+    // update question document
+    await updateDoc(questionRef, questionUpdates);
+
+    // if points changed, update quiz totalPoints
+    if (newPoints !== oldPoints) {
+      const quizRef = doc(this.quizCollection, quizId);
+      const quizSnap = await getDoc(quizRef);
+      const quiz = quizSnap.data();
+
+      const totalPoints =
+        (quiz.totalPoints ?? 0) - oldPoints + newPoints;
+
+      await updateDoc(quizRef, { totalPoints });
+    }
+
+    return { questionId, ...questionUpdates };
+  }
 }

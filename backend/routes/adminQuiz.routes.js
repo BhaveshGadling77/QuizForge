@@ -7,6 +7,7 @@ import {
   addQuestion,
   deleteQuestion,
   getQuestions,
+  updateQuestion,
 } from "../controllers/quiz.controller.js";
 
 import {
@@ -93,6 +94,14 @@ router.get(
   getQuestions
 );
 
+
+//update question
+router.put(
+  "/quizzes/:quizId/questions/:questionId",
+  authenticateToken,
+  authorizeAdminRole,
+  updateQuestion
+)
 /* PUBLISH  */
 
 // Publish
