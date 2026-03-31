@@ -7,10 +7,11 @@ const studentService = new StudentService(db);
 //Student Specific Controllers.
 export async function getActiveQuizzes(req, res) {
   try {
+    console.log("student hit this route.")
     const quizzes = await studentService.getActivePublicQuizzes();
     return res.status(200).json({ quizzes });
   } catch (e) {
-    return res.status(500).json({ msg: "Failed to fetch quizzes" });
+    return res.status(500).json({ msg: e.message });
   }
 }
 

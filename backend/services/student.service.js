@@ -87,7 +87,7 @@ export class StudentService {
       throw new Error("Quiz is not active");
     }
 
-    // check if the user already attempted the quiz (v9 syntax)
+    // check if the user already attempted the quiz
     const attemptQuery = query(
       collection(this.db, process.env.COLLECTION_RESULTS),
       where("quizId", "==", quizId),
@@ -101,19 +101,28 @@ export class StudentService {
       throw err;
     }
 
-    return {
-      id: quizId,
-      title: quiz.title,
-      description: quiz.description,
-      questions: quiz.questions.map((q) => ({
-        id: q.questionId,
+    // fetch questions from the subcollection
+    const questionsSnap = await getDocs(collection(quizRef, "questions"));
+    const questions = questionsSnap.docs.map((doc) => {
+      const q = doc.data();
+      return {
+        id: doc.id,
         question: q.questionMd,
         options: q.options,
         questionType: q.questionType,
-        order: q.order,
-      })),
+        order: q.order ?? 0,
+      };
+    });
+
+    return {
+      duration: quiz.durationSeconds ?? 0,
+      title: quiz.title ?? "",
+      description: quiz.description ?? "",
+      createdAt: quiz.createdAt ?? null,
+      totalQuestions: questions.length,
+      questions,
     };
-  }
+}
   /**
    * Submits a user's quiz attempt and evaluates answers atomically.
    *
