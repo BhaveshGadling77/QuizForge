@@ -1,5 +1,6 @@
 import { doc, getDoc, getDocs, collection, query, where, orderBy, limit } from "firebase/firestore";
 
+
 export class StudentService {
   c// Add to StudentService constructor
   constructor(db) {
@@ -63,7 +64,7 @@ export class StudentService {
     );
 
     const snapshot = await getDocs(q);
-
+    console.log(snapshot)
     return snapshot.docs.map((doc) => ({
       quizId: doc.id,
       ...doc.data(),

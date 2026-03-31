@@ -10,9 +10,9 @@ export default function QuizDetails() {
   const { data: quiz, isLoading, isError } = useQuery(["quiz", id], () =>
     getQuizData(id).then((r) => r.data.quiz)
   );
-
   if (isLoading) return <LoadingState />;
   if (isError || !quiz) return <ErrorState />;
+  console.log("Quiz details fetched:", quiz); // Debug log
 
   return (
     <div className="min-h-screen bg-forge-bg">
@@ -36,7 +36,10 @@ export default function QuizDetails() {
           </div>
         </div>
 
-        <Link to={`/quiz/${id}/attempt`} className="btn-primary block text-center w-full">
+        <Link 
+        to={`/quiz/${id}/attempt`} 
+        state={{ quiz }}
+        className="btn-primary block text-center w-full">
           Start Quiz →
         </Link>
       </main>

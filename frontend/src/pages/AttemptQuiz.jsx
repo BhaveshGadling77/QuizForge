@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useQuery } from "react-query";
 import { getQuestions, submitAttempt } from "@/services/quizService";
 import { getQuizById } from "@/services/quizService";
@@ -10,16 +10,13 @@ import { formatTime } from "@/utils/helpers";
 export default function AttemptQuiz() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const quiz = location.state?.quiz;
+  const { questions } = quiz; 
+  const [isLoading, setIsLoading] = useState(!quiz);
   const [answers, setAnswers] = useState({}); // { questionId: optionIndex }
   const [timeLeft, setTimeLeft] = useState(null);
   const [submitting, setSubmitting] = useState(false);
-
-  const { data: quiz } = useQuery(["quiz", id], () =>
-    getQuizById(id).then((r) => r.data.quiz)
-  );
-  const { data: questions = [], isLoading } = useQuery(["questions", id], () =>
-    getQuestions(id).then((r) => r.data.questions)
-  );
 
   // Set timer once quiz is loaded
   useEffect(() => {

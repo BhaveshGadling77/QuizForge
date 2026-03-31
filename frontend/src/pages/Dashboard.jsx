@@ -5,12 +5,12 @@ import { QUIZ_STATUS } from "@/utils/constants";
 import { getActiveQuizzes } from "../services/quizService";
 
 export default function Dashboard() {
-  const { data, isLoading, isError } = useQuery("quizzes", () =>
+  const { data = [], isLoading, isError } = useQuery("quizzes", () =>
     getActiveQuizzes().then((r) => r.data.quizzes)
   );
-  console.log("Fetched quizzes:", data); // Debug log
+  // console.log("Fetched quizzes:", data); // Debug log
   const published = data;
-  console.log("Published quizzes:", published); // Debug log
+  // console.log("Published quizzes:", published); // Debug log
   return (
     <div className="min-h-screen bg-forge-bg">
       <Navbar />
@@ -41,7 +41,7 @@ export default function Dashboard() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {published.map((quiz) => {
-              console.log("Rendering quiz:", quiz); // Debug log
+              // console.log("Rendering quiz:", quiz); // Debug log
               return <QuizCard key={quiz.quizId} quiz={quiz} />;
             })}
           </div>
