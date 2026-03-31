@@ -86,3 +86,11 @@ export async function deleteQuestion(req, res) {
   }
 }
 
+export async function updateQuestion(req, res) {
+  try {
+    await quizService.updateQuestion()
+    return res.status(200).json({ success: true, msg: "Question Updated."})
+  } catch(e) {
+    return res.status(500).json({success: false, msg: e.message})
+  }
+}

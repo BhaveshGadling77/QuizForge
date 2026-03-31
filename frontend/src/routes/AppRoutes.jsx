@@ -1,30 +1,26 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-
-// Auth pages (no layout)
+// Auth pages
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
-
 // Student pages
 import Dashboard from "@/pages/Dashboard";
 import QuizDetails from "@/pages/QuizDetails";
 import AttemptQuiz from "@/pages/AttemptQuiz";
 import Result from "@/pages/Result";
 import Leaderboard from "@/pages/Leaderboard";
-
 // Admin pages
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import CreateQuiz from "@/pages/admin/CreateQuiz";
 import EditQuiz from "@/pages/admin/EditQuiz";
 import AddQuestions from "@/pages/admin/AddQuestions";
+import EditQuestion from "@/pages/admin/EditQuestion";
 import ViewResults from "@/pages/admin/ViewResults";
-
 // Guard
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 export default function AppRoutes() {
   const { user } = useAuth();
-
   return (
     <Routes>
       {/* Public */}
@@ -53,6 +49,7 @@ export default function AppRoutes() {
         <Route path="/admin/create" element={<CreateQuiz />} />
         <Route path="/admin/edit/:id" element={<EditQuiz />} />
         <Route path="/admin/quiz/:id/questions" element={<AddQuestions />} />
+        <Route path="/admin/quiz/:id/questions/:questionId/edit" element={<EditQuestion />} />
         <Route path="/admin/quiz/:id/results" element={<ViewResults />} />
       </Route>
 

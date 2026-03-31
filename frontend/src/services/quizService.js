@@ -35,6 +35,9 @@ export const addQuestion = (quizId, data) =>
 export const deleteQuestion = (quizId, questionId) =>
   api.delete(`/admin/quizzes/${quizId}/questions/${questionId}`);
 
+export const updateQuestion = (quizId, questionId, updates) => 
+  api.put(`/admin/quizzes/${quizId}/questions/${questionId}`, updates);
+
 /*  RESULTS  */
 
 export const getAllResults = (quizId) =>
