@@ -4,14 +4,15 @@ import { submitAttempt } from "@/services/quizService";
 import QuestionCard from "@/components/QuestionCard";
 import Navbar from "@/components/Navbar";
 import { formatTime } from "@/utils/helpers";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function AttemptQuiz() {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-
-  // Load quiz from navigation state OR localStorage fallback
-  const quiz =
+  const { user } = useAuth();
+  // console.log("User in AttemptQuiz:", user);
+  const quiz = 
     location.state?.quiz ||
     JSON.parse(localStorage.getItem(`activeQuiz_${id}`));
 
@@ -19,7 +20,6 @@ export default function AttemptQuiz() {
 
   const [isLoading, setIsLoading] = useState(!quiz);
 
-  // Restore answers from localStorage; keyed by question id
   const [answers, setAnswers] = useState(() => {
     return JSON.parse(localStorage.getItem(`quizAnswers_${id}`)) || {};
   });
@@ -27,40 +27,71 @@ export default function AttemptQuiz() {
   const [timeLeft, setTimeLeft] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
-  // Persist quiz to localStorage on first load via navigation state
+  // Persist quiz
   useEffect(() => {
     if (location.state?.quiz) {
-      localStorage.setItem(`activeQuiz_${id}`, JSON.stringify(location.state.quiz));
+      localStorage.setItem(
+        `activeQuiz_${id}`,
+        JSON.stringify(location.state.quiz)
+      );
       setIsLoading(false);
     }
   }, [location.state, id]);
 
-  // Persist answers on every change
+  //  Persist answers
   useEffect(() => {
     localStorage.setItem(`quizAnswers_${id}`, JSON.stringify(answers));
   }, [answers, id]);
 
-  // Initialise timer once quiz is available
+  //  Warn before leaving
+  useEffect(() => {
+    const handler = (e) => {
+      e.preventDefault();
+      e.returnValue = "You have unsaved answers!";
+    };
+
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, []);
+
+  //  Timer init
   useEffect(() => {
     if (quiz?.duration && timeLeft === null) {
-      // duration is stored in seconds in this schema (1800 = 30 min)
-      // If your schema stores minutes, change to: quiz.duration * 60
       setTimeLeft(quiz.duration);
     }
   }, [quiz, timeLeft]);
 
-  // Countdown tick
+  //  Timer tick
   useEffect(() => {
     if (timeLeft === null || timeLeft <= 0) return;
-    const t = setTimeout(() => setTimeLeft((s) => s - 1), 1000);
+
+    const t = setTimeout(() => {
+      setTimeLeft((s) => Math.max(s - 1, 0));
+    }, 1000);
+
     return () => clearTimeout(t);
   }, [timeLeft]);
 
-  // Auto-submit when timer expires
+  //  Auto-submit
   useEffect(() => {
-    if (timeLeft === 0) handleSubmit();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timeLeft]);
+    if (timeLeft === 0 && !submitting) {
+      handleSubmit();
+    }
+  }, [timeLeft]); // eslint-disable-line
+
+  // Optional anti-cheat (tab switch)
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.hidden) {
+        console.warn("User switched tab!");
+        // You can track this if needed
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () =>
+      document.removeEventListener("visibilitychange", handleVisibility);
+  }, []);
 
   const handleAnswer = useCallback((questionId, value) => {
     setAnswers((prev) => ({ ...prev, [questionId]: value }));
@@ -72,25 +103,35 @@ export default function AttemptQuiz() {
 
     try {
       const formattedAnswers = Object.entries(answers).map(
-        ([questionId, value]) => {
-          if (typeof value === "number") {
-            return {
-              questionId,
-              selectedOptionIndex: value,
-            };
-          }
-
-          return {
-            questionId,
-            submittedAnswer: value,
-          };
-        }
+        ([questionId, value]) => ({
+          questionId,
+          answer:
+            typeof value === "number"
+              ? { type: "mcq", value }
+              : { type: "subjective", value },
+        })
       );
 
-      await submitAttempt(id, {
+      const timeTaken =
+        quiz?.duration && timeLeft !== null
+          ? quiz.duration - timeLeft
+          : 0;
+
+      const payload = {
+        quizId: id,
+
+        // ✅ USER DATA (IMPORTANT)
+        userId: user._id,
+        userName: user.name,
+        email: user.email,
+
         answers: formattedAnswers,
-        timeTakenSeconds: quiz.duration - timeLeft,
-      });
+        timeTakenSeconds: Math.max(timeTaken, 0),
+
+        attemptNumber: 1, // you can later increment from backend
+      };
+
+      await submitAttempt(id, payload);
 
       localStorage.removeItem(`activeQuiz_${id}`);
       localStorage.removeItem(`quizAnswers_${id}`);
@@ -101,20 +142,28 @@ export default function AttemptQuiz() {
       setSubmitting(false);
     }
   };
-
-  // Count answered: null / undefined = unanswered; "" = unanswered for subjective
   const answered = questions.filter((q) => {
     const qid = q.id || q.questionId;
     const val = answers[qid];
     return val !== null && val !== undefined && val !== "";
   }).length;
+
   const total = questions.length;
+
+  // 🚨 If quiz missing
+  if (!quiz && !isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-red-400">
+        Quiz not found or expired.
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-forge-bg">
       <Navbar />
 
-      {/* Sticky progress + timer bar */}
+      {/* Sticky bar */}
       <div className="sticky top-14 z-40 bg-forge-bg/90 backdrop-blur border-b border-forge-border">
         <div className="max-w-2xl mx-auto px-6 py-3 flex items-center justify-between">
           <span className="font-mono text-xs text-forge-muted">
@@ -139,7 +188,6 @@ export default function AttemptQuiz() {
           )}
         </div>
 
-        {/* Progress fill */}
         <div className="h-0.5 bg-forge-border">
           <div
             className="h-full bg-forge-accent transition-all duration-500"
@@ -149,12 +197,15 @@ export default function AttemptQuiz() {
       </div>
 
       <main className="max-w-2xl mx-auto px-6 py-8 flex flex-col gap-4">
-        {/* Quiz title */}
         {quiz?.title && !isLoading && (
           <div className="mb-2">
-            <h1 className="font-display text-xl font-bold text-forge-text">{quiz.title}</h1>
+            <h1 className="font-display text-xl font-bold text-forge-text">
+              {quiz.title}
+            </h1>
             {quiz.description && (
-              <p className="text-sm text-forge-muted mt-1">{quiz.description}</p>
+              <p className="text-sm text-forge-muted mt-1">
+                {quiz.description}
+              </p>
             )}
           </div>
         )}
@@ -184,7 +235,9 @@ export default function AttemptQuiz() {
             disabled={submitting}
             className="btn-primary mt-4 disabled:opacity-50"
           >
-            {submitting ? "Submitting…" : `Submit Quiz (${answered}/${total})`}
+            {submitting
+              ? "Submitting…"
+              : `Submit Quiz (${answered}/${total})`}
           </button>
         )}
       </main>

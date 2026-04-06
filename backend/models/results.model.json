@@ -1,6 +1,11 @@
 {
   "resultId": "string",
   "quizId": "string",
+  "quizSnapshot": {
+    "title": "Quiz Title",
+    "totalQuestions": 10,
+    "totalPoints": 100
+  },
   "userId": "string",
   "userName": "string",
   "email": "string",
@@ -8,23 +13,35 @@
   "totalPoints": 100,
   "percentage": 80,
   "correctCount": 8,
-  "totalQuestions": 10,
 
   "answers": [
     {
       "questionId": "q1",
-      "selectedOptionIndex": 0,
-      "submittedAnswer": null,
-      "isCorrect":" true | false | null",
-      "pointsEarned": "10 | null",
+      "questionSnapshot": {
+        "questionMd": "...",
+        "options": ["A", "B", "C", "D"],
+        "correctOptionIndex": 1,
+        "points": 10
+      },
+
+      "answer": {
+        "type": "mcq",
+        "value": 0
+      },
+
+      "isCorrect": true,
+      "pointsEarned": 10,
       "maxPoints": 10
     }
   ],
 
-  "evaluationStatus": "pending | evaluated",
+  "evaluationStatus": "auto | pending | evaluated",
   "evaluatedBy": "adminId | null",
   "evaluatedAt": "timestamp | null",
+
   "attemptNumber": 1,
   "timeTakenSeconds": 320,
+  "status": "submitted",
+
   "submittedAt": "timestamp"
 }
