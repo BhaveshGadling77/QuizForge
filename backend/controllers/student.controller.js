@@ -35,32 +35,37 @@ export async function attemptQuiz(req, res) {
 export async function submitQuiz(req, res) {
   try {
     const quizId = req.params.quizId;
-    const userId = req.user.userId; // from auth middleware
+    console.log(req.user)
+    const userId = req.user?.userId;
+    console.log(userId + " " + quizId)
+
+    if (!quizId || !userId) {
+      return res.status(400).json({
+        success: false,
+        msg: "quizId or userId missing",
+      });
+    }
+
     const { answers, timeTakenSeconds } = req.body;
 
     if (!answers || !Array.isArray(answers)) {
-      return res
-        .status(400)
-        .json({ success: false, msg: "Answers must be provided as an array" });
+      return res.status(400).json({
+        success: false,
+        msg: "Answers must be array",
+      });
     }
-
-    if (timeTakenSeconds === undefined || isNaN(timeTakenSeconds)) {
-      return res
-        .status(400)
-        .json({ success: false, msg: "Invalid timeTakenSeconds" });
-    }
-
     const summary = await studentService.submitQuiz(
       quizId,
       userId,
       answers,
-      Number(timeTakenSeconds),
+      Number(timeTakenSeconds)
     );
 
     return res.status(200).json({
       success: true,
       summary,
     });
+
   } catch (e) {
     return res.status(500).json({
       success: false,

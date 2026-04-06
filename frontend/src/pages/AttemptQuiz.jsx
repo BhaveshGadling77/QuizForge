@@ -69,10 +69,32 @@ export default function AttemptQuiz() {
   const handleSubmit = async () => {
     if (submitting) return;
     setSubmitting(true);
+
     try {
-      await submitAttempt(id, answers);
+      const formattedAnswers = Object.entries(answers).map(
+        ([questionId, value]) => {
+          if (typeof value === "number") {
+            return {
+              questionId,
+              selectedOptionIndex: value,
+            };
+          }
+
+          return {
+            questionId,
+            submittedAnswer: value,
+          };
+        }
+      );
+
+      await submitAttempt(id, {
+        answers: formattedAnswers,
+        timeTakenSeconds: quiz.duration - timeLeft,
+      });
+
       localStorage.removeItem(`activeQuiz_${id}`);
       localStorage.removeItem(`quizAnswers_${id}`);
+
       navigate(`/result/${id}`);
     } catch (err) {
       console.error("Submit failed:", err);

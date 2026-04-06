@@ -51,11 +51,8 @@ export const getActiveQuizzes = () =>
 export const getQuizData = (quizId) =>
   api.get(`/quizzes/${quizId}/attempt`);
 
-export const submitAttempt = (quizId, answers, timeTakenSeconds) =>
-  api.post(`/quizzes/${quizId}/submit`, {
-    answers,
-    timeTakenSeconds,
-  });
+export const submitAttempt = (quizId, data) =>
+  api.post(`/quizzes/${quizId}/submit`, data);
 
 export const getResult = (quizId) =>
   api.get(`/quizzes/${quizId}/result`);
