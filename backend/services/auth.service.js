@@ -1,5 +1,5 @@
 import { findById, createUser, getUserList } from "../utils/users.utils.js";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { collection, query, where, getDocs, connectFirestoreEmulator } from "firebase/firestore";
 import { generateAccessToken, decodeToken } from "./token.service.js";
 import { db } from "../config/firebase.config.js";
 import { comparePassword } from "./encrytion.service.js";
@@ -18,7 +18,7 @@ export class AuthService {
     }
 
     const user = await findById(decoded.id);
-
+    // console.log(user)
     if (!user) {
       throw new Error("User not found");
     }

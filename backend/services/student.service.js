@@ -1,4 +1,4 @@
-import { doc, getDoc, getDocs, collection, query, where, orderBy, limit } from "firebase/firestore";
+import { doc, getDoc, getDocs, collection, query, where, orderBy, limit, runTransaction } from "firebase/firestore";
 
 
 export class StudentService {
@@ -158,156 +158,143 @@ export class StudentService {
    *  - User has already attempted the quiz
    *  - Submitted answers are invalid or malformed
    */
-  async submitQuiz(quizId, userId, answers, timeTakenSeconds) {
-    const quizRef = doc(this.quizCollection, quizId);
-    const resultsRef = collection(this.db, process.env.COLLECTION_RESULTS);
+  async submitQuiz(quizId, userId, userName, email, answers, timeTakenSeconds) {
+  const quizRef = doc(this.quizCollection, quizId);
+  const resultsRef = collection(this.db, process.env.COLLECTION_RESULTS);
 
-    //check for the previous attempt of the user.
+  //  STEP 1: Fetch questions BEFORE transaction
+  const questionsRef = collection(
+    this.db,
+    process.env.COLLECTION_QUIZZES,
+    quizId,
+    "questions"
+  );
 
-    const attemptQuery = query(
-      resultsRef,
-      where("quizId", "==", quizId),
-      where("userId", "==", userId),
-    );
+  const questionSnap = await getDocs(questionsRef);
 
-    const attemptSnap = await getDocs(attemptQuery);
+  if (questionSnap.empty) {
+    throw new Error("No questions found");
+  }
 
-    if (!attemptSnap.empty) {
-      const err = new Error("Quiz already attempted.");
-      err.statusCode = 409;
-      throw err;
+  const questionMap = {};
+  questionSnap.forEach((doc) => {
+    const q = doc.data();
+    questionMap[q.questionId] = q;
+  });
+
+  // STEP 2: attempts
+  const attemptQuery = query(
+    resultsRef,
+    where("quizId", "==", quizId),
+    where("userId", "==", userId)
+  );
+
+  const attemptSnap = await getDocs(attemptQuery);
+  const attemptNumber = attemptSnap.size + 1;
+
+  //  STEP 3: transaction
+  return await runTransaction(this.db, async (tx) => {
+    const quizSnap = await tx.get(quizRef);
+
+    if (!quizSnap.exists()) throw new Error("Quiz Not Found");
+
+    const quiz = quizSnap.data();
+
+    if (!quiz.isActive) throw new Error("Quiz is not active");
+
+    if (quiz.timerEnabled && timeTakenSeconds > quiz.durationSeconds) {
+      if (quiz.autoSubmit) {
+        timeTakenSeconds = quiz.durationSeconds;
+      } else {
+        throw new Error("Time limit exceeded");
+      }
     }
-    return await runTransaction(this.db, async (tx) => {
-      //fetch the quiz
 
-      const quizSnap = await tx.get(quizRef);
+    let totalScore = 0;
+    let correctCount = 0;
+    let hasManual = false;
 
-      if (!quizSnap.exists()) {
-        throw new Error("Quiz Not Found");
+    const evaluatedAnswers = answers.map((ans) => {
+      const question = questionMap[ans.questionId];
+
+      if (!question) {
+        throw new Error(`Invalid question: ${ans.questionId}`);
       }
 
-      const quiz = quizSnap.data();
+      let isCorrect = null;
+      let pointsEarned = null;
 
-      //quiz Validation.
-      if (!quiz.isActive) throw new Error("Quiz is not active");
-      if (quiz.timerEnabled && timeTakenSeconds > quiz.durationSeconds) {
-        if (quiz.autoSubmit) {
-          // allow, but mark timeTakenSeconds as max
-          timeTakenSeconds = quiz.durationSeconds;
-        } else {
-          throw new Error("Time limit exceeded");
-        }
+      if (question.questionType === "mcq" || question.questionType === "true-false") {
+        isCorrect = ans.selectedOptionIndex == question.correctOptionIndex;
+        pointsEarned = isCorrect ? question.points : 0;
+
+        if (isCorrect) correctCount++;
+        totalScore += pointsEarned;
+
+      } else if (question.questionType === "short-integer") {
+        isCorrect =
+          Number(ans.submittedAnswer) === Number(question.correctAnswer);
+
+        pointsEarned = isCorrect ? question.points : 0;
+
+        if (isCorrect) correctCount++;
+        totalScore += pointsEarned;
+
+      } else {
+        hasManual = true;
       }
-
-      //building question map
-      const questionMap = {};
-      quiz.questions.map((q) => {
-        questionMap[q.questionId] = q;
-      });
-
-      let totalScore = 0;
-      let correctCount = 0;
-      let hasManual = false;
-
-      //evaluate the answers
-
-      const evaluatedAnswers = answers.map((ans) => {
-        const question = questionMap[ans.questionId];
-        if (!question)
-          throw new Error(`Invalid question submitted: ${ans.questionId}`);
-
-        let isCorrect = null;
-        let pointsEarned = null;
-
-        switch (question.questionType) {
-          case "mcq":
-          case "true-false":
-            isCorrect = ans.selectedOptionIndex == question.correctOptionIndex;
-            pointsEarned = isCorrect ? question.points : 0;
-
-            if (isCorrect) {
-              correctCount++;
-            }
-            totalScore += pointsEarned;
-            break;
-
-          case "short-integer":
-            if (
-              ans.submittedAnswer === undefined ||
-              isNaN(ans.submittedAnswer)
-            ) {
-              throw new Error(
-                `Invalid short-integer answer for question ${ans.questionId}`,
-              );
-            }
-            isCorrect =
-              Number(ans.submittedAnswer) === Number(question.correctAnswer);
-            pointsEarned = isCorrect ? question.points : 0;
-            if (isCorrect) correctCount++;
-
-            totalScore += pointsEarned;
-            break;
-
-          case "short-subjective":
-            hasManual = true;
-            pointsEarned = null;
-            isCorrect = null;
-            break;
-
-          default:
-            throw new Error(
-              `Unsupported question type: ${question.questionType}`,
-            );
-        }
-        return {
-          questionId: ans.questionId,
-          selectedOptionIndex: ans.selectedOptionIndex ?? null,
-          submittedAnswer: ans.submittedAnswer ?? null,
-          isCorrect,
-          pointsEarned,
-          maxPoints: question.points,
-        };
-      });
-      //determine evaluation status
-      const evaluationStatus = hasManual ? "pending" : "evaluated";
-      //build the result doc
-
-      const resultDoc = {
-        quizId,
-        userId,
-        score: totalScore,
-        totalPoints: quiz.totalPoints,
-        percentage:
-          quiz.totalPoints > 0 ? (totalScore / quiz.totalPoints) * 100 : 0,
-        correctCount,
-        totalQuestions: quiz.totalQuestions,
-        answers: evaluatedAnswers,
-        evaluationStatus,
-        evaluatedBy: null,
-        evaluatedAt: null,
-        timeTakenSeconds,
-        submittedAt: Timestamp.now(),
-      };
-
-      //write result in transaction
-      const resultRef = doc(
-        this.resultCollection,
-        `result_${quizId}_${userId}`,
-      ); //storing in the particular fashion for fast access.
-      tx.set(resultRef, resultDoc);
-
-      //summary for frontend.
 
       return {
-        score: totalScore,
-        totalPoints: quiz.totalPoints,
-        percentage:
-          quiz.totalPoints > 0 ? (totalScore / quiz.totalPoints) * 100 : 0,
-        correctCount,
-        evaluationStatus,
+        questionId: ans.questionId,
+        selectedOptionIndex: ans.selectedOptionIndex ?? null,
+        submittedAnswer: ans.submittedAnswer ?? null,
+        isCorrect,
+        pointsEarned,
+        maxPoints: question.points,
       };
     });
-  }
+
+    const evaluationStatus = hasManual ? "pending" : "evaluated";
+
+    const resultRef = doc(
+      this.resultCollection,
+      `result_${quizId}_${userId}_${attemptNumber}`
+    );
+
+    const resultDoc = {
+      resultId: resultRef.id,
+      quizId,
+      userId,
+      userName,
+      email,
+      score: totalScore,
+      totalPoints: quiz.totalPoints,
+      percentage:
+        quiz.totalPoints > 0 ? (totalScore / quiz.totalPoints) * 100 : 0,
+      correctCount,
+      totalQuestions: Object.keys(questionMap).length,
+      answers: evaluatedAnswers,
+      evaluationStatus,
+      evaluatedBy: null,
+      evaluatedAt: null,
+      attemptNumber,
+      timeTakenSeconds,
+      status: "submitted",
+      submittedAt: Timestamp.now(),
+    };
+
+    tx.set(resultRef, resultDoc);
+
+    return {
+      score: totalScore,
+      totalPoints: quiz.totalPoints,
+      percentage:
+        quiz.totalPoints > 0 ? (totalScore / quiz.totalPoints) * 100 : 0,
+      correctCount,
+      evaluationStatus,
+    };
+  });
+}
 
   // Replace getLeaderboard in student.service.js
   async getLeaderboard(quizId) {

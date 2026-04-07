@@ -103,14 +103,20 @@ export default function AttemptQuiz() {
 
     try {
       const formattedAnswers = Object.entries(answers).map(
-        ([questionId, value]) => ({
+    ([questionId, value]) => {
+      if (typeof value === "number") {
+        return {
           questionId,
-          answer:
-            typeof value === "number"
-              ? { type: "mcq", value }
-              : { type: "subjective", value },
-        })
-      );
+          selectedOptionIndex: value, // matches backend
+        };
+      }
+
+      return {
+        questionId,
+        submittedAnswer: value, //matches backend
+      };
+    }
+  );
 
       const timeTaken =
         quiz?.duration && timeLeft !== null
@@ -120,7 +126,7 @@ export default function AttemptQuiz() {
       const payload = {
         quizId: id,
 
-        // ✅ USER DATA (IMPORTANT)
+        // user data
         userId: user._id,
         userName: user.name,
         email: user.email,
@@ -150,7 +156,7 @@ export default function AttemptQuiz() {
 
   const total = questions.length;
 
-  // 🚨 If quiz missing
+  //  If quiz missing
   if (!quiz && !isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center text-red-400">

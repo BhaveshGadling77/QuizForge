@@ -1,5 +1,5 @@
 import { db } from "../config/firebase.config.js";
-import { comparePassword } from "../services/encrytion.service.js";
+import { comparePassword } from "../services/encrytion.service.js"
 import { StudentService } from "../services/student.service.js";
 
 const studentService = new StudentService(db);
@@ -35,9 +35,10 @@ export async function attemptQuiz(req, res) {
 export async function submitQuiz(req, res) {
   try {
     const quizId = req.params.quizId;
-    console.log(req.user)
-    const userId = req.user?.userId;
-    console.log(userId + " " + quizId)
+
+    const userId = req.user?.id;
+    const userName = req.user?.name;
+    const email = req.user?.email;
 
     if (!quizId || !userId) {
       return res.status(400).json({
@@ -54,9 +55,12 @@ export async function submitQuiz(req, res) {
         msg: "Answers must be array",
       });
     }
+
     const summary = await studentService.submitQuiz(
       quizId,
       userId,
+      userName,
+      email,
       answers,
       Number(timeTakenSeconds)
     );
@@ -65,7 +69,6 @@ export async function submitQuiz(req, res) {
       success: true,
       summary,
     });
-
   } catch (e) {
     return res.status(500).json({
       success: false,
@@ -73,7 +76,6 @@ export async function submitQuiz(req, res) {
     });
   }
 }
-
 export async function getMyResult(req, res) {
   try {
     const { quizId } = req.params;
