@@ -4,14 +4,14 @@ import adminRoutes from './routes/adminQuiz.routes.js'
 import userRoutes from './routes/user.routes.js' 
 import cookieParser from 'cookie-parser';
 import cors from 'cors'
-import { register } from './controllers/auth.controller.js';
 const app = express();
 
 //built-in middlewares
-
 app.use(express.json())
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL,
+  origin: process.env.NODE_ENV == "production" ?
+        process.env.FRONTEND_URL : true,
   credentials: true
 }));
 app.use(express.urlencoded({ extended: true }))
