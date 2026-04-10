@@ -64,7 +64,7 @@ export class StudentService {
     );
 
     const snapshot = await getDocs(q);
-    console.log(snapshot)
+    // console.log(snapshot)
     return snapshot.docs.map((doc) => ({
       quizId: doc.id,
       ...doc.data(),
