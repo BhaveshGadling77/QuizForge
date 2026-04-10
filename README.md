@@ -2,83 +2,120 @@
 
 A Secure Online Quiz & Assessment Platform
 
-- [x] User Registration (email + password)
-- [x] Password hashing using `bcrypt`
-- [x] User Login
-- [x] JWT token generation
-- [x] JWT verification middleware
-- [x] Role-based access control (admin, student)
-- [x] Protected routes using middleware
-- [x] Logout (client-side token removal)
-- [x] Private Quizzes with Access Token.
+---
 
-Backend skills shown: Auth flow, middleware, security
+## 🚀 Overview
+
+QuizForge is a full-stack web application that allows admins to create and manage quizzes, while students can browse and attempt **public quizzes**.
+
+The platform focuses on secure authentication, role-based access control, and scalable backend design.
 
 ---
 
-##  User Roles
+## 🔐 Core Features
 
-- **Admin**
-- **Student**
-
----
-
-## Student Features
-
-- [x] View list of active quizzes
-- [x] View quiz details
-- [x] Attempt quiz (MCQ-based)
-- [x] Submit quiz answers
-- [x] Score calculated on backend
-- [x] View quiz result immediately
-- [x] View past quiz attempts
-- [x] View leaderboard (per quiz)
-
- Backend logic shown: evaluation, validation, data filtering
+* User Registration (email + password)
+* Password hashing using `bcrypt`
+* JWT-based authentication
+* Role-based access control (Admin / Student)
+* Protected routes using middleware
+* Logout (client-side token removal)
 
 ---
 
-## Admin Features
+## 👥 User Roles
 
-- [x] Admin login
-- [x] Create quiz
-- [x] Add questions to quiz
-- [x] Edit quiz
-- [x] Delete quiz
-- [x] Publish / unpublish quiz
-- [x] View all student results for a quiz
-- [x] view result of a particular student.
-- [x] Manual evaluation for the short-subjective questions.
+### **Admin**
 
- Backend skills shown: CRUD APIs, access control
+* Full control over quizzes and results
+
+### **Student**
+
+* Can access and attempt **public quizzes only**
 
 ---
 
-## Quiz Management
+## 🎓 Student Features
 
-- [x] Quiz title & description
-- [x] Multiple questions per quiz
-- [x] Multiple options per question
-- [x] Single correct answer
-- [x] Quiz status (active / inactive)
-- [x] One attempt per user
+* View list of **public active quizzes**
+* View quiz details
+* Attempt MCQ-based quizzes
+* Submit answers
+* Score calculated on backend
+* View quiz result immediately after submission
+* View leaderboard (per quiz)
+
+> ⚠️ Note: Currently, students can only access **public quizzes**.
 
 ---
 
-##  Results & Leaderboard
+## 🛠️ Admin Features
 
-- [x] Store quiz results in `Firestore`
-- [x] Score calculation on backend
-- [x] Leaderboard sorted by score
-- [x] Timestamp-based tie-breaker
+* Admin login
+* Create quiz
+* Add questions to quiz
+* Edit quiz
+* Delete quiz
+* Publish / unpublish quiz
+* View all student results for a quiz
+* View result of a particular student
+* Manual evaluation for short subjective questions
 
-## Future Improvements
+---
 
-- [ ] upload image of question.
+## 📚 Quiz Management
 
-Backend skills shown: sorting, aggregation logic (manual)
+* Quiz title & description
+* Multiple questions per quiz
+* Multiple options per question
+* Single correct answer
+* Quiz status (active / inactive)
+* One attempt per user
 
-## DataBase indexes we have to make.
+---
 
+## 📊 Results & Leaderboard
 
-techstack :- Firebase, Nodejs, ExpressJs, Reactjs.
+* Store quiz results in Firebase (Firestore)
+* Backend-based score calculation
+* Leaderboard sorted by score
+* Timestamp-based tie-breaker
+
+---
+
+## ⚙️ Tech Stack
+
+* **Frontend:** React.js
+* **Backend:** Node.js, Express.js
+* **Database:** Firebase Firestore
+* **Authentication:** JWT + bcrypt
+
+---
+
+## 🚧 Future Improvements
+
+* Image support for questions
+* Private quiz access system (token-based access refinement)
+* Improved UI/UX for student quiz attempts
+* Database indexing optimization
+
+---
+
+## 💡 Backend Skills Demonstrated
+
+* Authentication & Authorization (JWT)
+* Middleware design
+* REST API development
+* CRUD operations
+* Data validation & filtering
+* Score evaluation logic
+* Leaderboard sorting & aggregation
+
+---
+
+## ⚠️ Project Status
+
+This project is **actively under development**.
+Core admin functionalities and public quiz flow are implemented, with additional features being improved continuously.
+
+---
