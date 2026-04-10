@@ -11,10 +11,10 @@ const app = express();
 
 app.use(express.json())
 app.use(cors({
-  origin: true,
+  origin: "https://quiz-forge-1wqc.vercel.app/",
   credentials: true
 }));
-app.use(express.urlencoded({extended: true}))
+app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 
 

@@ -1,4 +1,4 @@
-import { serverTimestamp } from "firebase/firestore";
+import { cookieSettings } from "../constants/cookie.constants.js";
 import { hashPassword } from "../services/encrytion.service.js";
 import { AuthService } from "../services/auth.service.js";
 import { generateAccessToken } from "../services/token.service.js";
@@ -26,13 +26,7 @@ export async function register(req, res) {
       role,
     });
 
-    res.cookie("quizforge_token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production" || false,
-      sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-      path: "/"
-    });
+    res.cookie("quizforge_token", token, cookieSettings);
 
     return res.status(201).json({
       msg: "User registered successfully",
@@ -51,13 +45,7 @@ export async function login(req, res) {
   try {
     const { token, user } = await authService.loginUser(req.body);
 
-    res.cookie("quizforge_token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production" || false,
-      sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-      path: "/"
-    });
+    res.cookie("quizforge_token", token, cookieSettings);
 
     return res.status(200).json({
       msg: "Login successful",
@@ -72,11 +60,7 @@ export async function login(req, res) {
 // LOGOUT
 export async function logout(req, res) {
   try {
-    res.clearCookie("quizforge_token", {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: false,
-    });
+    res.clearCookie("quizforge_token", cookieSettings);
 
     return res.status(200).json({
       msg: "Logout successful",
