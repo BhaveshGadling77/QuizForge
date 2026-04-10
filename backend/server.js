@@ -11,7 +11,7 @@ const app = express();
 
 app.use(express.json())
 app.use(cors({
-  origin: "https://quiz-forge-1wqc.vercel.app/",
+  origin: process.env.FRONTEND_URL,
   credentials: true
 }));
 app.use(express.urlencoded({ extended: true }))
