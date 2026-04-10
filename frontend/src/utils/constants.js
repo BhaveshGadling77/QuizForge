@@ -14,7 +14,7 @@ export const QUESTION_TYPES = {
   TRUE_FALSE: "true_false",
 };
 
-export const API_BASE = "http://localhost:3000/api";
+export const API_BASE = process.env.API_BASE;
 
 export const ROUTES = {
   LOGIN: "/",
