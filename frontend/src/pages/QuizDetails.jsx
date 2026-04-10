@@ -3,15 +3,16 @@ import { useQuery } from "react-query";
 import { getQuizById } from "@/services/quizService";
 import Navbar from "@/components/Navbar";
 import { formatDate } from "@/utils/helpers";
+import { getQuizData } from "@/services/quizService";
 
 export default function QuizDetails() {
   const { id } = useParams();
   const { data: quiz, isLoading, isError } = useQuery(["quiz", id], () =>
-    getQuizById(id).then((r) => r.data.quiz)
+    getQuizData(id).then((r) => r.data.quiz)
   );
-
   if (isLoading) return <LoadingState />;
   if (isError || !quiz) return <ErrorState />;
+  console.log("Quiz details fetched:", quiz); // Debug log
 
   return (
     <div className="min-h-screen bg-forge-bg">
@@ -29,13 +30,16 @@ export default function QuizDetails() {
             {quiz.description}
           </p>
           <div className="grid grid-cols-3 gap-4 border-t border-forge-border pt-4">
-            <Stat label="Questions" value={quiz.questionCount} />
-            <Stat label="Duration" value={`${quiz.duration} min`} />
+            <Stat label="Questions" value={quiz.totalQuestions} />
+            <Stat label="Duration" value={`${quiz.duration / 60} min`} />
             <Stat label="Created" value={formatDate(quiz.createdAt)} />
           </div>
         </div>
 
-        <Link to={`/quiz/${id}/attempt`} className="btn-primary block text-center w-full">
+        <Link 
+        to={`/quiz/${id}/attempt`} 
+        state={{ quiz }}
+        className="btn-primary block text-center w-full">
           Start Quiz →
         </Link>
       </main>

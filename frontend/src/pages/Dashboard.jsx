@@ -1,16 +1,16 @@
 import { useQuery } from "react-query";
-import { getQuizzes } from "@/services/quizService";
 import Navbar from "@/components/Navbar";
 import QuizCard from "@/components/QuizCard";
 import { QUIZ_STATUS } from "@/utils/constants";
+import { getActiveQuizzes } from "../services/quizService";
 
 export default function Dashboard() {
-  const { data, isLoading, isError } = useQuery("quizzes", () =>
-    getQuizzes().then((r) => r.data.quizzes)
+  const { data = [], isLoading, isError } = useQuery("quizzes", () =>
+    getActiveQuizzes().then((r) => r.data.quizzes)
   );
-
-  const published = data?.filter((q) => q.status === QUIZ_STATUS.PUBLISHED) ?? [];
-
+  // console.log("Fetched quizzes:", data); // Debug log
+  const published = data;
+  // console.log("Published quizzes:", published); // Debug log
   return (
     <div className="min-h-screen bg-forge-bg">
       <Navbar />
@@ -40,9 +40,10 @@ export default function Dashboard() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {published.map((quiz) => (
-              <QuizCard key={quiz._id} quiz={quiz} />
-            ))}
+            {published.map((quiz) => {
+              // console.log("Rendering quiz:", quiz); // Debug log
+              return <QuizCard key={quiz.quizId} quiz={quiz} />;
+            })}
           </div>
         )}
       </main>

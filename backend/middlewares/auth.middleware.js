@@ -22,7 +22,7 @@ export async function authenticateToken(req, res, next) {
     }
 
     const user = await authService.verifyAccessToken(token);
-    // console.log(user)
+    console.log(user)
     req.user = user;
     next();
 

@@ -1,5 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+//Lading page
+import Landing from "@/pages/Landing";
 // Auth pages
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
@@ -29,9 +31,10 @@ export default function AppRoutes() {
         element={
           user
             ? <Navigate to={user.role === "admin" ? "/admin" : "/dashboard"} replace />
-            : <Login />
+            : <Landing />
         }
       />
+      <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
       {/* Student */}

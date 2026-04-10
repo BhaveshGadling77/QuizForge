@@ -9,18 +9,18 @@ const statusStyles = {
 };
 
 export default function QuizCard({ quiz }) {
-  const { _id, title, description, status, questionCount, duration, createdAt } = quiz;
+  const { quizId, title, description, isActive, totalQuestions, duration, createdAt } = quiz;
 
   return (
-    <Link to={`/quiz/${_id}`}>
+    <Link to={`/quiz/${quizId}`}>
       <div className="card hover:border-forge-accent/50 hover:-translate-y-0.5 cursor-pointer group">
         {/* Header */}
         <div className="flex items-start justify-between mb-3">
           <h3 className="font-display font-semibold text-forge-text text-base group-hover:text-forge-accent transition-colors leading-snug">
             {truncate(title, 50)}
           </h3>
-          <span className={`badge ml-2 shrink-0 ${statusStyles[status] ?? ""}`}>
-            {status}
+          <span className={`badge ml-2 shrink-0 ${statusStyles[isActive ? QUIZ_STATUS.PUBLISHED : QUIZ_STATUS.DRAFT] ?? ""}`}>
+            {isActive ? "Published" : "Draft"}
           </span>
         </div>
 
@@ -31,7 +31,7 @@ export default function QuizCard({ quiz }) {
 
         {/* Meta */}
         <div className="flex items-center gap-4 text-xs font-mono text-forge-muted border-t border-forge-border pt-3 mt-auto">
-          <span>{questionCount ?? 0} questions</span>
+          <span>{totalQuestions ?? 0} questions</span>
           <span>{duration ?? "—"} min</span>
           <span className="ml-auto">{formatDate(createdAt)}</span>
         </div>

@@ -1,5 +1,5 @@
 import { db } from "../config/firebase.config.js";
-import { comparePassword } from "../services/encrytion.service.js";
+import { comparePassword } from "../services/encrytion.service.js"
 import { StudentService } from "../services/student.service.js";
 
 const studentService = new StudentService(db);
@@ -7,10 +7,11 @@ const studentService = new StudentService(db);
 //Student Specific Controllers.
 export async function getActiveQuizzes(req, res) {
   try {
+    // console.log("student hit this route.") //debug
     const quizzes = await studentService.getActivePublicQuizzes();
     return res.status(200).json({ quizzes });
   } catch (e) {
-    return res.status(500).json({ msg: "Failed to fetch quizzes" });
+    return res.status(500).json({ msg: e.message });
   }
 }
 
@@ -34,26 +35,34 @@ export async function attemptQuiz(req, res) {
 export async function submitQuiz(req, res) {
   try {
     const quizId = req.params.quizId;
-    const userId = req.user.userId; // from auth middleware
+
+    const userId = req.user?.id;
+    const userName = req.user?.name;
+    const email = req.user?.email;
+
+    if (!quizId || !userId) {
+      return res.status(400).json({
+        success: false,
+        msg: "quizId or userId missing",
+      });
+    }
+
     const { answers, timeTakenSeconds } = req.body;
 
     if (!answers || !Array.isArray(answers)) {
-      return res
-        .status(400)
-        .json({ success: false, msg: "Answers must be provided as an array" });
-    }
-
-    if (timeTakenSeconds === undefined || isNaN(timeTakenSeconds)) {
-      return res
-        .status(400)
-        .json({ success: false, msg: "Invalid timeTakenSeconds" });
+      return res.status(400).json({
+        success: false,
+        msg: "Answers must be array",
+      });
     }
 
     const summary = await studentService.submitQuiz(
       quizId,
       userId,
+      userName,
+      email,
       answers,
-      Number(timeTakenSeconds),
+      Number(timeTakenSeconds)
     );
 
     return res.status(200).json({
@@ -67,7 +76,6 @@ export async function submitQuiz(req, res) {
     });
   }
 }
-
 export async function getMyResult(req, res) {
   try {
     const { quizId } = req.params;
