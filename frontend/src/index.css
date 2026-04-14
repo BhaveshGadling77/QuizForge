@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600;700;800&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Merriweather:ital,opsz,wght@0,18..144,300..900;1,18..144,300..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap");
 @tailwind base;
 @tailwind components;
@@ -607,4 +608,304 @@
 .qf-role-btn:not(.active):hover {
   background: rgba(255, 255, 255, 0.04);
   border-color: rgba(255, 255, 255, 0.08);
+}
+
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --purple: #7c3aed;
+  --purple-light: #a78bfa;
+  --purple-faint: rgba(124, 58, 237, 0.08);
+  --border: rgba(255, 255, 255, 0.07);
+  --bg: #0c0e16;
+  --bg-card: #12141f;
+  --text: #f0f0f0;
+  --muted: #6b7280;
+  --muted-light: #9ca3af;
+}
+
+@keyframes qf-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes qf-glow-pulse {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+@keyframes qf-float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+@keyframes qf-shimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+@keyframes badge-pop {
+  0% {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.qf-fade-up {
+  animation: qf-fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.qf-d1 {
+  animation-delay: 0.05s;
+}
+.qf-d2 {
+  animation-delay: 0.12s;
+}
+.qf-d3 {
+  animation-delay: 0.2s;
+}
+.qf-d4 {
+  animation-delay: 0.28s;
+}
+.qf-d5 {
+  animation-delay: 0.36s;
+}
+
+.qf-card-float {
+  animation: qf-float 4s ease-in-out infinite;
+}
+
+.qf-feature-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.5rem;
+  transition:
+    border-color 0.25s,
+    box-shadow 0.25s,
+    transform 0.25s;
+  position: relative;
+  overflow: hidden;
+}
+.qf-feature-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.25s;
+  pointer-events: none;
+}
+.qf-feature-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.qf-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 0.7rem 1.4rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s;
+  font-family: "DM Sans", sans-serif;
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(124, 58, 237, 0.5),
+    0 4px 20px rgba(124, 58, 237, 0.25);
+}
+.qf-btn-primary::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.qf-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 0 0 1px rgba(124, 58, 237, 0.7),
+    0 8px 30px rgba(124, 58, 237, 0.4);
+}
+.qf-btn-primary:hover::before {
+  opacity: 1;
+}
+.qf-btn-primary:active {
+  transform: scale(0.97);
+}
+
+.qf-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--muted-light);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.7rem 1.4rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s;
+  font-family: "DM Sans", sans-serif;
+  backdrop-filter: blur(4px);
+}
+.qf-btn-ghost:hover {
+  border-color: rgba(167, 139, 250, 0.35);
+  color: #a78bfa;
+  background: rgba(167, 139, 250, 0.06);
+  transform: translateY(-1px);
+}
+
+.qf-nav-link {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: color 0.15s;
+  position: relative;
+}
+.qf-nav-link::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #a78bfa;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.2s;
+}
+.qf-nav-link:hover {
+  color: #a78bfa;
+}
+.qf-nav-link:hover::after {
+  transform: scaleX(1);
+}
+
+.qf-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(124, 58, 237, 0.1);
+  border: 1px solid rgba(124, 58, 237, 0.25);
+  border-radius: 99px;
+  padding: 5px 14px;
+  font-size: 0.75rem;
+  color: #a78bfa;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  animation: badge-pop 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
+}
+
+.qf-shimmer-text {
+  background: linear-gradient(90deg, #a78bfa, #c4b5fd, #7c3aed, #a78bfa);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: qf-shimmer 3s linear infinite;
+}
+
+.qf-quiz-card {
+  background: #13151f;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 1.625rem;
+  text-align: left;
+  box-shadow:
+    0 40px 80px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+.qf-testimonial {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem;
+  transition:
+    border-color 0.2s,
+    transform 0.2s;
+}
+.qf-testimonial:hover {
+  border-color: rgba(167, 139, 250, 0.2);
+  transform: translateY(-2px);
+}
+
+.qf-glow-orb {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(80px);
+  animation: qf-glow-pulse 6s ease-in-out infinite;
+}
+
+.qf-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 0;
+}
+
+.qf-stat-card {
+  text-align: center;
+  padding: 1.5rem 1rem;
+  transition: background 0.2s;
+  border-radius: 10px;
+}
+.qf-stat-card:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.qf-pill-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  padding: 3px 10px;
+  font-size: 0.7rem;
+  color: var(--muted);
+  font-weight: 500;
 }
