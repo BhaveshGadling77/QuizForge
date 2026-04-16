@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "react-query";
 import { getQuizById, updateQuiz, publishQuiz, unpublishQuiz } from "@/services/quizService";
-import Navbar from "@/components/Navbar";
 import toast from "react-hot-toast";
 
 // ─── Toggle (reused from CreateQuiz style) ───────────────────────────────────
@@ -145,7 +144,6 @@ function StatusBadge({ isActive, totalQuestions }) {
 function Skeleton() {
   return (
     <div className="min-h-screen bg-forge-bg">
-      <Navbar />
       <main className="max-w-xl mx-auto px-6 py-10">
         <div className="h-4 w-32 rounded bg-forge-surface animate-pulse mb-6" />
         <div className="h-8 w-48 rounded bg-forge-surface animate-pulse mb-8" />
@@ -271,7 +269,6 @@ export default function EditQuiz() {
 
   return (
     <div className="min-h-screen bg-forge-bg">
-      <Navbar />
 
       <main className="max-w-xl mx-auto px-6 py-10">
 

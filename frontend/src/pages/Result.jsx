@@ -1,7 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "react-query";
 import { getResult } from "@/services/quizService";
-import Navbar from "@/components/Navbar";
 import { scoreColor, calcScore } from "@/utils/helpers";
 
 export default function Result() {
@@ -13,7 +12,6 @@ export default function Result() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-forge-bg">
-        <Navbar />
         <div className="max-w-md mx-auto px-6 py-16 text-center">
           <p className="font-mono text-forge-muted text-sm animate-pulse">Calculating results…</p>
         </div>
@@ -25,7 +23,6 @@ export default function Result() {
 
   return (
     <div className="min-h-screen bg-forge-bg">
-      <Navbar />
       <main className="max-w-md mx-auto px-6 py-16 text-center animate-fade-up">
         <div className="mb-8">
           <div className={`font-display font-bold text-7xl mb-2 ${scoreColor(score)}`}>

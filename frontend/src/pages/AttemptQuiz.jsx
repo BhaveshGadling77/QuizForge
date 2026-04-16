@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { submitAttempt } from "@/services/quizService";
 import QuestionCard from "@/components/QuestionCard";
-import Navbar from "@/components/Navbar";
 import { formatTime } from "@/utils/helpers";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -167,7 +166,6 @@ export default function AttemptQuiz() {
 
   return (
     <div className="min-h-screen bg-forge-bg">
-      <Navbar />
 
       {/* Sticky bar */}
       <div className="sticky top-14 z-40 bg-forge-bg/90 backdrop-blur border-b border-forge-border">

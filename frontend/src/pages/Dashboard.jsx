@@ -1,5 +1,4 @@
 import { useQuery } from "react-query";
-import Navbar from "@/components/Navbar";
 import QuizCard from "@/components/QuizCard";
 import { QUIZ_STATUS } from "@/utils/constants";
 import { getActiveQuizzes } from "../services/quizService";
@@ -13,7 +12,6 @@ export default function Dashboard() {
   // console.log("Published quizzes:", published); // Debug log
   return (
     <div className="min-h-screen bg-forge-bg">
-      <Navbar />
       <main className="max-w-6xl mx-auto px-6 py-10">
         {/* Header */}
         <div className="mb-8">

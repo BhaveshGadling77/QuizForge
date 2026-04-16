@@ -34,6 +34,7 @@ export default function AppRoutes() {
             : <Landing />
         }
       />
+      <Route path="/about" element={<Landing />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 

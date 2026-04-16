@@ -1,7 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "react-query";
 import { getLeaderboard } from "@/services/quizService";
-import Navbar from "@/components/Navbar";
 import LeaderboardTable from "@/components/LeaderboardTable";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -14,7 +13,6 @@ export default function Leaderboard() {
 
   return (
     <div className="min-h-screen bg-forge-bg">
-      <Navbar />
       <main className="max-w-2xl mx-auto px-6 py-10">
         <div className="flex items-center justify-between mb-6">
           <div>

@@ -7,7 +7,6 @@ import {
   unpublishQuiz,
   deleteQuiz,
 } from "@/services/quizService";
-import Navbar from "@/components/Navbar";
 import { formatDate, truncate } from "@/utils/helpers";
 import toast from "react-hot-toast";
 // ─── utils ────────────────────────────────────────────────────────────────────
@@ -272,7 +271,6 @@ const { data, isLoading } = useQuery(
 
   return (
     <div className="min-h-screen bg-forge-bg">
-      <Navbar />
 
       <main className="max-w-6xl mx-auto px-6 py-10">
 

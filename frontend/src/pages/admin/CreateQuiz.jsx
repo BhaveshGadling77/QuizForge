@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { createQuiz } from "@/services/quizService";
 import { useAuth } from "@/hooks/useAuth";
-import Navbar from "@/components/Navbar";
 import toast from "react-hot-toast";
 // ─── Toggle ───────────────────────────────────────────────────────────────────
 function Toggle({ checked, onChange, label, desc }) {
@@ -181,8 +180,6 @@ export default function CreateQuiz() {
 
   return (
     <div className="min-h-screen bg-forge-bg">
-      {/* <style>{styles}</style> */}
-      <Navbar />
 
       <main className="max-w-xl mx-auto px-6 py-10">
         {/* Back */}

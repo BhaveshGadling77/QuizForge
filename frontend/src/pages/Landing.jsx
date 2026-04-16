@@ -1,4 +1,6 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth";
 import {
   Zap,
   BarChart3,
@@ -105,50 +107,31 @@ const testimonials = [
 ];
 
 export default function LandingPage() {
+  const { user, loading } = useAuth();
+  // console.log("Auth loading:", loading, "User:", user); debug
+  const dashboardPath = user?.role === "admin" ? "/admin" : "/dashboard";
+
+  // useEffect(() => {
+  //   if (!loading && user) {
+  //     console.log("Redirecting to dashboard...");
+  //   }
+  // }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-forge-bg flex items-center justify-center">
+        <span className="font-mono text-forge-muted text-sm animate-pulse">
+          Checking session...
+        </span>
+      </div>
+    );
+  }
+
   return (
     <>
-    
-
       <div style={{ minHeight: "100vh", background: "var(--bg)", color: "var(--text)", fontFamily: "'DM Sans', sans-serif" }}>
 
-        {/* ── Nav ── */}
-        <nav style={{
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          padding: "1rem 2rem",
-          borderBottom: "1px solid var(--border)",
-          position: "sticky", top: 0,
-          background: "rgba(12,14,22,0.8)",
-          backdropFilter: "blur(16px)",
-          zIndex: 50,
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <div style={{
-              width: 30, height: 30, borderRadius: 8,
-              background: "linear-gradient(135deg, #7c3aed, #4f46e5)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              boxShadow: "0 0 12px rgba(124,58,237,0.4)",
-            }}>
-              <Zap size={15} color="#fff" fill="#fff" />
-            </div>
-            <span style={{ fontWeight: 700, fontSize: "1.05rem", letterSpacing: "-0.01em" }}>
-              Quiz<span style={{ color: "#a78bfa" }}>Forge</span>
-            </span>
-          </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: "1.75rem" }}>
-            <a href="#features" className="qf-nav-link">Features</a>
-            <a href="#how-it-works" className="qf-nav-link">How it works</a>
-            <a href="#testimonials" className="qf-nav-link">Reviews</a>
-            <div style={{ display: "flex", gap: 8 }}>
-              <Link to="/login" className="qf-btn-ghost" style={{ padding: "0.45rem 1rem", fontSize: "0.8125rem" }}>
-                Sign in
-              </Link>
-              <Link to="/register" className="qf-btn-primary" style={{ padding: "0.45rem 1rem", fontSize: "0.8125rem" }}>
-                Get started <ChevronRight size={14} />
-              </Link>
-            </div>
-          </div>
-        </nav>
 
         {/* ── Hero ── */}
         <section style={{ position: "relative", overflow: "hidden", padding: "6rem 2rem 5rem", textAlign: "center" }}>
@@ -188,12 +171,20 @@ export default function LandingPage() {
             </p>
 
             <div className="qf-fade-up qf-d2" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, flexWrap: "wrap", marginBottom: "2.5rem" }}>
-              <Link to="/register" className="qf-btn-primary" style={{ fontSize: "0.9375rem", padding: "0.75rem 1.5rem" }}>
-                Create free account <ArrowRight size={16} />
-              </Link>
-              <Link to="/login" className="qf-btn-ghost" style={{ fontSize: "0.9375rem", padding: "0.75rem 1.5rem" }}>
-                <Play size={14} style={{ fill: "currentColor" }} /> Watch demo
-              </Link>
+              {user ? (
+                <Link to={dashboardPath} className="qf-btn-primary" style={{ fontSize: "0.9375rem", padding: "0.75rem 1.5rem" }}>
+                  Go to dashboard
+                </Link>
+              ) : (
+                <>
+                  <Link to="/register" className="qf-btn-primary" style={{ fontSize: "0.9375rem", padding: "0.75rem 1.5rem" }}>
+                    Create free account <ArrowRight size={16} />
+                  </Link>
+                  <Link to="/login" className="qf-btn-ghost" style={{ fontSize: "0.9375rem", padding: "0.75rem 1.5rem" }}>
+                    <Play size={14} style={{ fill: "currentColor" }} /> Watch demo
+                  </Link>
+                </>
+              )}
             </div>
 
             {/* Trust badges */}
@@ -497,33 +488,7 @@ export default function LandingPage() {
         </section>
 
         {/* ── Footer ── */}
-        <footer style={{
-          borderTop: "1px solid var(--border)",
-          padding: "1.5rem 2rem",
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          flexWrap: "wrap", gap: 12,
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-            <div style={{
-              width: 22, height: 22, borderRadius: 6,
-              background: "linear-gradient(135deg, #7c3aed, #4f46e5)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-            }}>
-              <Zap size={11} color="#fff" fill="#fff" />
-            </div>
-            <span style={{ fontWeight: 700, fontSize: "0.875rem" }}>
-              Quiz<span style={{ color: "#a78bfa" }}>Forge</span>
-            </span>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
-            <a href="#features" className="qf-nav-link" style={{ fontSize: "0.8rem" }}>Features</a>
-            <a href="#how-it-works" className="qf-nav-link" style={{ fontSize: "0.8rem" }}>How it works</a>
-            <a href="#testimonials" className="qf-nav-link" style={{ fontSize: "0.8rem" }}>Reviews</a>
-          </div>
-          <p style={{ fontSize: "0.75rem", color: "#374151" }}>
-            © {new Date().getFullYear()} QuizForge. Built with React.
-          </p>
-        </footer>
+        
       </div>
     </>
   );

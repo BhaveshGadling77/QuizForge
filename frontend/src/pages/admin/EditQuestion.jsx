@@ -7,7 +7,6 @@ import rehypeHighlight from "rehype-highlight";
 import "highlight.js/styles/github-dark.css";
 import { getQuestions, updateQuestion } from "@/services/quizService";
 import toast from "react-hot-toast";
-import Navbar from "@/components/Navbar";
 
 // ─── utils ────────────────────────────────────────────────────────────────────
 const cleanData = (obj) =>
@@ -523,7 +522,6 @@ export default function EditQuestion() {
 
   return (
     <div className="min-h-screen" style={{ background: "#080a12" }}>
-      <Navbar />
 
       <main className="max-w-3xl mx-auto px-5 py-10">
 

@@ -1,7 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "react-query";
 import { getQuizById } from "@/services/quizService";
-import Navbar from "@/components/Navbar";
 import { formatDate } from "@/utils/helpers";
 import { getQuizData } from "@/services/quizService";
 
@@ -16,7 +15,6 @@ export default function QuizDetails() {
 
   return (
     <div className="min-h-screen bg-forge-bg">
-      <Navbar />
       <main className="max-w-2xl mx-auto px-6 py-10">
         <Link to="/dashboard" className="text-forge-muted hover:text-forge-text text-sm mb-6 inline-block">
           ← Back to quizzes
@@ -59,7 +57,6 @@ function Stat({ label, value }) {
 function LoadingState() {
   return (
     <div className="min-h-screen bg-forge-bg">
-      <Navbar />
       <div className="max-w-2xl mx-auto px-6 py-10">
         <div className="card h-48 animate-pulse" />
       </div>
@@ -70,7 +67,6 @@ function LoadingState() {
 function ErrorState() {
   return (
     <div className="min-h-screen bg-forge-bg">
-      <Navbar />
       <div className="max-w-2xl mx-auto px-6 py-10">
         <p className="text-forge-red font-mono text-sm">Failed to load quiz.</p>
       </div>

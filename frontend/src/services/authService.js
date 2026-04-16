@@ -1,5 +1,5 @@
 import api from "./api.js";
-
+import Cookies from 'js-cookie';
 /**
  * Register a new user
  * @param {{ name: string, email: string, password: string, role: string }} data
@@ -27,5 +27,5 @@ export const getMe = () => api.post("/auth/login");
  * Logout (clears local token)
  */
 export const logout = () => {
-  localStorage.removeItem("token");
+  Cookies.remove("token")
 };

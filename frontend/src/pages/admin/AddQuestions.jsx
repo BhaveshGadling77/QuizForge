@@ -12,7 +12,6 @@ import {
   deleteQuestion,
 } from "@/services/quizService";
 import toast from "react-hot-toast";
-import Navbar from "@/components/Navbar";
 
 // ─── utils ─────────────────────────────────────────────────────────────────
 const cleanData = (obj) =>
@@ -724,7 +723,6 @@ export default function AddQuestions() {
 
   return (
     <div className="add-questions-root min-h-screen" style={{ background: "#080a12" }}>
-      <Navbar />
 
       <main className="max-w-7xl mx-auto px-5 py-10" ref={formTopRef}>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

@@ -1,7 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "react-query";
 import { getAllResults } from "@/services/quizService";
-import Navbar from "@/components/Navbar";
 import { scoreColor, formatDate } from "@/utils/helpers";
 
 export default function ViewResults() {
@@ -12,7 +11,6 @@ export default function ViewResults() {
 
   return (
     <div className="min-h-screen bg-forge-bg">
-      <Navbar />
       <main className="max-w-4xl mx-auto px-6 py-10">
         <Link to="/admin" className="text-forge-muted hover:text-forge-text text-sm mb-6 inline-block">
           ← Dashboard
