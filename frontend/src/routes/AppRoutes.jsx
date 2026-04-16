@@ -21,22 +21,30 @@ import ViewResults from "@/pages/admin/ViewResults";
 // Guard
 import ProtectedRoute from "@/components/ProtectedRoute";
 
+const getRedirectPath = (user) => {
+  if (!user) return "/";
+  return user.role === "admin" ? "/admin" : "/dashboard";
+};
+
 export default function AppRoutes() {
   const { user } = useAuth();
   return (
     <Routes>
       {/* Public */}
+      <Route path="/" element={<Landing />} />
+      <Route path="/about" element={<Landing />} />
       <Route
-        path="/"
+        path="/login"
         element={
-          user
-            ? <Navigate to={user.role === "admin" ? "/admin" : "/dashboard"} replace />
-            : <Landing />
+          user ? <Navigate to={getRedirectPath(user)} replace /> : <Login />
         }
       />
-      <Route path="/about" element={<Landing />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
+      <Route
+        path="/register"
+        element={
+          user ? <Navigate to={getRedirectPath(user)} replace /> : <Register />
+        }
+      />
 
       {/* Student */}
       <Route element={<ProtectedRoute role="student" />}>

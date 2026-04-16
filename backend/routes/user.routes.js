@@ -12,6 +12,7 @@ import {
 const router = express.Router();
 
 router.post("/", authenticateToken, (req, res) => {
+  console.log("tbis route is hit.")
   res.json({ msg: "User authenticated successfully.", user: req.user });
 });
 

@@ -1,7 +1,7 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useEffect, useRef } from "react";
-
+import Avatar from "@/components/Avatar";
 export default function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -41,9 +41,7 @@ export default function Navbar() {
       : location.pathname.startsWith(path);
 
   const NavLink = ({ to, children, exact = false }) => {
-    const active = exact
-      ? location.pathname === to
-      : location.pathname === to;
+    const active = exact ? location.pathname === to : location.pathname === to;
     return (
       <Link
         to={to}
@@ -94,17 +92,13 @@ export default function Navbar() {
       }`}
     >
       <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between gap-4">
-
         {/* ── Logo ── */}
-        <Link
-          to={user ? (user.role === "admin" ? "/admin" : "/dashboard") : "/"}
-          className="flex items-center gap-2 group shrink-0"
-        >
+        <Link to={"/"} className="flex items-center gap-2 group shrink-0">
           <img
-                src="/favicon.svg"
-                alt="QuizForge Logo"
-                className="w-7 h-7 rounded-md"
-            />
+            src="/favicon.svg"
+            alt="QuizForge Logo"
+            className="w-7 h-7 rounded-md"
+          />
           <span className="font-bold text-base tracking-tight">
             Quiz<span className="text-forge-accent">Forge</span>
           </span>
@@ -141,15 +135,7 @@ export default function Navbar() {
 
             {/* Avatar + Name */}
             <div className="flex items-center gap-2">
-              <div
-                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
-                  user.role === "admin"
-                    ? "bg-forge-accent/15 text-forge-accent border border-forge-accent/25"
-                    : "bg-emerald-500/15 text-emerald-400 border border-emerald-500/25"
-                }`}
-              >
-                {user.name?.[0]?.toUpperCase() ?? "U"}
-              </div>
+              <Avatar user={user} size="w-8 h-8" textSize="text-xs" />
               <span className="text-forge-text text-sm font-medium max-w-[120px] truncate">
                 {user.name}
               </span>
@@ -196,7 +182,13 @@ export default function Navbar() {
             >
               Get started
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                <path d="M2 6h8M7 3l3 3-3 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                <path
+                  d="M2 6h8M7 3l3 3-3 3"
+                  stroke="currentColor"
+                  strokeWidth="1.4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </svg>
             </Link>
           </div>
@@ -247,21 +239,54 @@ export default function Navbar() {
           }`}
         >
           <div className="border-t border-forge-border bg-forge-bg/98 backdrop-blur-md px-6 py-5 flex flex-col gap-5">
-
             {/* Nav links */}
             <div className="flex flex-col gap-1">
               {user.role === "student" && (
                 <>
-                  <MobileNavLink to="/dashboard" active={location.pathname === "/dashboard"}>
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="shrink-0">
-                      <path d="M1 1h5v5H1zM8 1h5v5H8zM1 8h5v5H1zM8 8h5v5H8z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
+                  <MobileNavLink
+                    to="/dashboard"
+                    active={location.pathname === "/dashboard"}
+                  >
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 14 14"
+                      fill="none"
+                      className="shrink-0"
+                    >
+                      <path
+                        d="M1 1h5v5H1zM8 1h5v5H8zM1 8h5v5H1zM8 8h5v5H8z"
+                        stroke="currentColor"
+                        strokeWidth="1.2"
+                        strokeLinejoin="round"
+                      />
                     </svg>
                     Quizzes
                   </MobileNavLink>
-                  <MobileNavLink to="/about" active={location.pathname === "/about"}>
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="shrink-0">
-                      <circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="1.2" />
-                      <path d="M7 6v4M7 4.5v.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+                  <MobileNavLink
+                    to="/about"
+                    active={location.pathname === "/about"}
+                  >
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 14 14"
+                      fill="none"
+                      className="shrink-0"
+                    >
+                      <circle
+                        cx="7"
+                        cy="7"
+                        r="6"
+                        stroke="currentColor"
+                        strokeWidth="1.2"
+                      />
+                      <path
+                        d="M7 6v4M7 4.5v.5"
+                        stroke="currentColor"
+                        strokeWidth="1.4"
+                        strokeLinecap="round"
+                      />
                     </svg>
                     About
                   </MobileNavLink>
@@ -269,22 +294,70 @@ export default function Navbar() {
               )}
               {user.role === "admin" && (
                 <>
-                  <MobileNavLink to="/admin" active={location.pathname === "/admin"}>
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="shrink-0">
-                      <path d="M1 1h5v5H1zM8 1h5v5H8zM1 8h5v5H1zM8 8h5v5H8z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
+                  <MobileNavLink
+                    to="/admin"
+                    active={location.pathname === "/admin"}
+                  >
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 14 14"
+                      fill="none"
+                      className="shrink-0"
+                    >
+                      <path
+                        d="M1 1h5v5H1zM8 1h5v5H8zM1 8h5v5H1zM8 8h5v5H8z"
+                        stroke="currentColor"
+                        strokeWidth="1.2"
+                        strokeLinejoin="round"
+                      />
                     </svg>
                     Dashboard
                   </MobileNavLink>
-                  <MobileNavLink to="/admin/create" active={location.pathname === "/admin/create"}>
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="shrink-0">
-                      <path d="M7 1v12M1 7h12" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+                  <MobileNavLink
+                    to="/admin/create"
+                    active={location.pathname === "/admin/create"}
+                  >
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 14 14"
+                      fill="none"
+                      className="shrink-0"
+                    >
+                      <path
+                        d="M7 1v12M1 7h12"
+                        stroke="currentColor"
+                        strokeWidth="1.4"
+                        strokeLinecap="round"
+                      />
                     </svg>
                     Create Quiz
                   </MobileNavLink>
-                  <MobileNavLink to="/about" active={location.pathname === "/about"}>
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="shrink-0">
-                      <circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="1.2" />
-                      <path d="M7 6v4M7 4.5v.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+                  <MobileNavLink
+                    to="/about"
+                    active={location.pathname === "/about"}
+                  >
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 14 14"
+                      fill="none"
+                      className="shrink-0"
+                    >
+                      <circle
+                        cx="7"
+                        cy="7"
+                        r="6"
+                        stroke="currentColor"
+                        strokeWidth="1.2"
+                      />
+                      <path
+                        d="M7 6v4M7 4.5v.5"
+                        stroke="currentColor"
+                        strokeWidth="1.4"
+                        strokeLinecap="round"
+                      />
                     </svg>
                     About
                   </MobileNavLink>
@@ -305,8 +378,12 @@ export default function Navbar() {
                   {user.name?.[0]?.toUpperCase() ?? "U"}
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-forge-text text-sm font-medium leading-tight">{user.name}</span>
-                  <span className="text-forge-muted text-xs font-mono capitalize leading-tight">{user.role}</span>
+                  <span className="text-forge-text text-sm font-medium leading-tight">
+                    {user.name}
+                  </span>
+                  <span className="text-forge-muted text-xs font-mono capitalize leading-tight">
+                    {user.role}
+                  </span>
                 </div>
               </div>
               <button
@@ -314,7 +391,13 @@ export default function Navbar() {
                 className="flex items-center gap-1.5 text-xs text-forge-muted hover:text-forge-red border border-transparent hover:border-forge-red/20 hover:bg-forge-red/5 px-2.5 py-1.5 rounded-md transition-all duration-200"
               >
                 <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                  <path d="M8 2l3 4-3 4M11 6H4M1 1v10" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+                  <path
+                    d="M8 2l3 4-3 4M11 6H4M1 1v10"
+                    stroke="currentColor"
+                    strokeWidth="1.3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
                 Logout
               </button>
