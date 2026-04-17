@@ -117,15 +117,6 @@ export default function LandingPage() {
   //   }
   // }, []);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-forge-bg flex items-center justify-center">
-        <span className="font-mono text-forge-muted text-sm animate-pulse">
-          Checking session...
-        </span>
-      </div>
-    );
-  }
 
   return (
     <>

@@ -19,8 +19,10 @@ export function AuthProvider({ children }) {
       .then((res) => {
         setUser(res.data.user);
       })
-      .catch(() => {
-        Cookie.remove('token');
+      .catch((err) => {
+        console.log("Auth failed:", err);
+        setUser(null);
+        Cookies.remove('token');
       })
       .finally(() => setLoading(false));
   }, []);
