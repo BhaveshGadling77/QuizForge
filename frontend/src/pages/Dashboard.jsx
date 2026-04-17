@@ -9,6 +9,7 @@ export default function Dashboard() {
   );
   // console.log("Fetched quizzes:", data); // Debug log
   const published = data;
+  
   // console.log("Published quizzes:", published); // Debug log
   return (
     <div className="min-h-screen bg-forge-bg">
