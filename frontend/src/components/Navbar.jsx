@@ -64,6 +64,7 @@ export default function Navbar() {
   const studentLinks = (
     <>
       <NavLink to="/dashboard">Quizzes</NavLink>
+      <NavLink to="/history">History</NavLink>
       <NavLink to="/about">About</NavLink>
     </>
   );

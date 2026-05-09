@@ -11,6 +11,7 @@ import QuizDetails from "@/pages/QuizDetails";
 import AttemptQuiz from "@/pages/AttemptQuiz";
 import Result from "@/pages/Result";
 import Leaderboard from "@/pages/Leaderboard";
+import StudentHistory from "@/pages/StudentHistory";
 // Admin pages
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import CreateQuiz from "@/pages/admin/CreateQuiz";
@@ -53,6 +54,7 @@ export default function AppRoutes() {
         <Route path="/quiz/:id/attempt" element={<AttemptQuiz />} />
         <Route path="/result/:id" element={<Result />} />
         <Route path="/leaderboard/:id" element={<Leaderboard />} />
+        <Route path="/history" element={<StudentHistory />} />
       </Route>
 
       {/* Admin */}
@@ -61,7 +63,10 @@ export default function AppRoutes() {
         <Route path="/admin/create" element={<CreateQuiz />} />
         <Route path="/admin/edit/:id" element={<EditQuiz />} />
         <Route path="/admin/quiz/:id/questions" element={<AddQuestions />} />
-        <Route path="/admin/quiz/:id/questions/:questionId/edit" element={<EditQuestion />} />
+        <Route
+          path="/admin/quiz/:id/questions/:questionId/edit"
+          element={<EditQuestion />}
+        />
         <Route path="/admin/quiz/:id/results" element={<ViewResults />} />
       </Route>
 
