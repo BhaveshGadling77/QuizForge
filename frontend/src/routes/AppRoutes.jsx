@@ -12,6 +12,7 @@ import AttemptQuiz from "@/pages/AttemptQuiz";
 import Result from "@/pages/Result";
 import Leaderboard from "@/pages/Leaderboard";
 import StudentHistory from "@/pages/StudentHistory";
+import UserProfile from "@/pages/UserProfile";
 // Admin pages
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import CreateQuiz from "@/pages/admin/CreateQuiz";
@@ -19,6 +20,7 @@ import EditQuiz from "@/pages/admin/EditQuiz";
 import AddQuestions from "@/pages/admin/AddQuestions";
 import EditQuestion from "@/pages/admin/EditQuestion";
 import ViewResults from "@/pages/admin/ViewResults";
+import Analytics from "@/pages/admin/Analytics";
 // Guard
 import ProtectedRoute from "@/components/ProtectedRoute";
 
@@ -55,11 +57,13 @@ export default function AppRoutes() {
         <Route path="/result/:id" element={<Result />} />
         <Route path="/leaderboard/:id" element={<Leaderboard />} />
         <Route path="/history" element={<StudentHistory />} />
+        <Route path="/profile" element={<UserProfile />} />
       </Route>
 
       {/* Admin */}
       <Route element={<ProtectedRoute role="admin" />}>
         <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin/analytics" element={<Analytics />} />
         <Route path="/admin/create" element={<CreateQuiz />} />
         <Route path="/admin/edit/:id" element={<EditQuiz />} />
         <Route path="/admin/quiz/:id/questions" element={<AddQuestions />} />
@@ -68,6 +72,7 @@ export default function AppRoutes() {
           element={<EditQuestion />}
         />
         <Route path="/admin/quiz/:id/results" element={<ViewResults />} />
+        <Route path="/profile" element={<UserProfile />} />
       </Route>
 
       {/* Catch-all */}

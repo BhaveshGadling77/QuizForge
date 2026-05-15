@@ -3,11 +3,14 @@ import { useAuth } from "@/hooks/useAuth";
 
 const studentLinks = [
   { label: "Quizzes", to: "/dashboard" },
+  { label: "Profile", to: "/profile" },
 ];
 
 const adminLinks = [
   { label: "Overview", to: "/admin" },
   { label: "Create Quiz", to: "/admin/create" },
+  { label: "Analytics", to: "/admin/analytics" },
+  { label: "Profile", to: "/profile" },
 ];
 
 export default function Sidebar() {

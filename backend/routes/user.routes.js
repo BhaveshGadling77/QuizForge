@@ -17,6 +17,12 @@ import {
   getFilteredQuizzes,
   searchQuizzes,
 } from "../controllers/student.controller.js";
+import {
+  getUserProfile,
+  updateUserProfile,
+  changePassword,
+  getUserStats,
+} from "../controllers/user.controller.js";
 
 const router = express.Router();
 
@@ -67,6 +73,12 @@ router.get(
 //then if the accesstoken is right it will open the quiz.
 
 router.post("/quizzes/:quizId/start", authenticateToken, getPrivateQuiz);
+
+// USER PROFILE ROUTES
+router.get("/profile", authenticateToken, getUserProfile);
+router.put("/profile", authenticateToken, updateUserProfile);
+router.post("/profile/change-password", authenticateToken, changePassword);
+router.get("/profile/stats", authenticateToken, getUserStats);
 
 // router.post("/api/quiz/:quizId/start")
 

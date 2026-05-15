@@ -20,6 +20,14 @@ import {
   getResultForStudent,
 } from "../controllers/admin.controller.js";
 
+import {
+  getQuizAnalytics,
+  getAllQuizzesAnalytics,
+  getStudentPerformance,
+  getDashboardStats,
+  getQuestionStatistics,
+} from "../controllers/analytics.controller.js";
+
 import { authenticateToken } from "../middlewares/auth.middleware.js";
 import { authorizeAdminRole } from "../middlewares/authRole.middleware.js";
 import express from "express";
@@ -29,19 +37,14 @@ const router = express.Router();
 /* QUIZ CRUD  */
 
 // quiz create
-router.post(
-  "/quizzes",
-  authenticateToken,
-  authorizeAdminRole,
-  createQuiz
-);
+router.post("/quizzes", authenticateToken, authorizeAdminRole, createQuiz);
 
-// update a quiz 
+// update a quiz
 router.put(
   "/quizzes/:quizId",
   authenticateToken,
   authorizeAdminRole,
-  updateQuiz
+  updateQuiz,
 );
 
 // delete a quiz
@@ -49,7 +52,7 @@ router.delete(
   "/quizzes/:quizId",
   authenticateToken,
   authorizeAdminRole,
-  deleteQuiz
+  deleteQuiz,
 );
 
 // get all quizzes
@@ -57,7 +60,7 @@ router.get(
   "/quizzes",
   authenticateToken,
   authorizeAdminRole,
-  getAllQuizzesForAdmin
+  getAllQuizzesForAdmin,
 );
 
 // get single quiz
@@ -65,7 +68,7 @@ router.get(
   "/quizzes/:quizId",
   authenticateToken,
   authorizeAdminRole,
-  getQuizById
+  getQuizById,
 );
 
 /*  QUESTIONS  */
@@ -75,7 +78,7 @@ router.post(
   "/quizzes/:quizId/questions",
   authenticateToken,
   authorizeAdminRole,
-  addQuestion
+  addQuestion,
 );
 
 // delete question
@@ -83,7 +86,7 @@ router.delete(
   "/quizzes/:quizId/questions/:questionId",
   authenticateToken,
   authorizeAdminRole,
-  deleteQuestion
+  deleteQuestion,
 );
 
 // get questions
@@ -91,17 +94,16 @@ router.get(
   "/quizzes/:quizId/questions",
   authenticateToken,
   authorizeAdminRole,
-  getQuestions
+  getQuestions,
 );
-
 
 //update question
 router.put(
   "/quizzes/:quizId/questions/:questionId",
   authenticateToken,
   authorizeAdminRole,
-  updateQuestion
-)
+  updateQuestion,
+);
 /* PUBLISH  */
 
 // Publish
@@ -109,7 +111,7 @@ router.post(
   "/quizzes/:quizId/publish",
   authenticateToken,
   authorizeAdminRole,
-  publishQuiz
+  publishQuiz,
 );
 
 // Unpublish
@@ -117,7 +119,7 @@ router.post(
   "/quizzes/:quizId/unpublish",
   authenticateToken,
   authorizeAdminRole,
-  unpublishQuiz
+  unpublishQuiz,
 );
 
 /* RESUTLS */
@@ -127,7 +129,7 @@ router.get(
   "/quizzes/pending",
   authenticateToken,
   authorizeAdminRole,
-  getQuizzesWithPendingResults
+  getQuizzesWithPendingResults,
 );
 
 // pending results
@@ -135,7 +137,7 @@ router.get(
   "/quizzes/:quizId/pending-results",
   authenticateToken,
   authorizeAdminRole,
-  getPendingResults
+  getPendingResults,
 );
 
 // Evaluate result
@@ -143,7 +145,7 @@ router.post(
   "/results/:resultId/evaluate",
   authenticateToken,
   authorizeAdminRole,
-  evaluateResult
+  evaluateResult,
 );
 
 // all results for quiz
@@ -151,7 +153,7 @@ router.get(
   "/quizzes/:quizId/results",
   authenticateToken,
   authorizeAdminRole,
-  getAllResultsForQuiz
+  getAllResultsForQuiz,
 );
 
 // Single student result
@@ -159,7 +161,47 @@ router.get(
   "/quizzes/:quizId/results/:userId",
   authenticateToken,
   authorizeAdminRole,
-  getResultForStudent
+  getResultForStudent,
+);
+/* ANALYTICS */
+
+// Dashboard statistics
+router.get(
+  "/analytics/dashboard",
+  authenticateToken,
+  authorizeAdminRole,
+  getDashboardStats,
 );
 
+// Quiz analytics
+router.get(
+  "/analytics/quizzes/:quizId",
+  authenticateToken,
+  authorizeAdminRole,
+  getQuizAnalytics,
+);
+
+// All quizzes analytics
+router.get(
+  "/analytics/quizzes",
+  authenticateToken,
+  authorizeAdminRole,
+  getAllQuizzesAnalytics,
+);
+
+// Student performance
+router.get(
+  "/analytics/quizzes/:quizId/performance",
+  authenticateToken,
+  authorizeAdminRole,
+  getStudentPerformance,
+);
+
+// Question statistics
+router.get(
+  "/analytics/quizzes/:quizId/questions",
+  authenticateToken,
+  authorizeAdminRole,
+  getQuestionStatistics,
+);
 export default router;
