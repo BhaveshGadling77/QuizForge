@@ -1,0 +1,79 @@
+graph TB
+%% === STYLES ===
+classDef core fill:#1E90FF,stroke:#000,color:#000,stroke-width:2px,rx:10px,ry:10px;
+classDef db fill:#9ACD32,stroke:#000,color:#000,stroke-width:2px,rx:10px,ry:10px;
+classDef external fill:#FFD700,stroke:#000,color:#000,stroke-width:2px,rx:10px,ry:10px;
+
+%% === USERS ===
+User(("User<br/>Admin, Student"))
+
+%% === BACKEND API SERVER ===
+BackendAPI["Backend API Server<br/>Node.js + Express"]:::core
+
+%% === FRONTEND WEB APPLICATION ===
+FrontendApp["Frontend Web Application<br/>React (Vite + JSX)"]:::core
+
+%% === DATABASE ===
+FirestoreDB[("Firebase Firestore<br/>NoSQL Database")]:::db
+
+%% === AUTHENTICATION ===
+AuthService["Authentication Service<br/>JWT, bcrypt"]:::core
+
+%% === ROUTING LAYER ===
+RoutingLayer["Routing Layer<br/>REST API Endpoints"]:::core
+
+%% === CONTROLLERS LAYER ===
+AuthController["Auth Controller<br/>Handles Auth Requests"]:::core
+StudentController["Student Controller<br/>Handles Student Operations"]:::core
+AdminController["Admin Controller<br/>Handles Admin Operations"]:::core
+QuizController["Quiz Controller<br/>Handles Quiz Management"]:::core
+
+%% === SERVICES LAYER ===
+AuthServiceLayer["Auth Service<br/>User Registration, Login"]:::core
+QuizServiceLayer["Quiz Service<br/>CRUD for Quizzes"]:::core
+StudentServiceLayer["Student Service<br/>Data Retrieval, Quiz Attempts"]:::core
+AdminServiceLayer["Admin Service<br/>Result Evaluation, Management"]:::core
+
+%% === MIDDLEWARES ===
+AuthMiddleware["Auth Middleware<br/>JWT Validation"]:::core
+RoleMiddleware["Role Middleware<br/>Access Control"]:::core
+TimerMiddleware["Timer Middleware<br/>Quiz Timer Validation"]:::core
+
+%% === DATA FLOW ===
+User -->|"Login/Register"| AuthService
+AuthService -->|"creates user, returns JWT"| AuthController
+AuthController -->|"validates token"| AuthMiddleware
+AuthMiddleware -->|"attaches user info"| RoutingLayer
+
+RoutingLayer -->|"routes requests"| AuthController
+RoutingLayer -->|"routes requests"| StudentController
+RoutingLayer -->|"routes requests"| AdminController
+RoutingLayer -->|"routes requests"| QuizController
+
+AuthController -->|"auth requests"| AuthServiceLayer
+StudentController -->|"student operations"| StudentServiceLayer
+AdminController -->|"admin operations"| AdminServiceLayer
+QuizController -->|"quiz management"| QuizServiceLayer
+
+QuizServiceLayer -->|"CRUD quizzes"| FirestoreDB
+StudentServiceLayer -->|"fetch attempts, results"| FirestoreDB
+AdminServiceLayer -->|"evaluate results"| FirestoreDB
+
+%% === FRONTEND INTERACTIONS ===
+FrontendApp -->|"API calls"| BackendAPI
+BackendAPI -->|"data from"| FirestoreDB
+
+FrontendApp -->|"fetch quizzes"| QuizServiceLayer
+FrontendApp -->|"submit answers"| StudentServiceLayer
+FrontendApp -->|"manage quizzes"| AdminServiceLayer
+
+%% === EXTERNAL DEPENDENCIES ===
+FirebaseSDK["Firebase SDK<br/>Auth, Firestore"]:::external
+JWT["JWT for Token Management"]:::external
+Bcrypt["bcrypt for Password Hashing"]:::external
+
+AuthServiceLayer -->|"uses"| FirebaseSDK
+AuthServiceLayer -->|"uses"| JWT
+AuthServiceLayer -->|"uses"| Bcrypt
+
+%% === END OF DIAGRAM ===
