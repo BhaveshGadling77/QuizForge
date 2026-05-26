@@ -50,9 +50,10 @@ The platform focuses on secure authentication, role-based access control, and sc
 ---
 
 ## Bugs in the project.
-- [ ] calculating result functionality is not working.
+- [x] calculating result functionality is not working.
 - [ ] unable to fetch the results on admin login.
 - [x] frontend bug of clicking true and false.
+- [x] allowing duplicates to add in the options.
 
 ## functionalities to implement.
 - [ ] private quiz attempting.

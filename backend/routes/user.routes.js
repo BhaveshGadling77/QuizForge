@@ -41,7 +41,7 @@ router.post(
   submitQuiz,
 );
 
-router.get("/quizzes/:quizId/my-result", authenticateToken, getMyResult);
+router.get("/quizzes/:quizId/result", authenticateToken, getMyResult);
 
 router.get("/quizzes/:quizId/leaderboard", authenticateToken, getLeaderboard);
 

@@ -382,14 +382,23 @@ function TypeSelector({ value, onChange }) {
 }
 
 // ─── OptionRow ────────────────────────────────────────────────────────────────
-function OptionRow({ index, value, checked, onChange, onCheck, isMcq }) {
+function OptionRow({ index, value, checked, onChange, onCheck, isMcq, isDuplicate }) {
   const LETTERS = ["A", "B", "C", "D"];
   return (
     <label
       className="option-row group flex items-start gap-3 px-4 py-3 rounded-xl border cursor-pointer transition-all duration-150"
       style={{
-        borderColor: checked ? "#6366f1" : "rgba(255,255,255,0.07)",
-        background:  checked ? "rgba(99,102,241,0.1)" : "rgba(255,255,255,0.02)",
+        borderColor: isDuplicate
+                  ? "#ef4444"
+                  : checked
+                  ? "#6366f1"
+                  : "rgba(255,255,255,0.07)",
+
+                background: isDuplicate
+                  ? "rgba(239,68,68,0.08)"
+                  : checked
+                  ? "rgba(99,102,241,0.1)"
+                  : "rgba(255,255,255,0.02)",
         alignItems:  isMcq ? "flex-start" : "center",
       }}
       onClick={(e) => { e.preventDefault(); onCheck(); }}
@@ -653,7 +662,7 @@ export default function AddQuestions() {
   const { id } = useParams();
   const qc     = useQueryClient();
   const formTopRef = useRef(null);
-
+  
   const { data: questions = [], isLoading } = useQuery(
     ["questions", id],
     () => getQuestions(id).then((r) => r.data.questions)
@@ -679,10 +688,92 @@ export default function AddQuestions() {
     opts[i]    = val;
     setForm({ ...form, options: opts });
   };
+  // ─── Normalize Markdown Text ──────────────────────────────────────────────
+  const normalizeMarkdown = (text = "") => {
+    return text
+      // code blocks
+      .replace(/```[\s\S]*?```/g, (m) =>
+        m.replace(/```/g, "")
+      )
 
+      // inline code
+      .replace(/`([^`]*)`/g, "$1")
+
+      // bold / italic
+      .replace(/\*\*(.*?)\*\*/g, "$1")
+      .replace(/\*(.*?)\*/g, "$1")
+      .replace(/__(.*?)__/g, "$1")
+      .replace(/_(.*?)_/g, "$1")
+
+      // strikethrough
+      .replace(/~~(.*?)~~/g, "$1")
+
+      // latex
+      .replace(/\$\$(.*?)\$\$/gs, "$1")
+      .replace(/\$(.*?)\$/g, "$1")
+
+      // headings
+      .replace(/^#{1,6}\s+/gm, "")
+
+      // blockquotes
+      .replace(/^>\s+/gm, "")
+
+      // markdown links
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+
+      // images
+      .replace(/!\[([^\]]*)\]\([^)]+\)/g, "$1")
+
+      // checklist / bullets
+      .replace(/^\s*[-*+]\s+/gm, "")
+      .replace(/^\s*\d+\.\s+/gm, "")
+      .replace(/^\s*-\s\[\s?\]\s+/gm, "")
+
+      // horizontal rules
+      .replace(/^---$/gm, "")
+
+      // html tags
+      .replace(/<[^>]+>/g, "")
+
+      // collapse whitespace
+      .replace(/\s+/g, " ")
+
+      .trim()
+      .toLowerCase();
+  };
+  // ─── Duplicate Option Checker ─────────────────────────────────────────────
+  const getDuplicateIndexes = useCallback(() => {
+    if (form.questionType !== "mcq") return [];
+
+    const normalized = form.options.map((o) =>
+      normalizeMarkdown(o)
+    );
+
+    const duplicates = [];
+
+    normalized.forEach((opt, idx) => {
+      if (!opt) return;
+
+      const firstIndex = normalized.indexOf(opt);
+
+      if (firstIndex !== idx || normalized.lastIndexOf(opt) !== idx) {
+        duplicates.push(idx);
+      }
+    });
+
+    return duplicates;
+  }, [form.options, form.questionType]);
+
+  const duplicateIndexes = getDuplicateIndexes();
+  const hasDuplicateOptions = duplicateIndexes.length > 0;
   const handleAdd = async (e) => {
     e.preventDefault();
     setSaving(true);
+    if (hasDuplicateOptions) {
+      setError("Duplicate options are not allowed");
+      setSaving(false);
+      return;
+    }
     try {
       let payload = { ...form, order: questions.length + 1, createdAt: new Date().toISOString() };
       if (form.questionType === "short-integer" || form.questionType === "short-subjective") {
@@ -799,8 +890,21 @@ export default function AddQuestions() {
                         onCheck={() => setForm({ ...form, correctOptionIndex: i })}
                         onChange={(val) => setOption(i, val)}
                         isMcq={true}
+                        isDuplicate={duplicateIndexes.includes(i)}
                       />
                     ))}
+                    {hasDuplicateOptions && (
+                      <div className="mt-2 text-xs text-red-400 flex items-center gap-2">
+                        <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+                          <path
+                            fillRule="evenodd"
+                            d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                        Duplicate options detected
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -819,6 +923,7 @@ export default function AddQuestions() {
                         onCheck={() => setForm({ ...form, correctOptionIndex: i })}
                         onChange={() => {}}
                         isMcq={false}
+                        isDuplicate={duplicateIndexes.includes(i)}
                       />
                     ))}
                   </div>

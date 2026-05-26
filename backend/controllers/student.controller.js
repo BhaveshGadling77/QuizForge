@@ -175,8 +175,9 @@ export async function submitQuiz(req, res) {
 export async function getMyResult(req, res) {
   try {
     const { quizId } = req.params;
+    // console.log(quizId) //debug
     const userId = req.user.id;
-
+    // console.log(userId) //debug
     const result = await studentService.getMyResult(quizId, userId);
 
     return res.status(200).json({

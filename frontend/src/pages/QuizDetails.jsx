@@ -18,7 +18,7 @@ export default function QuizDetails() {
 
   if (isLoading) return <LoadingState />;
   if (isError || !quiz) return <ErrorState error={error} />;
-  console.log("Quiz details fetched:", quiz); // Debug log
+  // console.log("Quiz details fetched:", quiz); // Debug log
 
   const handleStartPrivate = async () => {
     if (!token.trim()) {
