@@ -35,7 +35,7 @@ export async function deleteQuiz(req, res) {
 
 export async function getAllQuizzesForAdmin(req, res) {
   try {
-    console.log(req.user)
+    // console.log(req.user) //debug
     const quizzes = await quizService.getAllQuizzesForAdmin(req.user.id)
     return res.status(200).json({
       success: true,
@@ -88,7 +88,9 @@ export async function deleteQuestion(req, res) {
 
 export async function updateQuestion(req, res) {
   try {
-    await quizService.updateQuestion()
+    const {quizId, questionId} = req.params
+    const updates = req.body
+    await quizService.updateQuestion(quizId, questionId, updates)
     return res.status(200).json({ success: true, msg: "Question Updated."})
   } catch(e) {
     return res.status(500).json({success: false, msg: e.message})

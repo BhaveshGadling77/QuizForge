@@ -518,7 +518,23 @@ export default function EditQuestion() {
     }
   };
 
+  const isChanged = () => {
+    if (!form || !questions.length) return false;
+    const q = questions.find((q) => q.questionId === questionId);
+    if (!q) return false;
+    
+    return (
+      form.questionMd !== (q.questionMd ?? "") ||
+      form.questionType !== (q.questionType ?? "mcq") ||
+      JSON.stringify(form.options) !== JSON.stringify(q.options ?? ["", "", "", ""]) ||
+      form.correctOptionIndex !== (q.correctOptionIndex ?? 0) ||
+      form.correctAnswer !== (q.correctAnswer ?? "") ||
+      form.points !== (q.points ?? 10)
+    );
+  };
+
   const isMdEmpty = !form?.questionMd?.trim();
+  const canSave = !isMdEmpty && isChanged();
 
   return (
     <div className="min-h-screen" style={{ background: "#080a12" }}>
@@ -686,17 +702,17 @@ export default function EditQuestion() {
 
                 <button
                   type="submit"
-                  disabled={saving || isMdEmpty}
+                  disabled={saving || !canSave}
                   className="flex-1 h-12 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-200"
                   style={{
                     background: successFlash
                       ? "linear-gradient(135deg,#059669,#10b981)"
-                      : isMdEmpty || saving
+                      : !canSave || saving
                       ? "rgba(255,255,255,0.05)"
                       : "linear-gradient(135deg,#4f46e5,#6366f1)",
-                    color:     isMdEmpty && !saving ? "rgba(255,255,255,0.25)" : "#fff",
-                    boxShadow: !isMdEmpty && !saving && !successFlash ? "0 4px 20px rgba(99,102,241,0.35)" : "none",
-                    cursor:    isMdEmpty || saving ? "not-allowed" : "pointer",
+                    color:     !canSave && !saving ? "rgba(255,255,255,0.25)" : "#fff",
+                    boxShadow: canSave && !saving && !successFlash ? "0 4px 20px rgba(99,102,241,0.35)" : "none",
+                    cursor:    !canSave || saving ? "not-allowed" : "pointer",
                   }}
                 >
                   {successFlash ? (

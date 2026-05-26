@@ -6,7 +6,7 @@ import { scoreColor, calcScore } from "@/utils/helpers";
 export default function Result() {
   const { id } = useParams();
   const { data: result, isLoading } = useQuery(["result", id], () =>
-    getResult(id).then((r) => r.data.result)
+    getResult(id).then((r) => r.data.data)
   );
 
   if (isLoading) {
@@ -19,7 +19,7 @@ export default function Result() {
     );
   }
 
-  const score = calcScore(result?.correct, result?.total);
+  const score = calcScore(result?.correctCount, result?.totalQuestions);
 
   return (
     <div className="min-h-screen bg-forge-bg">
@@ -29,14 +29,14 @@ export default function Result() {
             {score}%
           </div>
           <p className="text-forge-muted text-sm font-mono">
-            {result?.correct} / {result?.total} correct
+            {result?.correctCount} / {result?.totalQuestions} correct
           </p>
         </div>
 
         <div className="card mb-6 grid grid-cols-3 gap-4 text-left">
-          <StatCell label="Correct" value={result?.correct} color="text-forge-green" />
-          <StatCell label="Wrong" value={result?.total - result?.correct} color="text-forge-red" />
-          <StatCell label="Time" value={`${result?.timeTaken}s`} color="text-forge-text" />
+          <StatCell label="Correct" value={result?.correctCount} color="text-forge-green" />
+          <StatCell label="Wrong" value={result?.totalQuestions - result?.correctCount} color="text-forge-red" />
+          <StatCell label="Time" value={`${result?.timeTakenSeconds}s`} color="text-forge-text" />
         </div>
 
         <div className="flex flex-col gap-2">

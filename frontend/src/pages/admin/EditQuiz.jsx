@@ -262,8 +262,23 @@ export default function EditQuiz() {
     }
   };
 
+  const isChanged = () => {
+    if (!quiz) return false;
+    return (
+      form.title !== (quiz.title ?? "") ||
+      form.description !== (quiz.description ?? "") ||
+      form.duration !== (quiz.durationSeconds ? Math.round(quiz.durationSeconds / 60) : (quiz.duration ?? 30)) ||
+      form.visibility !== (quiz.visibility ?? "public") ||
+      form.accessToken !== (quiz.accessToken ?? "") ||
+      form.timerEnabled !== (quiz.timerEnabled ?? true) ||
+      form.autoSubmit !== (quiz.autoSubmit ?? true)
+    );
+  };
+
   const isValid = form.title.trim().length > 0 &&
     (form.visibility === "public" || form.accessToken.trim().length > 0);
+  
+  const canSave = isValid && isChanged();
 
   if (isLoading) return <Skeleton />;
 
@@ -411,11 +426,10 @@ export default function EditQuiz() {
             </div>
           )}
 
-          {/* Save */}
           <button
             type="submit"
-            className={`btn-primary flex items-center justify-center gap-2 transition-all ${!isValid ? "opacity-50 cursor-not-allowed" : ""}`}
-            disabled={saving || !isValid}
+            className={`btn-primary flex items-center justify-center gap-2 transition-all ${!canSave ? "opacity-50 cursor-not-allowed" : ""}`}
+            disabled={saving || !canSave}
           >
             {saving ? (
               <>

@@ -37,19 +37,22 @@ export class StudentService {
    * @throws {Error} If result does not exist
    */
   async getMyResult(quizId, studentId) {
-    const resultId = `result_${quizId}_${studentId}`;
-    const resultRef = doc(this.resultCollection, resultId);
+    const q = query(
+      this.resultCollection,
+      where("quizId", "==", quizId),
+      where("userId", "==", studentId)
+    );
+    const snap = await getDocs(q);
 
-    const snap = await getDoc(resultRef);
-
-    if (!snap.exists()) {
+    if (snap.empty) {
       throw new Error("Result not found");
     }
 
-    const result = snap.data();
+    const docSnap = snap.docs[0];
+    const result = docSnap.data();
 
     return {
-      resultId: snap.id,
+      resultId: docSnap.id,
       quizId: result.quizId,
       userId: result.userId,
 
@@ -321,7 +324,6 @@ export class StudentService {
       throw new Error("Quiz is not active");
     }
 
-    // check if the user already attempted the quiz
     const attemptQuery = query(
       collection(this.db, process.env.COLLECTION_RESULTS),
       where("quizId", "==", quizId),
@@ -329,11 +331,7 @@ export class StudentService {
     );
     const attemptSnap = await getDocs(attemptQuery);
 
-    if (!attemptSnap.empty) {
-      const err = new Error("Quiz already attempted");
-      err.statusCode = 409;
-      throw err;
-    }
+    const alreadyAttempted = !attemptSnap.empty;
 
     // fetch questions from the subcollection
     const questionsSnap = await getDocs(collection(quizRef, "questions"));
@@ -356,6 +354,7 @@ export class StudentService {
       accessToken: quiz.accessToken ?? null,
       createdAt: quiz.createdAt ?? null,
       totalQuestions: questions.length,
+      alreadyAttempted,
       questions,
     };
   }
@@ -428,6 +427,9 @@ export class StudentService {
     console.log(questionMap);
 
     const attemptSnap = await getDocs(attemptQuery);
+    if (!attemptSnap.empty) {
+      throw new Error("Quiz already attempted");
+    }
     const attemptNumber = attemptSnap.size + 1;
 
     //  STEP 3: transaction
@@ -587,155 +589,6 @@ export class StudentService {
     });
   }
 
-async deleteDraft(quizId, userId) {
-  try {
-    const draftsRef = collection(
-      this.db,
-      process.env.COLLECTION_DRAFTS
-    );
-
-    const q = query(
-      draftsRef,
-      where("quizId", "==", quizId),
-      where("userId", "==", userId)
-    );
-
-    const snapshot = await getDocs(q);
-
-    if (snapshot.empty) {
-      return {
-        success: false,
-        message: "No draft found",
-      };
-    }
-
-    // Delete all matching drafts
-    const deletePromises = snapshot.docs.map((draftDoc) =>
-      deleteDoc(draftDoc.ref)
-    );
-
-    await Promise.all(deletePromises);
-
-    return {
-      success: true,
-      message: "Draft deleted successfully",
-    };
-  } catch (error) {
-    console.error("Failed to delete draft:", error);
-
-    throw new Error("Failed to delete draft");
-  }
-}
-  /**
-   * Auto-save quiz draft answers for a student
-   * Called every few seconds as user answers questions
-   * Allows resuming quiz after accidental refresh
-   *
-   * @param {string} quizId - Quiz ID
-   * @param {string} userId - Student ID
-   * @param {Array} answers - Array of {questionId, selectedOptionIndex/submittedAnswer}
-   * @param {number} timeLeftSeconds - Remaining time in quiz
-   * @returns {Promise<Object>} Confirmation of save
-   */
-  async autoSaveAnswers(quizId, userId, answers, timeLeftSeconds) {
-    try {
-      // Verify quiz exists and is active
-      const quizRef = doc(this.quizCollection, quizId);
-      const quizSnap = await getDoc(quizRef);
-
-      if (!quizSnap.exists()) {
-        throw new Error("Quiz not found");
-      }
-
-      const quiz = quizSnap.data();
-      if (!quiz.isActive) {
-        throw new Error("Quiz is not active");
-      }
-
-      // Check if user has already submitted this quiz
-      const attemptQuery = query(
-        this.resultCollection,
-        where("quizId", "==", quizId),
-        where("userId", "==", userId),
-        where("status", "==", "submitted"),
-      );
-      const attemptSnap = await getDocs(attemptQuery);
-
-      if (!attemptSnap.empty) {
-        throw new Error("Quiz already attempted. Cannot auto-save.");
-      }
-
-      // Create draft document ID
-      const draftId = `draft_${quizId}_${userId}`;
-      const draftRef = doc(collection(this.db, "quiz_drafts"), draftId);
-
-      // Save or update draft
-      const draftData = {
-        quizId,
-        userId,
-        answers,
-        timeLeftSeconds,
-        savedAt: new Date(),
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // Expire in 24 hours
-      };
-
-      await updateDoc(draftRef, draftData).catch(() => {
-        // If document doesn't exist, create it
-        return addDoc(collection(this.db, "quiz_drafts"), {
-          ...draftData,
-          id: draftId,
-        });
-      });
-
-      return {
-        success: true,
-        message: "Answers auto-saved successfully",
-        draftId,
-        savedAt: new Date(),
-      };
-    } catch (error) {
-      console.error("Auto-save error:", error);
-      throw error;
-    }
-  }
-
-  /**
-   * Retrieve saved draft answers for a quiz
-   * Used to resume quiz after refresh
-   *
-   * @param {string} quizId - Quiz ID
-   * @param {string} userId - Student ID
-   * @returns {Promise<Object>} Saved answers and timer state
-   */
-  async getDraftAnswers(quizId, userId) {
-    try {
-      const draftId = `draft_${quizId}_${userId}`;
-      const draftRef = doc(collection(this.db, "quiz_drafts"), draftId);
-      const draftSnap = await getDoc(draftRef);
-
-      if (!draftSnap.exists()) {
-        return null;
-      }
-
-      const draft = draftSnap.data();
-
-      // Check if draft has expired
-      if (draft.expiresAt && new Date(draft.expiresAt) < new Date()) {
-        // Delete expired draft
-        await deleteDoc(draftRef);
-        return null;
-      }
-
-      return {
-        answers: draft.answers || [],
-        timeLeftSeconds: draft.timeLeftSeconds || 0,
-        savedAt: draft.savedAt,
-      };
-    } catch (error) {
-      console.error("Get draft error:", error);
-      return null;
-    }
-  }
 
   /**
    * Record quiz attempt start time

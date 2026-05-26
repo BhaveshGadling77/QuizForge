@@ -47,6 +47,7 @@ export class QuizService {
   }
   //update quiz
   async updateQuiz(quizId, updates) {
+    console.log(this.quizCollection, quizId);
     const quizRef = doc(this.quizCollection, quizId);
     const quizSnap = await getDoc(quizRef);
 
@@ -198,6 +199,7 @@ export class QuizService {
 
   //update question.
   async updateQuestion(quizId, questionId, updates) {
+    // console.log(this.quizCollection, quizId, questionId); //debug.
     const questionRef = doc(this.quizCollection, quizId, "questions", questionId);
     const questionSnap = await getDoc(questionRef);
 

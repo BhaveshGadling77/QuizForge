@@ -98,14 +98,23 @@ export async function attemptQuiz(req, res) {
     let quizId = req.params.quizId;
     let userId = req.user.id;
     const quizData = await studentService.getQuizData(quizId, userId);
+    
+    // Do not leak the hashed token to the frontend
+    delete quizData.accessToken;
 
-    // Also try to get draft answers if they exist
-    const draft = await studentService.getDraftAnswers(quizId, userId);
+    if (quizData.visibility === "private") {
+      // For private quizzes, do not send questions yet!
+      delete quizData.questions;
+      return res.status(200).json({
+        success: true,
+        quiz: quizData,
+        isPrivate: true,
+      });
+    }
 
     return res.status(200).json({
       success: true,
       quiz: quizData,
-      draft: draft || null, // Include saved draft if it exists
     });
   } catch (e) {
     return res.status(500).json({
@@ -115,80 +124,7 @@ export async function attemptQuiz(req, res) {
   }
 }
 
-/**
- * Auto-save student answers (called every few seconds)
- * Allows resuming quiz after accidental page refresh
- */
-export async function autoSaveAnswers(req, res) {
-  try {
-    const quizId = req.params.quizId;
-    const userId = req.user?.id;
 
-    if (!quizId || !userId) {
-      return res.status(400).json({
-        success: false,
-        msg: "quizId or userId missing",
-      });
-    }
-
-    const { answers, timeLeftSeconds } = req.body;
-
-    if (!answers || !Array.isArray(answers)) {
-      return res.status(400).json({
-        success: false,
-        msg: "Answers must be array",
-      });
-    }
-
-    const result = await studentService.autoSaveAnswers(
-      quizId,
-      userId,
-      answers,
-      timeLeftSeconds,
-    );
-
-    return res.status(200).json({
-      success: true,
-      message: "Answers auto-saved",
-      data: result,
-    });
-  } catch (e) {
-    return res.status(400).json({
-      success: false,
-      msg: e.message,
-    });
-  }
-}
-
-/**
- * Get saved draft answers for a quiz
- * Called when user refreshes or comes back to quiz
- */
-export async function getDraftAnswers(req, res) {
-  try {
-    const quizId = req.params.quizId;
-    const userId = req.user?.id;
-
-    if (!quizId || !userId) {
-      return res.status(400).json({
-        success: false,
-        msg: "quizId or userId missing",
-      });
-    }
-
-    const draft = await studentService.getDraftAnswers(quizId, userId);
-
-    return res.status(200).json({
-      success: true,
-      data: draft,
-    });
-  } catch (e) {
-    return res.status(500).json({
-      success: false,
-      msg: e.message,
-    });
-  }
-}
 
 export async function submitQuiz(req, res) {
   try {
@@ -224,8 +160,6 @@ export async function submitQuiz(req, res) {
       Number(timeTakenSeconds),
     );
 
-    // Delete draft after successful submission
-    await studentService.deleteDraft(quizId, userId);
 
     return res.status(200).json({
       success: true,
@@ -433,12 +367,13 @@ export async function getPrivateQuiz(req, res) {
     const isMatch = await comparePassword(accessToken, quizData.accessToken);
 
     if (!isMatch) {
-      return res.status(403).json({
+      return res.status(401).json({
         success: false,
         msg: "Invalid access token",
       });
     }
-
+    
+    delete quizData.accessToken;
     return res.status(200).json({
       success: true,
       msg: "Access granted",

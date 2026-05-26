@@ -8,8 +8,6 @@ import {
   getLeaderboard,
   getPrivateQuiz,
   attemptQuiz,
-  autoSaveAnswers,
-  getDraftAnswers,
   getAttemptHistory,
   getStudentStats,
   getHistoryPaginated,
@@ -34,11 +32,6 @@ router.get("/quizzes/categories", authenticateToken, getCategories);
 
 router.get("/quizzes/:quizId/attempt", authenticateToken, attemptQuiz);
 
-// Auto-save endpoint - called every few seconds while answering
-router.post("/quizzes/:quizId/auto-save", authenticateToken, autoSaveAnswers);
-
-// Get draft answers - called on quiz load to resume
-router.get("/quizzes/:quizId/draft", authenticateToken, getDraftAnswers);
 
 // Submit with timer validation
 router.post(

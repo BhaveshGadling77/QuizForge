@@ -2,8 +2,6 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import {
   submitAttempt,
-  autoSaveQuizAnswers,
-  getDraftAnswers,
 } from "@/services/quizService";
 import QuestionCard from "@/components/QuestionCard";
 import { formatTime } from "@/utils/helpers";
@@ -23,8 +21,6 @@ export default function AttemptQuiz() {
   const questions = quiz?.questions || [];
 
   const [isLoading, setIsLoading] = useState(!quiz);
-  const [autoSaveFailed, setAutoSaveFailed] = useState(false);
-  const autoSaveTimeoutRef = useRef(null);
 
   const [answers, setAnswers] = useState(() => {
     return JSON.parse(localStorage.getItem(`quizAnswers_${id}`)) || {};
@@ -32,45 +28,6 @@ export default function AttemptQuiz() {
 
   const [timeLeft, setTimeLeft] = useState(null);
   const [submitting, setSubmitting] = useState(false);
-  const [timerRestored, setTimerRestored] = useState(false);
-
-  // Load draft answers and timer state on component mount
-  useEffect(() => {
-    const loadDraft = async () => {
-      try {
-        const draft = await getDraftAnswers(id);
-
-        if (draft?.data) {
-          // Restore saved answers
-          setAnswers(draft.data.answers || {});
-          localStorage.setItem(
-            `quizAnswers_${id}`,
-            JSON.stringify(draft.data.answers || {}),
-          );
-
-          // Restore timer state
-          if (draft.data.timeLeftSeconds) {
-            setTimeLeft(draft.data.timeLeftSeconds);
-            setTimerRestored(true);
-            toast.success("Quiz resumed from where you left off");
-          }
-        }
-      } catch (error) {
-        console.error("Failed to load draft:", error);
-        // Use local storage if draft fetch fails
-        const savedAnswers = JSON.parse(
-          localStorage.getItem(`quizAnswers_${id}`),
-        );
-        if (savedAnswers) {
-          setAnswers(savedAnswers);
-        }
-      }
-    };
-
-    if (quiz && !timerRestored) {
-      loadDraft();
-    }
-  }, [id, quiz, timerRestored]);
 
   // Persist quiz
   useEffect(() => {
@@ -88,52 +45,6 @@ export default function AttemptQuiz() {
     localStorage.setItem(`quizAnswers_${id}`, JSON.stringify(answers));
   }, [answers, id]);
 
-  // Auto-save answers to backend every 3 seconds
-  useEffect(() => {
-    if (!quiz || !id || Object.keys(answers).length === 0) return;
-
-    // Clear existing timeout
-    if (autoSaveTimeoutRef.current) {
-      clearTimeout(autoSaveTimeoutRef.current);
-    }
-
-    // Set new timeout for auto-save
-    autoSaveTimeoutRef.current = setTimeout(async () => {
-      try {
-        const formattedAnswers = Object.entries(answers).map(
-          ([questionId, value]) => {
-            if (typeof value === "number") {
-              return {
-                questionId,
-                selectedOptionIndex: value,
-              };
-            }
-            return {
-              questionId,
-              submittedAnswer: value,
-            };
-          },
-        );
-
-        await autoSaveQuizAnswers(id, {
-          answers: formattedAnswers,
-          timeLeftSeconds: timeLeft || 0,
-        });
-
-        setAutoSaveFailed(false);
-      } catch (error) {
-        console.error("Auto-save failed:", error);
-        setAutoSaveFailed(true);
-        // Don't show error toast every time, just set state
-      }
-    }, 3000); // Auto-save every 3 seconds
-
-    return () => {
-      if (autoSaveTimeoutRef.current) {
-        clearTimeout(autoSaveTimeoutRef.current);
-      }
-    };
-  }, [answers, timeLeft, quiz, id]);
 
   //  Warn before leaving
   useEffect(() => {
@@ -148,10 +59,10 @@ export default function AttemptQuiz() {
 
   //  Timer init
   useEffect(() => {
-    if (quiz?.duration && timeLeft === null && !timerRestored) {
+    if (quiz?.duration && timeLeft === null) {
       setTimeLeft(quiz.duration);
     }
-  }, [quiz, timeLeft, timerRestored]);
+  }, [quiz, timeLeft]);
 
   //  Timer tick
   useEffect(() => {
@@ -265,11 +176,6 @@ export default function AttemptQuiz() {
               <span className="ml-1 text-forge-muted/60">answered</span>
             </span>
 
-            {autoSaveFailed && (
-              <span className="text-xs text-orange-400 font-mono">
-                Auto-save failed
-              </span>
-            )}
           </div>
 
           {timeLeft !== null && (

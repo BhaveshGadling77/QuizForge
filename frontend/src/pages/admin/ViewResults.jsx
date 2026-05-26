@@ -9,6 +9,8 @@ export default function ViewResults() {
     getAllResults(id).then((r) => r.data)
   );
 
+  const results = data?.data ?? [];
+
   return (
     <div className="min-h-screen bg-forge-bg">
       <main className="max-w-4xl mx-auto px-6 py-10">
@@ -17,10 +19,10 @@ export default function ViewResults() {
         </Link>
         <div className="flex items-center justify-between mb-6">
           <h1 className="font-display font-bold text-2xl text-forge-text">
-            Results — {data?.quizTitle ?? "…"}
+            Results
           </h1>
           <span className="badge bg-forge-border text-forge-muted font-mono">
-            {data?.results?.length ?? 0} submissions
+            {results.length} submissions
           </span>
         </div>
 
@@ -39,13 +41,15 @@ export default function ViewResults() {
                 </tr>
               </thead>
               <tbody>
-                {data?.results?.map((r) => (
-                  <tr key={r._id} className="border-b border-forge-border last:border-0 hover:bg-forge-surface/60 transition-colors">
-                    <td className="px-4 py-3 text-forge-text font-medium">{r.student?.name}</td>
-                    <td className={`px-4 py-3 font-mono font-medium ${scoreColor(r.score)}`}>{r.score}%</td>
-                    <td className="px-4 py-3 font-mono text-forge-muted">{r.correct}/{r.total}</td>
-                    <td className="px-4 py-3 font-mono text-forge-muted">{r.timeTaken}s</td>
-                    <td className="px-4 py-3 font-mono text-forge-muted text-xs">{formatDate(r.submittedAt)}</td>
+                {results.map((r) => (
+                  <tr key={r.resultId} className="border-b border-forge-border last:border-0 hover:bg-forge-surface/60 transition-colors">
+                    <td className="px-4 py-3 text-forge-text font-medium">{r.userName || r.userId}</td>
+                    <td className={`px-4 py-3 font-mono font-medium ${scoreColor(r.percentage)}`}>{r.percentage?.toFixed(1)}%</td>
+                    <td className="px-4 py-3 font-mono text-forge-muted">{r.correctCount}/{r.totalQuestions}</td>
+                    <td className="px-4 py-3 font-mono text-forge-muted">{r.timeTakenSeconds}s</td>
+                    <td className="px-4 py-3 font-mono text-forge-muted text-xs">
+                      {formatDate(r.submittedAt?.seconds ? r.submittedAt.seconds * 1000 : r.submittedAt)}
+                    </td>
                   </tr>
                 ))}
               </tbody>

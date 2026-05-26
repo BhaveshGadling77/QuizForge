@@ -52,20 +52,6 @@ export const getResult = (quizId) => api.get(`/quizzes/${quizId}/result`);
 export const getLeaderboard = (quizId) =>
   api.get(`/quizzes/${quizId}/leaderboard`);
 
-/*  USER SIDE - AUTO-SAVE & DRAFT  */
-
-/**
- * Auto-save answers while user is answering questions
- * Called every 3 seconds to persist answers to backend
- */
-export const autoSaveQuizAnswers = (quizId, data) =>
-  api.post(`/quizzes/${quizId}/auto-save`, data);
-
-/**
- * Get previously saved draft answers
- * Called when user opens quiz to resume from where they left off
- */
-export const getDraftAnswers = (quizId) => api.get(`/quizzes/${quizId}/draft`);
 
 /*  USER SIDE - STUDENT DASHBOARD  */
 
