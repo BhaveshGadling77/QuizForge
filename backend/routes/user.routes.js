@@ -11,9 +11,7 @@ import {
   getAttemptHistory,
   getStudentStats,
   getHistoryPaginated,
-  getCategories,
-  getFilteredQuizzes,
-  searchQuizzes,
+  
 } from "../controllers/student.controller.js";
 
 const router = express.Router();
@@ -25,10 +23,6 @@ router.post("/", authenticateToken, (req, res) => {
 
 router.get("/quizzes", authenticateToken, getActiveQuizzes);
 
-// Quiz filtering and search
-router.get("/quizzes/filter", authenticateToken, getFilteredQuizzes);
-router.get("/quizzes/search", authenticateToken, searchQuizzes);
-router.get("/quizzes/categories", authenticateToken, getCategories);
 
 router.get("/quizzes/:quizId/attempt", authenticateToken, attemptQuiz);
 

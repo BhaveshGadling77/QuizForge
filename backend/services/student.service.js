@@ -75,7 +75,6 @@ export class StudentService {
     const q = query(
       this.quizCollection,
       where("isActive", "==", true),
-      where("visibility", "==", "public"),
       orderBy("createdAt", "desc"),
     );
 
@@ -424,7 +423,7 @@ export class StudentService {
       where("quizId", "==", quizId),
       where("userId", "==", userId),
     );
-    console.log(questionMap);
+    // console.log(questionMap);
 
     const attemptSnap = await getDocs(attemptQuery);
     if (!attemptSnap.empty) {
@@ -664,106 +663,4 @@ export class StudentService {
     }
   }
 
-  /**
-   * Get attempt statistics for a student
-   * Calculates average score, total attempts, etc.
-   *
-   * @param {string} userId - Student ID
-   * @returns {Promise<Object>} Statistics object
-   */
-  async getStudentStatistics(userId) {
-    try {
-      const results = await this.getStudentAttemptHistory(userId, 100); // Get more for accurate stats
-
-      if (results.length === 0) {
-        return {
-          totalAttempts: 0,
-          averageScore: 0,
-          averagePercentage: 0,
-          highestScore: 0,
-          lowestScore: 0,
-          totalQuizzesAttempted: 0,
-          averageTimeSeconds: 0,
-        };
-      }
-
-      const totalAttempts = results.length;
-      const totalScore = results.reduce((sum, r) => sum + r.score, 0);
-      const averageScore = totalScore / totalAttempts;
-      const averagePercentage =
-        results.reduce((sum, r) => sum + r.percentage, 0) / totalAttempts;
-      const scores = results.map((r) => r.score);
-      const highestScore = Math.max(...scores);
-      const lowestScore = Math.min(...scores);
-      const uniqueQuizzes = new Set(results.map((r) => r.quizId)).size;
-      const averageTimeSeconds = Math.round(
-        results.reduce((sum, r) => sum + r.timeTakenSeconds, 0) / totalAttempts,
-      );
-
-      return {
-        totalAttempts,
-        averageScore: Math.round(averageScore * 100) / 100,
-        averagePercentage: Math.round(averagePercentage * 100) / 100,
-        highestScore,
-        lowestScore,
-        totalQuizzesAttempted: uniqueQuizzes,
-        averageTimeSeconds,
-      };
-    } catch (error) {
-      console.error("Get student statistics error:", error);
-      throw error;
-    }
-  }
-
-  /**
-   * Get detailed quiz history with pagination
-   * @param {string} userId - Student ID
-   * @param {number} pageSize - Items per page
-   * @param {number} pageNumber - Page number (1-indexed)
-   */
-  async getQuizHistoryPaginated(userId, pageSize = 10, pageNumber = 1) {
-    try {
-      const q = query(
-        this.resultCollection,
-        where("userId", "==", userId),
-        orderBy("submittedAt", "desc"),
-        limit(pageNumber * pageSize),
-      );
-
-      const snapshot = await getDocs(q);
-      const allResults = snapshot.docs.map((doc) => {
-        const result = doc.data();
-        return {
-          resultId: doc.id,
-          quizId: result.quizId,
-          quizTitle: result.quizSnapshot?.title || "Unknown Quiz",
-          score: result.score,
-          totalPoints: result.totalPoints,
-          percentage: result.percentage,
-          correctCount: result.correctCount,
-          totalQuestions: result.totalQuestions,
-          timeTakenSeconds: result.timeTakenSeconds,
-          submittedAt: result.submittedAt,
-          evaluationStatus: result.evaluationStatus,
-        };
-      });
-
-      const startIndex = (pageNumber - 1) * pageSize;
-      const paginatedResults = allResults.slice(
-        startIndex,
-        pageNumber * pageSize,
-      );
-
-      return {
-        data: paginatedResults,
-        totalCount: allResults.length,
-        pageNumber,
-        pageSize,
-        totalPages: Math.ceil(allResults.length / pageSize),
-      };
-    } catch (error) {
-      console.error("Get paginated history error:", error);
-      throw error;
-    }
-  }
 }

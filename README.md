@@ -54,6 +54,9 @@ The platform focuses on secure authentication, role-based access control, and sc
 - [ ] unable to fetch the results on admin login.
 - [x] frontend bug of clicking true and false.
 - [x] allowing duplicates to add in the options.
+- [ ] admin can create quiz and publish it publically to attempt.
+
+
 
 ## functionalities to implement.
 - [ ] private quiz attempting.
@@ -68,9 +71,9 @@ The platform focuses on secure authentication, role-based access control, and sc
 * Edit quiz
 * Delete quiz
 * Publish / unpublish quiz
-* View all student results for a quiz
-* View result of a particular student
-* Manual evaluation for short subjective questions
+* View all student results for a quiz (to be implemented...)
+* View result of a particular student (to be implemented...)
+* Manual evaluation for short subjective questions (to be implemented...)
 
 ---
 
@@ -89,8 +92,8 @@ The platform focuses on secure authentication, role-based access control, and sc
 
 * Store quiz results in Firebase (Firestore)
 * Backend-based score calculation
-* Leaderboard sorted by score
-* Timestamp-based tie-breaker
+* Leaderboard sorted by score (to be implemented...)
+* Timestamp-based tie-breaker (to be implemented...)
 
 ---
 

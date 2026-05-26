@@ -101,27 +101,135 @@ export default function AttemptQuiz() {
     setAnswers((prev) => ({ ...prev, [questionId]: value }));
   }, []);
 
+  // ─── Normalize Submitted Answer ──────────────────────────────────────────
+  const normalizeAnswer = (value) => {
+    if (value === null || value === undefined) {
+      return null;
+    }
+
+    // numbers
+    if (typeof value === "number") {
+      return Number.isNaN(value) ? null : value;
+    }
+
+    // strings
+    if (typeof value === "string") {
+      const cleaned = value
+        // markdown formatting
+        .replace(/\*\*(.*?)\*\*/g, "$1")
+        .replace(/\*(.*?)\*/g, "$1")
+        .replace(/__(.*?)__/g, "$1")
+        .replace(/_(.*?)_/g, "$1")
+
+        // inline code
+        .replace(/`([^`]*)`/g, "$1")
+
+        // code blocks
+        .replace(/```[\s\S]*?```/g, "")
+
+        // latex
+        .replace(/\$\$(.*?)\$\$/gs, "$1")
+        .replace(/\$(.*?)\$/g, "$1")
+
+        // headings
+        .replace(/^#{1,6}\s+/gm, "")
+
+        // blockquotes
+        .replace(/^>\s+/gm, "")
+
+        // checklist / bullets
+        .replace(/^\s*[-*+]\s+/gm, "")
+        .replace(/^\s*\d+\.\s+/gm, "")
+        .replace(/^\s*-\s\[\s?\]\s+/gm, "")
+
+        // links
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+
+        // html
+        .replace(/<[^>]+>/g, "")
+
+        // whitespace collapse
+        .replace(/\s+/g, " ")
+        .trim();
+
+      return cleaned.length ? cleaned : null;
+    }
+
+    return value;
+  };
   const handleSubmit = async () => {
     if (submitting) return;
     setSubmitting(true);
 
     try {
-      const formattedAnswers = Object.entries(answers).map(
-        ([questionId, value]) => {
-          if (typeof value === "number") {
-            return {
-              questionId,
-              selectedOptionIndex: value,
-            };
-          }
+      const formattedAnswers = questions.map((q) => {
+        const questionId = q.id || q.questionId;
 
+        const rawValue = answers[questionId];
+        const normalizedValue = normalizeAnswer(rawValue);
+
+        const unanswered =
+          normalizedValue === null ||
+          normalizedValue === undefined;
+
+        // ── MCQ / True-False ─────────────────────────
+        if (
+          q.questionType === "mcq" ||
+          q.questionType === "true-false"
+        ) {
           return {
             questionId,
-            submittedAnswer: value,
-          };
-        },
-      );
 
+            selectedOptionIndex: unanswered
+              ? null
+              : rawValue,
+
+            submittedAnswer: null,
+
+            status: unanswered
+              ? "unanswered"
+              : "answered",
+
+            autoSubmitted: timeLeft === 0,
+          };
+        }
+
+        // ── Short Integer ────────────────────────────
+        if (q.questionType === "short-integer") {
+          return {
+            questionId,
+
+            selectedOptionIndex: null,
+
+            submittedAnswer: unanswered
+              ? null
+              : Number(normalizedValue),
+
+            status: unanswered
+              ? "unanswered"
+              : "answered",
+
+            autoSubmitted: timeLeft === 0,
+          };
+        }
+
+        // ── Subjective ───────────────────────────────
+        return {
+          questionId,
+
+          selectedOptionIndex: null,
+
+          submittedAnswer: unanswered
+            ? null
+            : rawValue.trim(),
+
+          status: unanswered
+            ? "unanswered"
+            : "answered",
+
+          autoSubmitted: timeLeft === 0,
+        };
+      });
       const timeTaken =
         quiz?.duration && timeLeft !== null ? quiz.duration - timeLeft : 0;
 
@@ -135,11 +243,13 @@ export default function AttemptQuiz() {
       };
 
       const res = await submitAttempt(id, payload);
+      
       // Clean up after successful submission
       localStorage.removeItem(`activeQuiz_${id}`);
       localStorage.removeItem(`quizAnswers_${id}`);
       toast.success("Quiz submitted successfully!");
-      navigate(`/result/${res.data.resultId}`);
+      console.log(res);
+      navigate(`/result/${res.data.quizId}`);
     } catch (err) {
       console.error("Submit failed:", err);
       toast.error("Failed to submit quiz. Please try again.");

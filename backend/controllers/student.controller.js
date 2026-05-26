@@ -15,83 +15,6 @@ export async function getActiveQuizzes(req, res) {
   }
 }
 
-/**
- * Get all available quiz categories
- * Used for category filter dropdown
- */
-export async function getCategories(req, res) {
-  try {
-    const categories = await studentService.getCategories();
-    return res.status(200).json({
-      success: true,
-      categories,
-    });
-  } catch (e) {
-    return res.status(500).json({
-      success: false,
-      msg: e.message,
-    });
-  }
-}
-
-/**
- * Get filtered quizzes with optional category, difficulty, search
- * Query params: category, difficulty, search, sortBy, sortOrder
- */
-export async function getFilteredQuizzes(req, res) {
-  try {
-    const { category, difficulty, search, sortBy, sortOrder } = req.query;
-
-    const filters = {};
-    if (category) filters.category = category;
-    if (difficulty) filters.difficulty = difficulty;
-    if (search) filters.search = search;
-    if (sortBy) filters.sortBy = sortBy;
-    if (sortOrder) filters.sortOrder = sortOrder;
-
-    const quizzes = await studentService.getFilteredQuizzes(filters);
-
-    return res.status(200).json({
-      success: true,
-      quizzes,
-      count: quizzes.length,
-    });
-  } catch (e) {
-    return res.status(500).json({
-      success: false,
-      msg: e.message,
-    });
-  }
-}
-
-/**
- * Search quizzes by title and description
- */
-export async function searchQuizzes(req, res) {
-  try {
-    const { q } = req.query;
-
-    if (!q) {
-      return res.status(400).json({
-        success: false,
-        msg: "Search term (q) is required",
-      });
-    }
-
-    const results = await studentService.searchQuizzes(q);
-
-    return res.status(200).json({
-      success: true,
-      results,
-      count: results.length,
-    });
-  } catch (e) {
-    return res.status(500).json({
-      success: false,
-      msg: e.message,
-    });
-  }
-}
 
 export async function attemptQuiz(req, res) {
   try {
@@ -142,7 +65,7 @@ export async function submitQuiz(req, res) {
     }
 
     const { answers, timeTakenSeconds } = req.body;
-    console.log(answers)
+    // console.log(answers)
 
     if (!answers || !Array.isArray(answers)) {
       return res.status(400).json({
@@ -160,10 +83,11 @@ export async function submitQuiz(req, res) {
       Number(timeTakenSeconds),
     );
 
-
+    // console.log(summary);
     return res.status(200).json({
       success: true,
       summary,
+      quizId
     });
   } catch (e) {
     return res.status(500).json({

@@ -118,7 +118,7 @@ export class AdminService {
 
   async unpublishQuiz(quizId) {
     const quizRef = doc(this.quizCollection, quizId);
-
+    // console.log(quizRef.id)
     return await runTransaction(this.db, async (tx) => {
       const quizSnap = await tx.get(quizRef);
 

@@ -25,7 +25,7 @@ export async function uploadQuiz({
       isActive,
     });
 
-    console.log("Quiz doc id = ", quizDocRef.id);
+    // console.log("Quiz doc id = ", quizDocRef.id);
     // logic behind adding questions in the
     const questionsRef = collection(
       quizDocRef,
@@ -34,9 +34,10 @@ export async function uploadQuiz({
     // loop through each element and upload that in the doc
     for (let question of questions) {
       const questionDocRef = await addDoc(questionsRef, question);
-      console.log(questionDocRef.id);
+      // console.log(questionDocRef.id);
     }
   } catch (e) {
     console.log(e.message);
+    
   }
 }
