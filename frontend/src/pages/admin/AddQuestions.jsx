@@ -392,6 +392,7 @@ function OptionRow({ index, value, checked, onChange, onCheck, isMcq }) {
         background:  checked ? "rgba(99,102,241,0.1)" : "rgba(255,255,255,0.02)",
         alignItems:  isMcq ? "flex-start" : "center",
       }}
+      onClick={(e) => { e.preventDefault(); onCheck(); }}
     >
       {/* Letter badge */}
       <div
@@ -424,7 +425,7 @@ function OptionRow({ index, value, checked, onChange, onCheck, isMcq }) {
           opacity:   checked ? 1 : 0.25,
           marginTop: isMcq ? "10px" : "0",
         }}
-        onClick={(e) => { e.preventDefault(); onCheck(); }}
+        
       >
         <div
           className="w-4 h-4 rounded-full border-2 flex items-center justify-center"
