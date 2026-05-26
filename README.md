@@ -59,7 +59,7 @@ The platform focuses on secure authentication, role-based access control, and sc
 
 
 ## functionalities to implement.
-- [ ] private quiz attempting.
+- [x] private quiz attempting.
 - [ ] chekcing and marking of admin whether the question is correct or not.
 - [ ] leaderboard functionality.
 
