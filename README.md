@@ -54,7 +54,7 @@ The platform focuses on secure authentication, role-based access control, and sc
 - [ ] unable to fetch the results on admin login.
 - [x] frontend bug of clicking true and false.
 - [x] allowing duplicates to add in the options.
-- [ ] admin can create quiz and publish it publically to attempt.
+- [x] admin can create quiz and publish it publically to attempt.
 
 
 

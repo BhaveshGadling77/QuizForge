@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "react-query";
 import { getAllResults } from "@/services/quizService";
@@ -8,6 +9,8 @@ export default function ViewResults() {
   const { data, isLoading } = useQuery(["admin-results", id], () =>
     getAllResults(id).then((r) => r.data)
   );
+
+  const [expandedRow, setExpandedRow] = useState(null);
 
   const results = data?.data ?? [];
 
@@ -29,11 +32,11 @@ export default function ViewResults() {
         {isLoading ? (
           <div className="card h-64 animate-pulse" />
         ) : (
-          <div className="overflow-hidden rounded-xl border border-forge-border">
+          <div className="overflow-hidden rounded-xl border border-forge-border bg-forge-surface/30">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-forge-border bg-forge-surface">
-                  {["Student", "Score", "Correct", "Time Taken", "Submitted"].map((h) => (
+                  {["Student", "Score", "Correct", "Time Taken", "Submitted", "Details"].map((h) => (
                     <th key={h} className="px-4 py-3 text-left font-mono text-xs text-forge-muted uppercase tracking-wider">
                       {h}
                     </th>
@@ -42,16 +45,45 @@ export default function ViewResults() {
               </thead>
               <tbody>
                 {results.map((r) => (
-                  <tr key={r.resultId} className="border-b border-forge-border last:border-0 hover:bg-forge-surface/60 transition-colors">
-                    <td className="px-4 py-3 text-forge-text font-medium">{r.userName || r.userId}</td>
-                    <td className={`px-4 py-3 font-mono font-medium ${scoreColor(r.percentage)}`}>{r.percentage?.toFixed(1)}%</td>
-                    <td className="px-4 py-3 font-mono text-forge-muted">{r.correctCount}/{r.totalQuestions}</td>
-                    <td className="px-4 py-3 font-mono text-forge-muted">{r.timeTakenSeconds}s</td>
-                    <td className="px-4 py-3 font-mono text-forge-muted text-xs">
-                      {formatDate(r.submittedAt?.seconds ? r.submittedAt.seconds * 1000 : r.submittedAt)}
+                  <React.Fragment key={r.resultId}>
+                    <tr 
+                      className={`border-b border-forge-border/50 hover:bg-forge-surface/60 transition-colors cursor-pointer ${expandedRow === r.resultId ? 'bg-forge-surface/60' : ''}`}
+                      onClick={() => setExpandedRow(expandedRow === r.resultId ? null : r.resultId)}
+                    >
+                      <td className="px-4 py-3 text-forge-text font-medium">{r.userName || r.userId}</td>
+                      <td className={`px-4 py-3 font-mono font-medium ${scoreColor(r.percentage)}`}>{r.percentage?.toFixed(1)}%</td>
+                      <td className="px-4 py-3 font-mono text-forge-muted">{r.correctCount}/{r.totalQuestions}</td>
+                      <td className="px-4 py-3 font-mono text-forge-muted">{r.timeTakenSeconds}s</td>
+                      <td className="px-4 py-3 font-mono text-forge-muted text-xs">
+                        {formatDate(r.submittedAt?.seconds ? r.submittedAt.seconds * 1000 : r.submittedAt)}
+                      </td>
+                      <td className="px-4 py-3 font-mono text-forge-muted text-xs">
+                        <button className="text-forge-accent hover:underline">
+                          {expandedRow === r.resultId ? 'Hide' : 'View Doc'}
+                        </button>
+                      </td>
+                    </tr>
+                    {expandedRow === r.resultId && (
+                      <tr className="border-b border-forge-border bg-forge-surface/20">
+                        <td colSpan={6} className="px-6 py-4">
+                          <div className="bg-black/40 rounded-lg p-4 overflow-x-auto border border-forge-border/50">
+                            <h3 className="text-forge-muted text-xs font-mono uppercase tracking-wider mb-3">Document Snapshot</h3>
+                            <pre className="text-xs text-forge-text font-mono whitespace-pre-wrap break-all">
+                              {JSON.stringify(r, null, 2)}
+                            </pre>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
+                ))}
+                {results.length === 0 && (
+                  <tr>
+                    <td colSpan={6} className="px-4 py-8 text-center text-forge-muted text-sm">
+                      No results found for this quiz.
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>

@@ -104,6 +104,7 @@ export async function getAllResultsForQuiz(req, res) {
       data: results,
     });
   } catch (err) {
+    // console.log(err.message) //debug log
     res.status(400).json({
       success: false,
       message: err.message,

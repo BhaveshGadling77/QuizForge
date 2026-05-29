@@ -1,4 +1,4 @@
-import { collection, doc, runTransaction, Timestamp, updateDoc } from "firebase/firestore";
+import { collection, doc, runTransaction, Timestamp, updateDoc, query, where, orderBy, getDocs, getDoc } from "firebase/firestore";
 import { QuizService } from "./quiz.service.js";
 export class AdminService {
   constructor(db) {
@@ -218,16 +218,7 @@ export class AdminService {
       const data = resultDoc.data();
       return {
         resultId: resultDoc.id,
-        userId: data.userId,
-        userName: data.userName,
-        score: data.score,
-        totalPoints: data.totalPoints,
-        percentage: data.percentage,
-        correctCount: data.correctCount,
-        totalQuestions: data.totalQuestions,
-        evaluationStatus: data.evaluationStatus,
-        submittedAt: data.submittedAt,
-        timeTakenSeconds: data.timeTakenSeconds,
+        ...data,
       };
     });
   }
