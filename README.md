@@ -51,7 +51,7 @@ The platform focuses on secure authentication, role-based access control, and sc
 
 ## Bugs in the project.
 - [x] calculating result functionality is not working.
-- [ ] unable to fetch the results on admin login.
+- [x] unable to fetch the results on admin login.
 - [x] frontend bug of clicking true and false.
 - [x] allowing duplicates to add in the options.
 - [x] admin can create quiz and publish it publically to attempt.
@@ -60,7 +60,7 @@ The platform focuses on secure authentication, role-based access control, and sc
 
 ## functionalities to implement.
 - [x] private quiz attempting.
-- [ ] chekcing and marking of admin whether the question is correct or not.
+- [ ] chekcing and marking of admin whether the question is correct or not.(WIP)
 - [ ] leaderboard functionality.
 
 ## 🛠️ Admin Features

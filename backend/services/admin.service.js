@@ -45,32 +45,38 @@ export class AdminService {
       });
 
       let totalScore = 0;
-      let correctCount = result.correctCount || 0;
+      let correctCount = 0;
 
       const updatedAnswers = result.answers.map((ans) => {
         //find the score for this question.
         const scoreEntry = scores.find((s) => s.questionId == ans.questionId);
 
-        if (!scoreEntry) return ans; //leave auto graded ans as it is
+        let finalPoints = ans.pointsEarned || 0;
+        let finalCorrect = ans.isCorrect || false;
 
-        const question = questionMap[ans.questionId];
-        if (!question) {
-          throw new Error(`Question Not Found: ${ans.questionId}`);
+        if (scoreEntry) {
+          const question = questionMap[ans.questionId];
+          if (!question) {
+            throw new Error(`Question Not Found: ${ans.questionId}`);
+          }
+
+          //validate scores
+          if (
+            scoreEntry.pointsEarned < 0 ||
+            scoreEntry.pointsEarned > question.points
+          ) {
+            throw new Error(`Invalid points for question ${ans.questionId}`);
+          }
+
+          finalPoints = scoreEntry.pointsEarned;
+          finalCorrect = finalPoints > 0;
         }
 
-        //validate scores
-        if (
-          scoreEntry.pointsEarned < 0 ||
-          scoreEntry.pointsEarned > question.pointsEarned
-        ) {
-          throw new Error(`Invalid points for question ${ans.questionId}`);
-        }
+        ans.pointsEarned = finalPoints;
+        ans.isCorrect = finalCorrect;
 
-        ans.pointsEarned = scoreEntry.pointsEarned;
-        ans.isCorrect = true;
-
-        totalScore += scoreEntry.pointsEarned;
-        if (ans.isCorrect) correctCount++;
+        totalScore += finalPoints;
+        if (finalCorrect) correctCount++;
 
         return ans;
       });
@@ -229,7 +235,7 @@ export class AdminService {
    * @returns result doc  
    */
   async getResultForStudent(quizId, userId) {
-    const resultId = `result_${quizId}_${userId}`;
+    const resultId = `result_${quizId}_${userId}_1`;
     const resultRef = doc(this.resultCollection, resultId);
 
     const snap = await getDoc(resultRef);
@@ -242,23 +248,7 @@ export class AdminService {
 
     return {
       resultId: snap.id,
-      quizId: result.quizId,
-      userId: result.userId,
-
-      score: result.score,
-      totalPoints: result.totalPoints,
-      percentage: result.percentage,
-      correctCount: result.correctCount,
-      totalQuestions: result.totalQuestions,
-
-      evaluationStatus: result.evaluationStatus,
-      evaluatedBy: result.evaluatedBy,
-      evaluatedAt: result.evaluatedAt,
-
-      timeTakenSeconds: result.timeTakenSeconds,
-      submittedAt: result.submittedAt,
-
-      answers: result.answers,
+      ...result
     };
   }
 }

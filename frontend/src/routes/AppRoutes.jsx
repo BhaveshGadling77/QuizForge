@@ -19,6 +19,7 @@ import EditQuiz from "@/pages/admin/EditQuiz";
 import AddQuestions from "@/pages/admin/AddQuestions";
 import EditQuestion from "@/pages/admin/EditQuestion";
 import ViewResults from "@/pages/admin/ViewResults";
+import EvaluateResult from "@/pages/admin/EvaluateResult";
 // Guard
 import ProtectedRoute from "@/components/ProtectedRoute";
 
@@ -68,6 +69,7 @@ export default function AppRoutes() {
           element={<EditQuestion />}
         />
         <Route path="/admin/quiz/:id/results" element={<ViewResults />} />
+        <Route path="/admin/quiz/:id/results/:userId" element={<EvaluateResult />} />
       </Route>
 
       {/* Catch-all */}

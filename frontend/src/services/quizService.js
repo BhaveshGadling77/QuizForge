@@ -38,6 +38,12 @@ export const updateQuestion = (quizId, questionId, updates) =>
 export const getAllResults = (quizId) =>
   api.get(`/admin/quizzes/${quizId}/results`);
 
+export const getStudentResult = (quizId, userId) =>
+  api.get(`/admin/quizzes/${quizId}/results/${userId}`);
+
+export const evaluateResult = (resultId, scores) =>
+  api.post(`/admin/results/${resultId}/evaluate`, { scores });
+
 /*  USER SIDE - QUIZZES  */
 
 export const getActiveQuizzes = () => api.get("/quizzes");

@@ -491,6 +491,14 @@ export class StudentService {
           isCorrect,
           pointsEarned,
           maxPoints: question.points,
+          questionSnapshot: {
+            questionMd: question.questionMd ?? "",
+            questionType: question.questionType ?? "",
+            options: question.options ?? [],
+            correctOptionIndex: question.correctOptionIndex ?? null,
+            correctAnswer: question.correctAnswer ?? null,
+            points: question.points ?? 0
+          }
         };
       });
 
@@ -498,7 +506,7 @@ export class StudentService {
 
       const resultRef = doc(
         this.resultCollection,
-        `result_${quizId}_${userId}_${attemptNumber}`,
+        `result_${quizId}_${userId}_1`,
       );
 
       const resultDoc = {

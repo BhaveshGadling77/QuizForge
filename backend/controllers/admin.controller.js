@@ -116,7 +116,7 @@ export async function getResultForStudent(req, res) {
   try {
     const { quizId, userId } = req.params;
 
-    const result = await quizService.getResultForStudent(quizId, userId);
+    const result = await adminService.getResultForStudent(quizId, userId);
 
     res.status(200).json({
       success: true,
