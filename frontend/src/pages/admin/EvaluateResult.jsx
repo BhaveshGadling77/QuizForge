@@ -108,7 +108,7 @@ export default function EvaluateResult() {
             const maxPoints = questionData.points || ans.maxPoints;
 
             let studentAnswer = null;
-            if (ans.submittedAnswer !== null && ans.submittedAnswer !== undefined) {
+            if (ans.submittedAnswer !== null && ans.submittedAnswer !== undefined && String(ans.submittedAnswer).trim() !== "") {
               studentAnswer = String(ans.submittedAnswer);
             } else if (ans.selectedOptionIndex !== null && ans.selectedOptionIndex !== undefined) {
               studentAnswer = questionData.options?.[ans.selectedOptionIndex] || `Option ${ans.selectedOptionIndex + 1}`;
@@ -148,7 +148,9 @@ export default function EvaluateResult() {
 
                 <div className="flex items-center justify-between border-t border-forge-border/40 pt-4 mt-2">
                   <div className="text-sm">
-                    Status: <span className={`font-semibold ${ans.isCorrect ? "text-forge-green" : "text-forge-red"}`}>{ans.isCorrect ? "Correct" : "Incorrect"}</span>
+                    Status: <span className={`font-semibold ${ans.isCorrect === true ? "text-forge-green" : ans.isCorrect === false ? "text-forge-red" : "text-forge-yellow"}`}>
+                      {ans.isCorrect === true ? "Correct" : ans.isCorrect === false ? "Incorrect" : "Pending"}
+                    </span>
                   </div>
                   
                   {needsGrading && resultData.evaluationStatus !== 'evaluated' ? (

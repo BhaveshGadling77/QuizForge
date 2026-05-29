@@ -463,7 +463,14 @@ export class StudentService {
         let isCorrect = null;
         let pointsEarned = null;
 
-        if (
+        const isSkipped = 
+          (ans.selectedOptionIndex === null || ans.selectedOptionIndex === undefined) &&
+          (ans.submittedAnswer === null || ans.submittedAnswer === undefined || String(ans.submittedAnswer).trim() === "");
+
+        if (isSkipped) {
+          isCorrect = false;
+          pointsEarned = 0;
+        } else if (
           question.questionType === "mcq" ||
           question.questionType === "true-false"
         ) {

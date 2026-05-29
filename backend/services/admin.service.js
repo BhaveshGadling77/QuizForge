@@ -229,25 +229,31 @@ export class AdminService {
     });
   }
   /**
-   * get result doc for the particular student
+   * get result doc for the particular student (fetches the latest attempt)
    * @param {string} quizId - Firestore QuizId
    * @param {string} userId - particular doc of student that admin wants to view.
    * @returns result doc  
    */
   async getResultForStudent(quizId, userId) {
-    const resultId = `result_${quizId}_${userId}_1`;
-    const resultRef = doc(this.resultCollection, resultId);
+    const q = query(
+      this.resultCollection,
+      where("quizId", "==", quizId),
+      where("userId", "==", userId),
+      orderBy("submittedAt", "desc")
+    );
+    
+    const snap = await getDocs(q);
 
-    const snap = await getDoc(resultRef);
-
-    if (!snap.exists()) {
+    if (snap.empty) {
       throw new Error("Result not found");
     }
 
-    const result = snap.data();
+    // Return the latest attempt
+    const docSnap = snap.docs[0];
+    const result = docSnap.data();
 
     return {
-      resultId: snap.id,
+      resultId: docSnap.id,
       ...result
     };
   }
