@@ -10,7 +10,7 @@ import {
   getDocs,
   where,
 } from "firebase/firestore";
-import { hashPassword } from "./encrytion.service.js";
+import { encryptToken, decryptToken } from "./encrytion.service.js";
 
 export class QuizService {
   constructor(db) {
@@ -33,7 +33,7 @@ export class QuizService {
     }
 
     if (quizData.visibility === "private") {
-      quizData.accessToken = await hashPassword(quizData.accessToken);
+      quizData.accessToken = encryptToken(quizData.accessToken);
     }
 
     const payload = this.cleanData({
@@ -68,6 +68,13 @@ export class QuizService {
         quizUpdates[field] = updates[field];
       }
     });
+
+    // Encrypt the access token if it is being updated for a private quiz
+    if (quizUpdates.accessToken && updates.visibility === "private") {
+      quizUpdates.accessToken = encryptToken(quizUpdates.accessToken);
+    } else if (quizUpdates.accessToken && quizSnap.data().visibility === "private" && updates.visibility !== "public") {
+      quizUpdates.accessToken = encryptToken(quizUpdates.accessToken);
+    }
 
     if (updates.questions) {
       quizUpdates.questions = updates.questions;
@@ -112,14 +119,26 @@ export class QuizService {
     }));
   }
 
-  // get a quiz by id
+  // get a quiz by id (admin use — decrypts the access token for display)
   async getQuizById(quizId) {
     const quizRef = doc(this.quizCollection, quizId);
     const quizSnap = await getDoc(quizRef);
 
     if (!quizSnap.exists()) throw new Error("Quiz not found");
 
-    return { quizId: quizSnap.id, ...quizSnap.data() };
+    const data = quizSnap.data();
+
+    // Decrypt the access token so the admin can see it in plain text
+    if (data.accessToken && data.visibility === "private") {
+      try {
+        data.accessToken = decryptToken(data.accessToken);
+      } catch (e) {
+        // If decryption fails (e.g. legacy bcrypt hash), leave as-is
+        console.warn("Could not decrypt accessToken for quiz", quizId, e.message);
+      }
+    }
+
+    return { quizId: quizSnap.id, ...data };
   }
 
   // get questions

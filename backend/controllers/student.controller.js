@@ -1,5 +1,5 @@
 import { db } from "../config/firebase.config.js";
-import { comparePassword } from "../services/encrytion.service.js";
+import { decryptToken } from "../services/encrytion.service.js";
 import { StudentService } from "../services/student.service.js";
 
 const studentService = new StudentService(db);
@@ -288,8 +288,15 @@ export async function getPrivateQuiz(req, res) {
       });
     }
 
-    // Verify the access token matches
-    const isMatch = await comparePassword(accessToken, quizData.accessToken);
+    // Verify the access token matches (compare against AES-decrypted stored token)
+    let isMatch = false;
+    try {
+      const storedPlain = decryptToken(quizData.accessToken);
+      isMatch = accessToken === storedPlain;
+    } catch (e) {
+      // Fallback: if token cannot be decrypted (legacy data), reject
+      isMatch = false;
+    }
 
     if (!isMatch) {
       return res.status(401).json({
