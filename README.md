@@ -55,13 +55,13 @@ The platform focuses on secure authentication, role-based access control, and sc
 - [x] frontend bug of clicking true and false.
 - [x] allowing duplicates to add in the options.
 - [x] admin can create quiz and publish it publically to attempt.
+- [x] student can access and attempt the quiz only when the admin has published it publically.
+- [x] admin can evaluate the short subjective questions and make the result public.
 
 
 
 ## functionalities to implement.
-- [x] private quiz attempting.
-- [ ] chekcing and marking of admin whether the question is correct or not.(WIP)
-- [ ] leaderboard functionality.
+- [x] leaderboard functionality.
 
 ## 🛠️ Admin Features
 

@@ -102,7 +102,7 @@ export async function getMyResult(req, res) {
     // console.log(quizId) //debug
     const userId = req.user.id;
     // console.log(userId) //debug
-    const result = await studentService.getMyResult(quizId, userId);
+    const result = await studentService.getDetailedResult(quizId, userId);
 
     return res.status(200).json({
       success: true,

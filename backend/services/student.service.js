@@ -223,13 +223,18 @@ export class StudentService {
    */
   async getDetailedResult(quizId, userId) {
     try {
-      const resultId = `result_${quizId}_${userId}`;
-      const resultRef = doc(this.resultCollection, resultId);
-      const resultSnap = await getDoc(resultRef);
+      const q = query(
+        this.resultCollection,
+        where("quizId", "==", quizId),
+        where("userId", "==", userId)
+      );
+      const snap = await getDocs(q);
 
-      if (!resultSnap.exists()) {
+      if (snap.empty) {
         throw new Error("Result not found");
       }
+
+      const resultSnap = snap.docs[0];
 
       const result = resultSnap.data();
 
@@ -555,8 +560,11 @@ export class StudentService {
     });
   }
 
-  // Replace getLeaderboard in student.service.js
   async getLeaderboard(quizId) {
+    const quizRef = doc(this.quizCollection, quizId);
+    const quizSnap = await getDoc(quizRef);
+    const quizTitle = quizSnap.exists() ? quizSnap.data().title : "Unknown Quiz";
+
     const resultsRef = collection(this.db, process.env.COLLECTION_RESULTS);
     const q = query(
       resultsRef,
@@ -566,16 +574,20 @@ export class StudentService {
       limit(15),
     );
     const snapshot = await getDocs(q);
-    return snapshot.docs.map((doc, index) => {
+    const entries = snapshot.docs.map((doc, index) => {
       const data = doc.data();
       return {
         rank: index + 1,
         userId: data.userId,
         studentName: data.userName,
         score: data.score,
+        percentage: data.percentage,
+        timeTakenSeconds: data.timeTakenSeconds,
         submittedAt: data.submittedAt,
       };
     });
+
+    return { quizTitle, entries };
   }
 
   async getAllResultOfStudent(studentId) {

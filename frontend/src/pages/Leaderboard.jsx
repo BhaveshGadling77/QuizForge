@@ -8,7 +8,7 @@ export default function Leaderboard() {
   const { id } = useParams();
   const { user } = useAuth();
   const { data, isLoading } = useQuery(["leaderboard", id], () =>
-    getLeaderboard(id).then((r) => r.data)
+    getLeaderboard(id).then((r) => r.data.data)
   );
 
   return (
@@ -31,7 +31,7 @@ export default function Leaderboard() {
         ) : (
           <LeaderboardTable
             entries={data?.entries ?? []}
-            currentUserId={user?._id}
+            currentUserId={user?.id || user?._id}
           />
         )}
       </main>

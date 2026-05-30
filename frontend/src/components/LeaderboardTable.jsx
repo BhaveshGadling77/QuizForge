@@ -43,18 +43,18 @@ export default function LeaderboardTable({ entries = [], currentUserId }) {
                   {medals[i] ?? `#${entry.rank}`}
                 </td>
                 <td className="px-4 py-3 text-forge-text font-medium">
-                  {entry.name}
+                  {entry.studentName || entry.userId.substring(0, 8)}
                   {isSelf && (
                     <span className="ml-2 badge bg-forge-accent/10 text-forge-accent text-[10px]">
                       you
                     </span>
                   )}
                 </td>
-                <td className={`px-4 py-3 text-right font-mono font-medium ${scoreColor(entry.score)}`}>
-                  {entry.score}%
+                <td className={`px-4 py-3 text-right font-mono font-medium ${scoreColor(entry.percentage)}`}>
+                  {Math.round(entry.percentage || 0)}%
                 </td>
                 <td className="px-4 py-3 text-right font-mono text-forge-muted">
-                  {entry.timeTaken}s
+                  {entry.timeTakenSeconds || 0}s
                 </td>
               </tr>
             );

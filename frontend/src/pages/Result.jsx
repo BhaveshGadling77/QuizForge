@@ -26,10 +26,20 @@ export default function Result() {
   const wrongCount = (result?.totalQuestions || 0) - correctCount - pendingCount;
   const score = calcScore(correctCount, result?.totalQuestions);
 
+  const getStudentAnswer = (ans) => {
+    if (ans.submittedAnswer !== null && ans.submittedAnswer !== undefined && String(ans.submittedAnswer).trim() !== "") {
+      return String(ans.submittedAnswer);
+    }
+    if (ans.selectedOptionIndex !== null && ans.selectedOptionIndex !== undefined) {
+      return ans.options?.[ans.selectedOptionIndex] || `Option ${ans.selectedOptionIndex + 1}`;
+    }
+    return <span className="italic opacity-50 text-forge-muted">Skipped / No Answer</span>;
+  };
+
   return (
     <div className="min-h-screen bg-forge-bg">
-      <main className="max-w-md mx-auto px-6 py-16 text-center animate-fade-up">
-        <div className="mb-8">
+      <main className="max-w-3xl mx-auto px-6 py-16 animate-fade-up">
+        <div className="text-center mb-8">
           <div className={`font-display font-bold text-7xl mb-2 ${scoreColor(score)}`}>
             {isEvaluated ? `${score}%` : "..."}
           </div>
@@ -38,7 +48,7 @@ export default function Result() {
           </p>
         </div>
 
-        <div className={`card mb-6 grid gap-4 text-left ${pendingCount > 0 ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-3"}`}>
+        <div className={`card mb-8 grid gap-4 text-left ${pendingCount > 0 ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-3"}`}>
           <StatCell label="Correct" value={correctCount} color="text-forge-green" />
           <StatCell label="Wrong" value={wrongCount} color="text-forge-red" />
           {pendingCount > 0 && (
@@ -47,13 +57,66 @@ export default function Result() {
           <StatCell label="Time" value={`${result?.timeTakenSeconds || 0}s`} color="text-forge-text" />
         </div>
 
-        <div className="flex flex-col gap-2">
-          <Link to={`/leaderboard/${id}`} className="btn-primary block">
+        <div className="flex flex-col sm:flex-row gap-4 mb-12 justify-center">
+          <Link to={`/leaderboard/${id}`} className="btn-primary text-center">
             View Leaderboard →
           </Link>
-          <Link to="/dashboard" className="btn-ghost block">
-            Back to Quizzes
+          <Link to="/dashboard" className="btn-ghost text-center">
+            Back to Dashboard
           </Link>
+        </div>
+
+        <div className="space-y-6">
+          <h2 className="font-display font-bold text-xl text-forge-text border-b border-forge-border pb-2 mb-4">
+            Question Breakdown
+          </h2>
+          {result?.answerBreakdown?.map((ans, idx) => (
+            <div key={ans.questionId} className="card p-5 border border-forge-border bg-forge-surface/40 flex flex-col gap-3">
+              <div className="flex justify-between items-start gap-4">
+                <h3 className="font-medium text-forge-text text-sm">
+                  <span className="text-forge-muted mr-2">{idx + 1}.</span>
+                  {ans.question}
+                </h3>
+                <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider whitespace-nowrap border ${
+                  ans.isCorrect === true ? "bg-forge-green/10 text-forge-green border-forge-green/20" :
+                  ans.isCorrect === false ? "bg-forge-red/10 text-forge-red border-forge-red/20" :
+                  "bg-forge-yellow/10 text-forge-yellow border-forge-yellow/20"
+                }`}>
+                  {ans.isCorrect === true ? "Correct" : ans.isCorrect === false ? "Incorrect" : "Pending"}
+                </span>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                <div className="bg-forge-bg rounded-lg p-3 border border-forge-border/50 text-sm">
+                  <span className="text-xs font-semibold text-forge-muted uppercase tracking-wider block mb-1">Your Answer</span>
+                  <div className="text-forge-text break-words">
+                    {getStudentAnswer(ans)}
+                  </div>
+                </div>
+                
+                {isEvaluated && (ans.correctAnswer !== undefined || ans.correctOptionIndex !== undefined) ? (
+                  <div className="bg-forge-green/5 rounded-lg p-3 border border-forge-green/20 text-sm">
+                    <span className="text-xs font-semibold text-forge-green uppercase tracking-wider block mb-1">Correct Answer</span>
+                    <div className="text-forge-green break-words">
+                      {ans.correctAnswer !== undefined && ans.correctAnswer !== null && String(ans.correctAnswer).trim() !== ""
+                        ? String(ans.correctAnswer)
+                        : (ans.correctOptionIndex !== undefined && ans.correctOptionIndex !== null
+                            ? (ans.options?.[ans.correctOptionIndex] || `Option ${ans.correctOptionIndex + 1}`)
+                            : <span className="italic opacity-50">Manual Evaluation</span>
+                          )
+                      }
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+              
+              <div className="flex justify-end text-xs font-mono">
+                <span className="text-forge-muted">
+                  Points: <span className="font-bold text-forge-text">{ans.pointsEarned}</span> / {ans.maxPoints}
+                </span>
+              </div>
+            </div>
+          ))}
         </div>
       </main>
     </div>
