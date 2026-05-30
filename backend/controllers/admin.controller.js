@@ -38,10 +38,10 @@ export async function getPendingResults(req, res) {
 
 export async function evaluateResult(req, res) {
   try {
-    const adminUserId = req.user.userId;
-    const { resultId } = req.params 
+    const adminUserId = req.user.id;
+    const { resultId } = req.params; 
     const { scores } = req.body;
-    const result = adminService.evaluateResult(resultId, adminUserId, scores)
+    const result = await adminService.evaluateResult(resultId, adminUserId, scores);
     
     return res.status(200).json({
       success: true,

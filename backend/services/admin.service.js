@@ -39,8 +39,9 @@ export class AdminService {
       const quiz = quizSnap.data();
       //build the questionMap
 
+      const questions = await this.quizService.getQuestions(result.quizId);
       const questionMap = {};
-      quiz.questions.forEach((q) => {
+      questions.forEach((q) => {
         questionMap[q.questionId] = q;
       });
 

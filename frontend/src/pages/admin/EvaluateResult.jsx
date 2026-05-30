@@ -154,16 +154,38 @@ export default function EvaluateResult() {
                   </div>
                   
                   {needsGrading && resultData.evaluationStatus !== 'evaluated' ? (
-                    <div className="flex items-center gap-3">
-                      <span className="text-sm font-medium text-forge-muted">Points ({maxPoints} max):</span>
-                      <input 
-                        type="number" 
-                        min="0" 
-                        max={maxPoints}
-                        className="input-field w-24 text-center py-1.5 px-2 bg-forge-bg"
-                        value={scores[ans.questionId] !== undefined ? scores[ans.questionId] : (ans.pointsEarned || 0)}
-                        onChange={(e) => handleScoreChange(ans.questionId, e.target.value, maxPoints)}
-                      />
+                    <div className="flex items-center flex-wrap gap-3">
+                      <button
+                        onClick={() => handleScoreChange(ans.questionId, maxPoints, maxPoints)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
+                          (scores[ans.questionId] !== undefined ? scores[ans.questionId] : (ans.pointsEarned || 0)) === maxPoints
+                            ? "bg-forge-green/20 text-forge-green border-forge-green/50"
+                            : "bg-forge-surface text-forge-muted border-forge-border hover:bg-forge-green/10 hover:text-forge-green hover:border-forge-green/30"
+                        }`}
+                      >
+                        Correct ({maxPoints} pts)
+                      </button>
+                      <button
+                        onClick={() => handleScoreChange(ans.questionId, 0, maxPoints)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
+                          (scores[ans.questionId] !== undefined ? scores[ans.questionId] : (ans.pointsEarned || 0)) === 0
+                            ? "bg-forge-red/20 text-forge-red border-forge-red/50"
+                            : "bg-forge-surface text-forge-muted border-forge-border hover:bg-forge-red/10 hover:text-forge-red hover:border-forge-red/30"
+                        }`}
+                      >
+                        Incorrect (0 pts)
+                      </button>
+                      <div className="flex items-center gap-2 sm:ml-2 sm:pl-4 sm:border-l border-forge-border/50">
+                        <span className="text-sm font-medium text-forge-muted">Custom:</span>
+                        <input 
+                          type="number" 
+                          min="0" 
+                          max={maxPoints}
+                          className="input-field w-16 text-center py-1 px-2 bg-forge-bg text-sm"
+                          value={scores[ans.questionId] !== undefined ? scores[ans.questionId] : (ans.pointsEarned || 0)}
+                          onChange={(e) => handleScoreChange(ans.questionId, e.target.value, maxPoints)}
+                        />
+                      </div>
                     </div>
                   ) : (
                     <div className="text-sm font-bold text-forge-text">
