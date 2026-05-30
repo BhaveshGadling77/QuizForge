@@ -12,11 +12,12 @@ export default function QuizDetails() {
   const [token, setToken] = useState("");
   const [verifying, setVerifying] = useState(false);
 
-  const { data: quiz, isLoading, isError, error } = useQuery(["quiz", id], () =>
-    getQuizData(id).then((r) => r.data.quiz)
+  const { data: quiz, isLoading, isError, error, isFetching } = useQuery(["quiz", id], () =>
+    getQuizData(id).then((r) => r.data.quiz),
+    { refetchOnMount: "always" }
   );
 
-  if (isLoading) return <LoadingState />;
+  if (isLoading || isFetching) return <LoadingState />;
   if (isError || !quiz) return <ErrorState error={error} />;
   // console.log("Quiz details fetched:", quiz); // Debug log
 
