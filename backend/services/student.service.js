@@ -660,7 +660,8 @@ export class StudentService {
         return {
           resultId: doc.id,
           quizId: result.quizId,
-          quizTitle: result.quizSnapshot?.title || "Unknown Quiz",
+          // result.title is saved directly by submitQuiz; fallback to quizSnapshot
+          quizTitle: result.title || result.quizSnapshot?.title || "Unknown Quiz",
           score: result.score,
           totalPoints: result.totalPoints,
           percentage: result.percentage,
@@ -674,6 +675,116 @@ export class StudentService {
       });
     } catch (error) {
       console.error("Get attempt history error:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Compute aggregate statistics for a student's quiz history.
+   *
+   * @param {string} userId - Firestore user ID
+   * @returns {Promise<Object>} stats object
+   */
+  async getStudentStatistics(userId) {
+    try {
+      const q = query(
+        this.resultCollection,
+        where("userId", "==", userId),
+        orderBy("submittedAt", "desc"),
+      );
+
+      const snapshot = await getDocs(q);
+
+      if (snapshot.empty) {
+        return {
+          totalAttempts: 0,
+          totalQuizzesAttempted: 0,
+          highestScore: 0,
+          highestPercentage: 0,
+          averageScore: 0,
+          averagePercentage: 0,
+          averageTimeSeconds: 0,
+          totalCorrect: 0,
+          totalQuestions: 0,
+          bestQuiz: null,
+          recentStreak: 0,
+        };
+      }
+
+      const results = snapshot.docs.map((doc) => ({
+        ...doc.data(),
+        resultId: doc.id,
+      }));
+
+      const totalAttempts = results.length;
+
+      // Unique quiz IDs
+      const uniqueQuizIds = new Set(results.map((r) => r.quizId));
+      const totalQuizzesAttempted = uniqueQuizIds.size;
+
+      // Scores
+      const percentages = results.map((r) => r.percentage ?? 0);
+      const scores = results.map((r) => r.score ?? 0);
+      const times = results.map((r) => r.timeTakenSeconds ?? 0);
+
+      const highestPercentage = Math.max(...percentages);
+      const highestScore = Math.max(...scores);
+      const averageScore =
+        scores.reduce((a, b) => a + b, 0) / totalAttempts;
+      const averagePercentage =
+        percentages.reduce((a, b) => a + b, 0) / totalAttempts;
+      const averageTimeSeconds =
+        times.reduce((a, b) => a + b, 0) / totalAttempts;
+
+      // Total correct / total questions across all attempts
+      const totalCorrect = results.reduce(
+        (sum, r) => sum + (r.correctCount ?? 0),
+        0,
+      );
+      const totalQuestions = results.reduce(
+        (sum, r) => sum + (r.totalQuestions ?? 0),
+        0,
+      );
+
+      // Best quiz (highest percentage)
+      const bestResult = results.reduce((best, r) =>
+        (r.percentage ?? 0) > (best.percentage ?? 0) ? r : best,
+      );
+      const bestQuiz = bestResult
+        ? {
+            quizId: bestResult.quizId,
+            title: bestResult.title || bestResult.quizSnapshot?.title || "Unknown Quiz",
+            percentage: bestResult.percentage ?? 0,
+            score: bestResult.score ?? 0,
+            totalPoints: bestResult.totalPoints ?? 0,
+          }
+        : null;
+
+      // Recent streak: consecutive evaluated attempts (not pending) from newest
+      let recentStreak = 0;
+      for (const r of results) {
+        if (r.evaluationStatus === "evaluated" && (r.percentage ?? 0) >= 50) {
+          recentStreak++;
+        } else {
+          break;
+        }
+      }
+
+      return {
+        totalAttempts,
+        totalQuizzesAttempted,
+        highestScore,
+        highestPercentage,
+        averageScore,
+        averagePercentage,
+        averageTimeSeconds,
+        totalCorrect,
+        totalQuestions,
+        bestQuiz,
+        recentStreak,
+      };
+    } catch (error) {
+      console.error("Get student statistics error:", error);
       throw error;
     }
   }
