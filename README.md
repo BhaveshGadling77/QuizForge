@@ -1,135 +1,89 @@
-# QuizForge
+# QuizForge 🚀
 
-A Secure Online Quiz & Assessment Platform
-
----
-
-## 🚀 Overview
-
-QuizForge is a full-stack web application that allows admins to create and manage quizzes, while students can browse and attempt **public quizzes**.
-
-The platform focuses on secure authentication, role-based access control, and scalable backend design.
+A Secure, Scalable, and Feature-Rich Online Quiz & Assessment Platform
 
 ---
 
-## 🔐 Core Features
+## 📖 Overview
 
-* User Registration (email + password)
-* Password hashing using `bcrypt`
-* JWT-based authentication
-* Role-based access control (Admin / Student)
-* Protected routes using middleware
-* Logout (client-side token removal)
+**QuizForge** is a full-stack web application designed to empower educators and administrators to create, manage, and evaluate quizzes seamlessly. For students, it provides a highly engaging, premium interface to attempt quizzes, track performance over time, and view detailed analytical breakdowns. 
+
+The platform places a heavy emphasis on security (AES encryption for private tokens, JWT auth), robust database architecture (Firebase Firestore), and a beautiful modern user experience using React.
 
 ---
 
-## 👥 User Roles
+## ✨ Key Features
 
-### **Admin**
+### 🔐 Security & Core
+- **Authentication**: Secure user registration and login using encrypted passwords (`bcrypt`) and JWT.
+- **Role-Based Access Control**: Strict segregation between `admin` and `student` routes.
+- **Private Quizzes**: Supports locked "private" quizzes using AES-256-CBC symmetrically encrypted access tokens. 
 
-* Full control over quizzes and results
+### 🛠️ Admin Capabilities
+- **Comprehensive Quiz Management**: Create, edit, delete, and publish/unpublish quizzes.
+- **Diverse Question Types**: 
+  - Multiple Choice (MCQ)
+  - True / False
+  - Short Subjective (requires manual grading)
+  - Short Integer (exact number matching)
+- **Manual Evaluation Dashboard**: A streamlined interface allowing admins to quickly review short subjective answers. Includes 1-click "Correct/Incorrect" buttons for rapid grading alongside custom point allocation.
+- **Analytics View**: View all student submissions for a specific quiz at a glance.
 
-### **Student**
-
-* Can access and attempt **public quizzes only**
-
----
-
-## 🎓 Student Features
-
-* View list of **public active quizzes**
-* View quiz details
-* Attempt MCQ-based quizzes
-* Submit answers
-* Score calculated on backend
-* View quiz result immediately after submission
-* View leaderboard (per quiz)
-
-> ⚠️ Note: Currently, students can only access **public quizzes**.
-
----
-
-## Bugs in the project.
-- [x] calculating result functionality is not working.
-- [x] unable to fetch the results on admin login.
-- [x] frontend bug of clicking true and false.
-- [x] allowing duplicates to add in the options.
-- [x] admin can create quiz and publish it publically to attempt.
-- [x] student can access and attempt the quiz only when the admin has published it publically.
-- [x] admin can evaluate the short subjective questions and make the result public.
-
-
-
-## functionalities to implement.
-- [x] leaderboard functionality.
-
-## 🛠️ Admin Features
-
-* Admin login
-* Create quiz
-* Add questions to quiz
-* Edit quiz
-* Delete quiz
-* Publish / unpublish quiz
-* View all student results for a quiz (to be implemented...)
-* View result of a particular student (to be implemented...)
-* Manual evaluation for short subjective questions (to be implemented...)
-
----
-
-## 📚 Quiz Management
-
-* Quiz title & description
-* Multiple questions per quiz
-* Multiple options per question
-* Single correct answer
-* Quiz status (active / inactive)
-* One attempt per user
-
----
-
-## 📊 Results & Leaderboard
-
-* Store quiz results in Firebase (Firestore)
-* Backend-based score calculation
-* Leaderboard sorted by score (to be implemented...)
-* Timestamp-based tie-breaker (to be implemented...)
+### 🎓 Student Experience
+- **Dynamic Dashboard**: Browse available active public quizzes or unlock private quizzes with an access token.
+- **Premium Attempt Interface**: A smooth, timer-based UI for taking quizzes.
+- **Comprehensive History & Stats**: An animated, analytical dashboard showing total attempts, highest score, average percentage, total accuracy, and recent win streaks.
+- **Detailed Result Breakdown**: A question-by-question review showing exactly what the student answered, whether it was correct/incorrect/pending, the points earned, and the correct answer (once evaluated).
+- **Global Leaderboard**: Competitive ranking system per quiz, sorted by highest score (descending) and time taken (ascending).
 
 ---
 
 ## ⚙️ Tech Stack
 
-* **Frontend:** React.js
+* **Frontend:** React.js, React Query, React Router v6, TailwindCSS (with custom design tokens and keyframe animations).
 * **Backend:** Node.js, Express.js
-* **Database:** Firebase Firestore
-* **Authentication:** JWT + bcrypt
+* **Database:** Firebase Firestore (NoSQL)
+* **Security:** JWT (JSON Web Tokens), `bcrypt` (one-way hashing), Node `crypto` (AES-256-CBC symmetric encryption).
 
 ---
 
-## 🚧 Future Improvements
+## 💡 Backend Skills & Architecture Demonstrated
 
-* Image support for questions
-* Private quiz access system (token-based access refinement)
-* Improved UI/UX for student quiz attempts
-* Database indexing optimization
-
----
-
-## 💡 Backend Skills Demonstrated
-
-* Authentication & Authorization (JWT)
-* Middleware design
-* REST API development
-* CRUD operations
-* Data validation & filtering
-* Score evaluation logic
-* Leaderboard sorting & aggregation
+* **Advanced Firestore Queries & Transactions**: Ensuring data consistency during quiz submissions and manual grading via `runTransaction`.
+* **Scalable Data Modeling**: Subcollections for questions to avoid document size limits and allow massive quiz banks.
+* **Symmetric vs Asymmetric Encryption**: Practical application of AES-256-CBC for reversible tokens so admins can view them, while keeping them encrypted at rest.
+* **Complex Aggregations**: Backend logic for computing averages, streaks, and performance stats dynamically across collections.
+* **REST API Best Practices**: Standardized response formats, middleware-based token validation, and robust error handling.
 
 ---
 
-## ⚠️ Project Status
+## 🚀 Getting Started
 
-This project is **actively under development**.
-Core admin functionalities and public quiz flow are implemented, with additional features being improved continuously.
+### Prerequisites
+- Node.js (v16+)
+- Firebase Project with Firestore enabled
 
----
+### Installation
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/BhaveshGadling77/QuizForge.git
+   cd QuizForge
+   ```
+
+2. **Backend Setup:**
+   ```bash
+   cd backend
+   npm install
+   ```
+   Create a `.env` file based on `.env.sample` and add your Firebase credentials, `JWT_SECRET`, and a 32-byte hex `ENCRYPTION_KEY`.
+   ```bash
+   npm start
+   ```
+
+3. **Frontend Setup:**
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
