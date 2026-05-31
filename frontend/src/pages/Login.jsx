@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { login as loginService } from "@/services/authService";
+import { googleLogin, login as loginService } from "@/services/authService";
+import { getGoogleAuthErrorMessage, signInWithGoogle } from "@/services/firebaseAuth";
 import { useAuth } from "@/hooks/useAuth";
 
 const MailIcon = () => (
@@ -14,6 +15,15 @@ const LockIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
     <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+  </svg>
+);
+
+const GoogleIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
+    <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.1 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.5-.4-3.5z" />
+    <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.1 6.1 29.3 4 24 4 16.3 4 9.6 8.3 6.3 14.7z" />
+    <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.4 39.5 16.1 44 24 44z" />
+    <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.2-4.1 5.6l6.2 5.2C36.9 39.3 44 34 44 24c0-1.3-.1-2.5-.4-3.5z" />
   </svg>
 );
 
@@ -54,6 +64,7 @@ export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [shaking, setShaking] = useState(false);
   const cardRef = useRef(null);
@@ -75,11 +86,28 @@ export default function Login() {
       login(res.data.token, res.data.user);
       navigate(res.data.user.role === "admin" ? "/admin" : "/dashboard");
     } catch (err) {
-      const msg = err.response?.data?.message ?? "Invalid credentials";
+      const msg = err.response?.data?.error ?? err.response?.data?.message ?? "Invalid credentials";
       setError(msg);
       triggerShake();
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setError("");
+    setGoogleLoading(true);
+    try {
+      const idToken = await signInWithGoogle();
+      const res = await googleLogin(idToken);
+      login(res.data.token, res.data.user);
+      navigate(res.data.user.role === "admin" ? "/admin" : "/dashboard");
+    } catch (err) {
+      const msg = err.response?.data?.error ?? getGoogleAuthErrorMessage(err);
+      setError(msg);
+      triggerShake();
+    } finally {
+      setGoogleLoading(false);
     }
   };
 
@@ -198,7 +226,7 @@ export default function Login() {
           {/* Submit */}
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || googleLoading}
             className="btn-primary w-full mt-2 qf-btn-primary"
             style={{
               display: "flex",
@@ -210,6 +238,30 @@ export default function Login() {
           >
             {loading && <Spinner />}
             {loading ? "Signing in…" : "Sign In"}
+          </button>
+
+          <button
+            type="button"
+            disabled={loading || googleLoading}
+            onClick={handleGoogleLogin}
+            className="w-full"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 10,
+              minHeight: 44,
+              borderRadius: 8,
+              border: "1px solid rgba(255,255,255,0.12)",
+              background: "rgba(255,255,255,0.04)",
+              color: "#f3f4f6",
+              fontWeight: 600,
+              opacity: googleLoading ? 0.7 : 1,
+              transition: "border-color 0.15s, background 0.15s, transform 0.1s",
+            }}
+          >
+            {googleLoading ? <Spinner /> : <GoogleIcon />}
+            {googleLoading ? "Connecting…" : "Continue with Google"}
           </button>
         </form>
 

@@ -71,3 +71,20 @@ export async function logout(req, res) {
     });
   }
 }
+
+//Google OAuth
+export async function googleLogin(req, res) {
+  try {
+    const { token, user } = await authService.googleLoginUser(req.body);
+
+    res.cookie("quizforge_token", token, cookieSettings);
+
+    return res.status(200).json({
+      msg: "Google login successful",
+      token,
+      user,
+    });
+  } catch (e) {
+    return res.status(401).json({ error: e.message });
+  }
+}

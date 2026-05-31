@@ -1,10 +1,12 @@
 import { db } from "../config/firebase.config.js";
 import { addDoc, collection, doc,  getDoc, } from "firebase/firestore";
 
+const usersCollection = process.env.COLLECTION_USERS || "users";
+
 //this is for the storing the users details in the database.
 async function createUser(user) {
   try {
-    return await addDoc(collection(db, process.env.COLLECTION_USERS), user);
+    return await addDoc(collection(db, usersCollection), user);
   } catch (e) {
     console.error(e.message);
   }
@@ -35,7 +37,7 @@ async function getUserList() {
 // }
 // users.utils.js - fix findById to return plain object
 export async function findById(id) {
-  const docRef = doc(db, process.env.COLLECTION_USERS, id);
+  const docRef = doc(db, usersCollection, id);
   const docSnap = await getDoc(docRef);
   if (!docSnap.exists()) return null;
   return { id: docSnap.id, ...docSnap.data() };

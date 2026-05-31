@@ -13,6 +13,12 @@ export const login = (email, password) =>
   api.post("/auth/login", { email, password });
 
 /**
+ * Login/register with a Firebase Google ID token.
+ */
+export const googleLogin = (idToken, role) =>
+  api.post("/auth/google", { idToken, role });
+
+/**
  * Login with token
  * @returns 
  */
