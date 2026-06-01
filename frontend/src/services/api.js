@@ -12,8 +12,9 @@ api.interceptors.response.use(
   (res) => res,
   (err) => {
     const isLoginRequest = err.config?.url?.includes("/auth/login");
+    const isSessionCheck = err.config?.url === "/";
 
-    if (err.response?.status === 401 && !isLoginRequest) {
+    if (err.response?.status === 401 && !isLoginRequest && !isSessionCheck) {
       console.log("Unauthorized:", err.config.url);
 
       // Don't redirect immediately

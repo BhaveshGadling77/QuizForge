@@ -1,5 +1,5 @@
 import api from "./api.js";
-import Cookies from 'js-cookie';
+
 /**
  * Register a new user
  * @param {{ name: string, email: string, password: string, role: string }} data
@@ -19,19 +19,16 @@ export const googleLogin = (idToken, role) =>
   api.post("/auth/google", { idToken, role });
 
 /**
- * Login with token
- * @returns 
+ * Rehydrate the current session from the HTTP-only quizforge_token cookie.
  */
-export const loginWithToken = () => api.post("/")
+export const loginWithToken = () => api.post("/");
 
 /**
  * Fetch the currently authenticated user's profile
  */
-export const getMe = () => api.post("/auth/login");
+export const getMe = loginWithToken;
 
 /**
- * Logout (clears local token)
+ * Logout clears the HTTP-only auth cookie on the backend.
  */
-export const logout = () => {
-  Cookies.remove("token")
-};
+export const logout = () => api.post("/auth/logout");

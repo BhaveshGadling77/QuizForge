@@ -1,39 +1,30 @@
 import { createContext, useState, useEffect, useCallback } from "react";
 import { loginWithToken, logout as logoutService } from "@/services/authService";
-import Cookies  from "js-cookie";
+
 export const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // On mount, try to rehydrate user from stored token
+  //this will ensure that broswer javascript will not try to access the cookie before the component is mounted and the token is checked.
   useEffect(() => {
-    const token = Cookies.get("token");
-    console.log("AuthProvider mounted. Found token:", !!token);
-    if (!token) {
-      setLoading(false);
-      return;
-    }
     loginWithToken()
       .then((res) => {
         setUser(res.data.user);
       })
-      .catch((err) => {
-        console.log("Auth failed:", err);
+      .catch(() => {
         setUser(null);
-        Cookies.remove('token');
       })
       .finally(() => setLoading(false));
   }, []);
 
-  const login = useCallback((token, userData) => {
-    Cookies.set("token", token, { expires: 14 }); // Store token in cookie for 14 days
+  const login = useCallback((_token, userData) => {
     setUser(userData);
   }, []);
 
   const logout = useCallback(() => {
-    logoutService();
+    logoutService().catch(() => {});
     setUser(null);
   }, []);
 

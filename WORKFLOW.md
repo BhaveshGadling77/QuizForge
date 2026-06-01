@@ -6,7 +6,15 @@ This document describes the current user and admin workflows in QuizForge. The d
 
 ```mermaid
 flowchart TD
-  Start([Visitor opens QuizForge]) --> Landing[Landing page]
+  Start([Visitor opens QuizForge]) --> ExistingCookie{Browser has quizforge_token?}
+  ExistingCookie -->|Yes| RehydrateSession[POST /api/ with cookie]
+  RehydrateSession --> TokenValid{Token valid?}
+  TokenValid -->|Yes| RestoreUser[Restore user in AuthContext]
+  RestoreUser --> RoleRedirect
+  TokenValid -->|No| ClearSession[Clear local auth state]
+  ClearSession --> Landing[Landing page]
+
+  ExistingCookie -->|No| Landing
   Landing --> AuthChoice{Has an account?}
 
   AuthChoice -->|No| Register[Register page]
@@ -268,4 +276,3 @@ flowchart TD
   ManualGrade --> UpdateResult[Update result record]
   UpdateResult --> FinalResult
 ```
-
