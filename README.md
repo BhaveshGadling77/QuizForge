@@ -63,6 +63,10 @@ QuizForge/
       utils/
 ```
 
+## Workflow Diagrams
+
+Detailed Mermaid diagrams for the overall app flow, student workflow, admin workflow, auth flow, and result evaluation flow are available in [WORKFLOW.md](./WORKFLOW.md).
+
 ## Authentication Flow
 
 QuizForge supports two authentication methods.
