@@ -2,6 +2,19 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
 import "highlight.js/styles/github-dark.css";
+import { useState } from "react";
+import {
+  Hash,
+  Type,
+  ToggleLeft,
+  Binary,
+  AlignLeft,
+  Check,
+  X,
+  Circle,
+  CheckCircle2,
+  AlertCircle,
+} from "lucide-react";
 
 /**
  * Firestore sometimes double-escapes newlines (\\n → \n).
@@ -21,13 +34,12 @@ function unescapeMd(str) {
 const mdComponents = {
   pre({ children }) {
     return (
-      <pre className="my-3 rounded-lg border border-forge-border overflow-x-auto text-xs leading-relaxed">
+      <pre className="my-3 rounded-lg border border-white/10 overflow-x-auto text-xs leading-relaxed bg-[#0f0f1a]">
         {children}
       </pre>
     );
   },
   code({ className, children, ...props }) {
-    // Block code (has a language-* class from rehype-highlight) — let hljs styles take over
     if (className?.startsWith("language-")) {
       return (
         <code className={`${className} px-4 py-3 block`} {...props}>
@@ -35,10 +47,9 @@ const mdComponents = {
         </code>
       );
     }
-    // Inline code
     return (
       <code
-        className="px-1.5 py-0.5 rounded bg-forge-surface text-forge-accent font-mono text-[0.8em]"
+        className="px-1.5 py-0.5 rounded bg-white/10 text-purple-300 font-mono text-[0.8em] border border-white/10"
         {...props}
       >
         {children}
@@ -50,13 +61,13 @@ const mdComponents = {
   },
   h3({ children }) {
     return (
-      <h3 className="text-base font-semibold text-forge-text mb-2 leading-snug">
+      <h3 className="text-base font-semibold text-slate-100 mb-2 leading-snug">
         {children}
       </h3>
     );
   },
   strong({ children }) {
-    return <strong className="text-forge-text font-semibold">{children}</strong>;
+    return <strong className="text-slate-100 font-semibold">{children}</strong>;
   },
 };
 
@@ -65,10 +76,30 @@ const rehypePlugins = [rehypeHighlight];
 
 // ─── Badge config ────────────────────────────────────────────────
 const TYPE_BADGE = {
-  mcq:               { label: "MCQ",          color: "text-forge-accent bg-forge-accent/10 border-forge-accent/30" },
-  "true-false":      { label: "True / False", color: "text-amber-400 bg-amber-400/10 border-amber-400/30" },
-  "short-integer":   { label: "Numeric",      color: "text-sky-400 bg-sky-400/10 border-sky-400/30" },
-  "short-subjective":{ label: "Subjective",   color: "text-violet-400 bg-violet-400/10 border-violet-400/30" },
+  mcq: {
+    label: "MCQ",
+    icon: Hash,
+    color: "text-purple-400 bg-purple-500/10 border-purple-500/20",
+    accent: "purple",
+  },
+  "true-false": {
+    label: "True / False",
+    icon: ToggleLeft,
+    color: "text-amber-400 bg-amber-500/10 border-amber-500/20",
+    accent: "amber",
+  },
+  "short-integer": {
+    label: "Numeric",
+    icon: Binary,
+    color: "text-sky-400 bg-sky-500/10 border-sky-500/20",
+    accent: "sky",
+  },
+  "short-subjective": {
+    label: "Subjective",
+    icon: AlignLeft,
+    color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
+    accent: "emerald",
+  },
 };
 
 // ─── Main component ──────────────────────────────────────────────
@@ -80,46 +111,80 @@ const TYPE_BADGE = {
  *   onChange  – (questionId, value) => void
  */
 export default function QuestionCard({ question, index, selected, onChange }) {
-  const qid  = question.id || question.questionId || question._id;
+  const qid = question.id || question.questionId || question._id;
   const type = question.questionType || "mcq";
   const badge = TYPE_BADGE[type] || TYPE_BADGE.mcq;
+  const BadgeIcon = badge.icon;
 
   return (
-    <div className="card animate-fade-up group transition-all duration-200 hover:border-forge-accent/30">
-      {/* Header row */}
-      <div className="flex items-start justify-between gap-3 mb-4">
-        <span className="shrink-0 font-mono text-sm font-bold text-forge-accent bg-forge-accent/10 border border-forge-accent/30 rounded-md px-2.5 py-1 leading-none">
-          Q{index + 1}
-        </span>
-        <span className={`shrink-0 text-[10px] font-mono font-medium uppercase tracking-widest border rounded-full px-2.5 py-1 ${badge.color}`}>
-          {badge.label}
-        </span>
-      </div>
+    <div className="group relative rounded-2xl bg-white/[0.03] border border-white/10 hover:border-white/15 transition-all duration-300 overflow-hidden">
+      {/* Top accent line */}
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-      {/* Question body — markdown + syntax highlighting */}
-      <div className="text-forge-text text-sm leading-relaxed mb-5 prose prose-invert prose-sm max-w-none">
-        <ReactMarkdown
-          remarkPlugins={remarkPlugins}
-          rehypePlugins={rehypePlugins}
-          components={mdComponents}
-        >
-          {unescapeMd(question.question)}
-        </ReactMarkdown>
-      </div>
+      <div className="p-5 sm:p-6">
+        {/* Header row */}
+        <div className="flex items-center justify-between gap-3 mb-5">
+          <div className="flex items-center gap-3">
+            {/* Question number */}
+            <div className="w-9 h-9 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center shrink-0">
+              <span className="font-mono text-sm font-bold text-purple-400">
+                {index + 1}
+              </span>
+            </div>
 
-      {/* Answer input per question type */}
-      {type === "mcq" && (
-        <MCQOptions options={question.options} selected={selected} qid={qid} onChange={onChange} />
-      )}
-      {type === "true-false" && (
-        <TrueFalseToggle selected={selected} qid={qid} onChange={onChange} />
-      )}
-      {type === "short-integer" && (
-        <IntegerInput selected={selected} qid={qid} onChange={onChange} />
-      )}
-      {type === "short-subjective" && (
-        <SubjectiveInput selected={selected} qid={qid} onChange={onChange} />
-      )}
+            {/* Type badge */}
+            <div
+              className={`inline-flex items-center gap-1.5 text-[10px] font-mono font-semibold uppercase tracking-widest border rounded-full px-3 py-1.5 ${badge.color}`}
+            >
+              <BadgeIcon size={11} />
+              {badge.label}
+            </div>
+          </div>
+
+          {/* Status indicator */}
+          {selected !== null && selected !== undefined && selected !== "" ? (
+            <div className="flex items-center gap-1.5 text-xs font-medium text-emerald-400">
+              <CheckCircle2 size={14} />
+              <span className="hidden sm:inline">Answered</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1.5 text-xs font-medium text-slate-600">
+              <Circle size={14} />
+              <span className="hidden sm:inline">Pending</span>
+            </div>
+          )}
+        </div>
+
+        {/* Question body — markdown + syntax highlighting */}
+        <div className="text-slate-200 text-sm leading-relaxed mb-6 prose prose-invert prose-sm max-w-none">
+          <ReactMarkdown
+            remarkPlugins={remarkPlugins}
+            rehypePlugins={rehypePlugins}
+            components={mdComponents}
+          >
+            {unescapeMd(question.question)}
+          </ReactMarkdown>
+        </div>
+
+        {/* Answer input per question type */}
+        {type === "mcq" && (
+          <MCQOptions
+            options={question.options}
+            selected={selected}
+            qid={qid}
+            onChange={onChange}
+          />
+        )}
+        {type === "true-false" && (
+          <TrueFalseToggle selected={selected} qid={qid} onChange={onChange} />
+        )}
+        {type === "short-integer" && (
+          <IntegerInput selected={selected} qid={qid} onChange={onChange} />
+        )}
+        {type === "short-subjective" && (
+          <SubjectiveInput selected={selected} qid={qid} onChange={onChange} />
+        )}
+      </div>
     </div>
   );
 }
@@ -128,30 +193,35 @@ export default function QuestionCard({ question, index, selected, onChange }) {
 function MCQOptions({ options, selected, qid, onChange }) {
   if (!options?.length) return null;
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2.5">
       {options.map((opt, i) => {
         const isSelected = selected === i;
+        const letter = String.fromCharCode(65 + i);
+
         return (
           <button
             key={i}
             onClick={() => onChange(qid, i)}
-            className={`group/opt text-left px-4 py-3 rounded-lg border text-sm transition-all duration-150 ${
+            className={`group/opt relative text-left w-full p-4 rounded-xl border text-sm transition-all duration-200 ${
               isSelected
-                ? "border-forge-accent bg-forge-accent/10 text-forge-accent"
-                : "border-forge-border bg-forge-bg text-forge-muted hover:border-forge-accent/50 hover:text-forge-text"
+                ? "border-purple-500/40 bg-purple-500/10 text-purple-200 shadow-sm shadow-purple-500/10"
+                : "border-white/10 bg-white/[0.02] text-slate-400 hover:border-purple-500/30 hover:bg-white/[0.04] hover:text-slate-200"
             }`}
           >
-            <span className="inline-flex items-start gap-3">
+            <span className="inline-flex items-start gap-3.5">
+              {/* Letter circle */}
               <span
-                className={`shrink-0 font-mono text-xs mt-0.5 w-5 h-5 rounded flex items-center justify-center border transition-colors ${
+                className={`shrink-0 mt-0.5 w-6 h-6 rounded-md flex items-center justify-center text-xs font-bold font-mono border transition-all duration-200 ${
                   isSelected
-                    ? "border-forge-accent bg-forge-accent text-forge-bg"
-                    : "border-forge-border text-forge-muted group-hover/opt:border-forge-accent/50"
+                    ? "border-purple-500 bg-purple-500 text-white shadow-md shadow-purple-500/30"
+                    : "border-white/15 text-slate-500 group-hover/opt:border-purple-500/40 group-hover/opt:text-slate-300"
                 }`}
               >
-                {String.fromCharCode(65 + i)}
+                {isSelected ? <Check size={14} strokeWidth={2.5} /> : letter}
               </span>
-              <span className="prose prose-invert prose-sm max-w-none leading-relaxed">
+
+              {/* Option text */}
+              <span className="prose prose-invert prose-sm max-w-none leading-relaxed pt-0.5">
                 <ReactMarkdown
                   remarkPlugins={remarkPlugins}
                   rehypePlugins={rehypePlugins}
@@ -161,6 +231,11 @@ function MCQOptions({ options, selected, qid, onChange }) {
                 </ReactMarkdown>
               </span>
             </span>
+
+            {/* Selected glow line */}
+            {isSelected && (
+              <div className="absolute left-0 top-4 bottom-4 w-0.5 rounded-full bg-gradient-to-b from-purple-500 to-violet-500" />
+            )}
           </button>
         );
       })}
@@ -172,21 +247,42 @@ function MCQOptions({ options, selected, qid, onChange }) {
 function TrueFalseToggle({ selected, qid, onChange }) {
   return (
     <div className="flex gap-3">
-      {["True", "False"].map((label, i) => {
-        const isSelected = selected === i;
+      {[
+        { label: "True", value: 0, icon: Check, color: "emerald" },
+        { label: "False", value: 1, icon: X, color: "rose" },
+      ].map(({ label, value, icon: Icon, color }) => {
+        const isSelected = selected === value;
+        const colorMap = {
+          emerald: {
+            active: "border-emerald-500/40 bg-emerald-500/10 text-emerald-300 shadow-sm shadow-emerald-500/10",
+            icon: "bg-emerald-500 text-white border-emerald-500 shadow-md shadow-emerald-500/30",
+            inactive: "border-white/10 bg-white/[0.02] text-slate-400 hover:border-emerald-500/30 hover:bg-white/[0.04]",
+            iconInactive: "border-white/15 text-slate-500 group-hover:border-emerald-500/40 group-hover:text-slate-300",
+          },
+          rose: {
+            active: "border-rose-500/40 bg-rose-500/10 text-rose-300 shadow-sm shadow-rose-500/10",
+            icon: "bg-rose-500 text-white border-rose-500 shadow-md shadow-rose-500/30",
+            inactive: "border-white/10 bg-white/[0.02] text-slate-400 hover:border-rose-500/30 hover:bg-white/[0.04]",
+            iconInactive: "border-white/15 text-slate-500 group-hover:border-rose-500/40 group-hover:text-slate-300",
+          },
+        };
+        const c = colorMap[color];
+
         return (
           <button
             key={label}
-            onClick={() => onChange(qid, i)}
-            className={`flex-1 py-3 rounded-lg border text-sm font-semibold transition-all duration-150 ${
-              isSelected
-                ? i === 0
-                  ? "border-emerald-500 bg-emerald-500/10 text-emerald-400"
-                  : "border-rose-500 bg-rose-500/10 text-rose-400"
-                : "border-forge-border bg-forge-bg text-forge-muted hover:border-forge-accent/50 hover:text-forge-text"
+            onClick={() => onChange(qid, value)}
+            className={`group/tf flex-1 flex items-center justify-center gap-2.5 py-3.5 rounded-xl border text-sm font-semibold transition-all duration-200 ${
+              isSelected ? c.active : c.inactive
             }`}
           >
-            <span className="mr-2">{i === 0 ? "✓" : "✗"}</span>
+            <span
+              className={`w-6 h-6 rounded-md flex items-center justify-center border transition-all duration-200 ${
+                isSelected ? c.icon : c.iconInactive
+              }`}
+            >
+              <Icon size={14} strokeWidth={2.5} />
+            </span>
             {label}
           </button>
         );
@@ -197,22 +293,35 @@ function TrueFalseToggle({ selected, qid, onChange }) {
 
 // ─── Short integer ────────────────────────────────────────────────
 function IntegerInput({ selected, qid, onChange }) {
+  const [focused, setFocused] = useState(false);
+
   return (
-    <div className="flex flex-col gap-1.5">
-      <label className="text-xs text-forge-muted font-mono">Enter a number</label>
-      <input
-        type="number"
-        value={selected ?? ""}
-        onChange={(e) => {
-          const val = e.target.value;
-          onChange(qid, val === "" ? null : Number(val));
-        }}
-        placeholder="0"
-        className="w-40 px-4 py-2.5 rounded-lg border border-forge-border bg-forge-bg text-forge-text text-sm font-mono
-                   focus:outline-none focus:border-forge-accent focus:ring-1 focus:ring-forge-accent/30
-                   transition-all placeholder:text-forge-muted/40
-                   [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none"
-      />
+    <div className="flex flex-col gap-2">
+      <label className="flex items-center gap-2 text-xs text-slate-500 font-mono uppercase tracking-wider">
+        <Binary size={12} className="text-sky-400" />
+        Enter a number
+      </label>
+      <div className="relative">
+        <input
+          type="number"
+          value={selected ?? ""}
+          onChange={(e) => {
+            const val = e.target.value;
+            onChange(qid, val === "" ? null : Number(val));
+          }}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          placeholder="0"
+          className={`w-48 px-4 py-3 rounded-xl border bg-white/[0.03] text-slate-100 text-sm font-mono
+            focus:outline-none focus:ring-2 transition-all duration-300
+            placeholder:text-slate-700
+            [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none
+            ${focused ? "border-sky-500/50 ring-sky-500/20 ring-2" : "border-white/10 hover:border-white/20"}`}
+        />
+        {selected !== null && selected !== undefined && selected !== "" && (
+          <CheckCircle2 size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-400" />
+        )}
+      </div>
     </div>
   );
 }
@@ -221,23 +330,37 @@ function IntegerInput({ selected, qid, onChange }) {
 function SubjectiveInput({ selected, qid, onChange }) {
   const MAX = 800;
   const val = selected ?? "";
+  const nearLimit = val.length > MAX * 0.85;
+
   return (
-    <div className="flex flex-col gap-1.5">
-      <label className="text-xs text-forge-muted font-mono">Your answer</label>
-      <textarea
-        value={val}
-        onChange={(e) => onChange(qid, e.target.value)}
-        maxLength={MAX}
-        rows={5}
-        placeholder="Write your answer here…"
-        className="w-full px-4 py-3 rounded-lg border border-forge-border bg-forge-bg text-forge-text text-sm
-                   resize-y min-h-[120px]
-                   focus:outline-none focus:border-forge-accent focus:ring-1 focus:ring-forge-accent/30
-                   transition-all placeholder:text-forge-muted/40 leading-relaxed"
-      />
-      <span className={`text-right text-[10px] font-mono ${val.length > MAX * 0.9 ? "text-amber-400" : "text-forge-muted"}`}>
-        {val.length}/{MAX}
-      </span>
+    <div className="flex flex-col gap-2">
+      <label className="flex items-center gap-2 text-xs text-slate-500 font-mono uppercase tracking-wider">
+        <AlignLeft size={12} className="text-emerald-400" />
+        Your answer
+      </label>
+      <div className="relative">
+        <textarea
+          value={val}
+          onChange={(e) => onChange(qid, e.target.value)}
+          maxLength={MAX}
+          rows={5}
+          placeholder="Write your answer here…"
+          className={`w-full px-4 py-3.5 rounded-xl border bg-white/[0.03] text-slate-100 text-sm
+            resize-y min-h-[120px] leading-relaxed
+            focus:outline-none focus:ring-2 transition-all duration-300
+            placeholder:text-slate-700
+            ${nearLimit ? "border-amber-500/40 focus:ring-amber-500/20" : "border-white/10 focus:border-emerald-500/50 focus:ring-emerald-500/20 hover:border-white/20"}`}
+        />
+        <div className="flex items-center justify-between mt-2">
+          <span className={`text-[10px] font-mono flex items-center gap-1 ${nearLimit ? "text-amber-400" : "text-slate-600"}`}>
+            {nearLimit && <AlertCircle size={10} />}
+            {val.length > 0 ? `${val.length} characters` : "Start typing…"}
+          </span>
+          <span className={`text-[10px] font-mono ${nearLimit ? "text-amber-400" : "text-slate-600"}`}>
+            {val.length}/{MAX}
+          </span>
+        </div>
+      </div>
     </div>
   );
 }

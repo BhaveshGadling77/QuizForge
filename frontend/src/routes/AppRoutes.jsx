@@ -4,6 +4,8 @@ import { useAuth } from "@/hooks/useAuth";
 import NotFoundPage from "@/pages/NotFound";
 //Landing page
 import Landing from "@/pages/Landing";
+// about page
+import About from "@/pages/About";
 // Auth pages
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
@@ -36,7 +38,7 @@ export default function AppRoutes() {
     <Routes>
       {/* Public */}
       <Route path="/" element={<Landing />} />
-      <Route path="/about" element={<Landing />} />
+      <Route path="/about" element={<About />} />
       <Route
         path="/login"
         element={

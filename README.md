@@ -1,20 +1,22 @@
 # QuizForge
 
-QuizForge is a full-stack online quiz and assessment platform built with React, Express, and Firebase Firestore. It supports separate student and admin workflows, JWT-based authentication, Google OAuth, public and private quizzes, timed attempts, automatic and manual evaluation, result history, and leaderboards.
+QuizForge is a full-stack quiz and assessment platform for creating, attempting, evaluating, and tracking quizzes. It supports student and admin workflows, public and private quizzes, timed attempts, automatic grading, manual subjective evaluation, result history, and leaderboards.
 
-## Current Status
+## Highlights
 
-This project currently includes:
-
-- Email/password registration and login with bcrypt password hashing.
-- Google OAuth sign-in through Firebase Authentication.
-- JWT session handling with an HTTP-only backend cookie and frontend auth state.
-- Role-based access for `student` and `admin` users.
-- Admin quiz CRUD with publish/unpublish controls.
-- Public and private quizzes, including encrypted private quiz access tokens.
+- Student and admin roles with protected routes.
+- Email/password authentication with bcrypt password hashing.
+- Google OAuth through Firebase Authentication.
+- JWT sessions stored in the HTTP-only `quizforge_token` backend cookie.
+- Session rehydration on refresh through a protected backend endpoint.
+- Admin quiz CRUD with publish and unpublish controls.
+- Public quizzes and private quizzes with encrypted access tokens.
 - Question types: MCQ, true/false, short integer, and short subjective.
-- Student quiz dashboard, quiz attempt flow, result page, history page, and leaderboard.
+- Backend timer validation for submitted quiz attempts.
+- Automatic grading for objective questions.
 - Manual admin evaluation for subjective answers.
+- Result pages with question breakdowns and Markdown-rendered question text.
+- Student history, stats, and quiz leaderboards.
 - Firebase Firestore as the database.
 
 ## Tech Stack
@@ -27,14 +29,15 @@ Frontend:
 - React Query
 - Tailwind CSS
 - Axios
-- Firebase client SDK for Google OAuth
+- Firebase client SDK
+- React Markdown, Remark GFM, and Rehype Highlight
 
 Backend:
 
 - Node.js
 - Express 5
 - Firebase Firestore
-- Firebase Admin SDK for verifying Google ID tokens
+- Firebase Admin SDK
 - JSON Web Tokens
 - bcrypt
 - Node crypto for AES-256-CBC private quiz token encryption
@@ -63,13 +66,33 @@ QuizForge/
       utils/
 ```
 
-## Workflow Diagrams
+## Screenshots
 
-Detailed Mermaid diagrams for the overall app flow, student workflow, admin workflow, auth flow, and result evaluation flow are available in [WORKFLOW.md](./WORKFLOW.md).
+<img width="1919" height="898" alt="Screenshot 1" src="./images/screenshot1.png" />
+<img width="1919" height="898" alt="Screenshot 1" src="./images/screenshot2.png" />
+<img width="1919" height="898" alt="Screenshot 1" src="./images/screenshot3.png" />
+<img width="1919" height="898" alt="Screenshot 1" src="./images/screenshot4.png" />
+<img width="1919" height="898" alt="Screenshot 1" src="./images/screenshot5.png" />
+<img width="1919" height="898" alt="Screenshot 1" src="./images/screenshot6.png" />
+<img width="1919" height="898" alt="Screenshot 1" src="./images/screenshot7.png" />
+<img width="1919" height="898" alt="Screenshot 1" src="./images/screenshot8.png" />
+<img width="1919" height="898" alt="Screenshot 1" src="./images/screenshot9.png" />
 
-## Authentication Flow
+## Workflows
 
-QuizForge supports two authentication methods.
+Workflow diagrams and notes are available in [WORKFLOW.md](./WORKFLOW.md).
+
+The current documented flows cover:
+
+- Overall application flow
+- Student quiz flow
+- Admin quiz management flow
+- Result evaluation flow
+- Backend auth and authorization flow
+
+## Authentication And Sessions
+
+QuizForge supports email/password auth and Google OAuth.
 
 Email/password:
 
@@ -87,13 +110,47 @@ Google OAuth:
 5. Backend finds or creates the app user in Firestore.
 6. Backend issues the app JWT and sets `quizforge_token`.
 
-Important role behavior:
+Session rehydration:
 
-- On the Register page, the user selects `student` or `admin` before continuing with Google.
-- On the Login page, Google sign-in only signs in an existing Firestore user.
-- If a Google email does not exist yet, login shows an error and the user must register first.
+1. On app load, the frontend calls `POST /api/`.
+2. The browser automatically sends `quizforge_token` when credentials and cookie settings allow it.
+3. `authenticateToken` verifies the JWT and attaches the user to `req.user`.
+4. The backend returns the authenticated user.
+5. The frontend restores `AuthContext`.
 
-For production, allowing public self-registration as `admin` is risky. A safer production setup is to register Google users as `student` only and promote admins manually in Firestore, or require an invite/admin code.
+Role behavior:
+
+- Student routes require an authenticated user with role `student`.
+- Admin routes require an authenticated user with role `admin`.
+- Admin APIs pass through role authorization middleware.
+- In production, public self-registration as `admin` is risky. A safer setup is to register users as `student` by default and promote admins manually or through an invite/admin code.
+
+## Quiz And Result Flow
+
+Admins can:
+
+- Create quizzes with title, description, duration, visibility, and access token when private.
+- Add MCQ, true/false, short integer, and short subjective questions.
+- Publish or unpublish quizzes.
+- Edit or delete quizzes and questions.
+- Review and evaluate subjective answers.
+- View quiz submissions and final results.
+
+Students can:
+
+- Browse active quizzes.
+- Attempt public quizzes directly.
+- Enter an access token for private quizzes.
+- Complete timed attempts.
+- View result breakdowns.
+- Check leaderboards, history, and stats.
+
+Result behavior:
+
+- MCQ and true/false answers are checked by selected option index.
+- Short integer answers are normalized and compared numerically.
+- Short subjective answers are marked pending for admin evaluation.
+- Result records include answer data and question snapshots so result pages can display the original question context later.
 
 ## Firebase Setup
 
@@ -116,7 +173,7 @@ Create a Firebase project and enable:
 In Firebase Console:
 
 1. Go to Authentication -> Settings -> Authorized domains.
-2. Add local/deployed domains.
+2. Add local and deployed frontend domains.
 
 For local development:
 
@@ -124,7 +181,7 @@ For local development:
 localhost
 ```
 
-For Vercel production, add your exact Vercel domain without `https://`:
+For Vercel production, add the exact Vercel domain without `https://`:
 
 ```txt
 your-project.vercel.app
@@ -137,13 +194,18 @@ example.com
 www.example.com
 ```
 
-Firebase authorized domains do not generally cover every random Vercel preview URL automatically. Add preview domains manually if you want OAuth to work on those preview deployments.
+Firebase authorized domains do not generally cover every random Vercel preview URL automatically. Add preview domains manually if OAuth should work there.
 
 ## Environment Variables
 
-### Backend
+Create environment files from the provided samples:
 
-Create `backend/.env` from `backend/.env.sample`.
+```bash
+cp backend/.env.sample backend/.env
+cp frontend/.env.sample frontend/.env
+```
+
+### Backend
 
 ```env
 FIREBASE_API_KEY=
@@ -173,19 +235,17 @@ FRONTEND_URL=
 Notes:
 
 - `ACCESS_TOKEN_SECRET` should be a strong random string.
-- `ENCRYPTION_KEY` must be a 32-byte hex key for AES-256-CBC. That means 64 hex characters.
+- `ENCRYPTION_KEY` must be a 32-byte hex key for AES-256-CBC, which means 64 hex characters.
 - In production, set `NODE_ENV=production`.
-- In production, set `FRONTEND_URL` to your deployed frontend URL, for example `https://your-project.vercel.app`.
+- In production, set `FRONTEND_URL` to the deployed frontend origin, for example `https://your-project.vercel.app`.
 
-To generate an encryption key:
+Generate an encryption key:
 
 ```bash
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
 ### Frontend
-
-Create `frontend/.env` from `frontend/.env.sample`.
 
 ```env
 VITE_API_BASE=http://localhost:5000/api
@@ -199,7 +259,7 @@ VITE_FIREBASE_APP_ID=
 VITE_FIREBASE_MEASUREMENT_ID=
 ```
 
-For production on Vercel:
+For production:
 
 ```env
 VITE_API_BASE=https://your-backend-domain.com/api
@@ -209,7 +269,7 @@ The `VITE_FIREBASE_*` values come from Firebase Console -> Project settings -> Y
 
 ## Local Development
 
-Install dependencies separately for backend and frontend.
+Install dependencies separately:
 
 ```bash
 cd backend
@@ -228,7 +288,7 @@ cd backend
 npm start
 ```
 
-Start the frontend:
+Start the frontend in another terminal:
 
 ```bash
 cd frontend
@@ -238,7 +298,7 @@ npm run dev
 Default local URLs:
 
 - Frontend: `http://localhost:5173`
-- Backend: based on `PORT`, usually `http://localhost:5000`
+- Backend: usually `http://localhost:5000`
 - API base: `http://localhost:5000/api`
 
 ## Available Scripts
@@ -249,13 +309,13 @@ Backend:
 npm start
 ```
 
-Starts the Express server with Node's `--env-file=.env` and watch mode.
+Starts Express with Node's `--env-file=.env` and watch mode.
 
 ```bash
 npm run dev
 ```
 
-Starts the Express server without `--env-file`. Use this only if your shell already has the environment variables loaded.
+Starts Express without `--env-file`. Use this only when your shell already has the required environment variables loaded.
 
 Frontend:
 
@@ -265,6 +325,8 @@ npm run build
 npm run preview
 npm run lint
 ```
+
+Note: the current frontend lint script uses the legacy `--ext` flag with `eslint.config.js`. If linting fails locally, update the script/config or run the compatible ESLint command for your installed version.
 
 ## Main API Routes
 
@@ -311,28 +373,34 @@ Admin:
 
 Frontend on Vercel:
 
-1. Set the frontend root to `frontend`.
+1. Set the project root to `frontend`.
 2. Build command: `npm run build`.
 3. Output directory: `dist`.
-4. Add all `VITE_*` environment variables in Vercel.
+4. Add all `VITE_*` environment variables.
 5. Add the Vercel domain to Firebase Authorized domains.
 
 Backend:
 
 Deploy the `backend` folder to a Node-capable host such as Render, Railway, Fly.io, or a VPS.
 
-Backend production requirements:
+Production requirements:
 
 - Set all backend environment variables on the host.
 - Set `NODE_ENV=production`.
-- Set `FRONTEND_URL=https://your-project.vercel.app`.
-- Ensure the frontend `VITE_API_BASE` points to `https://your-backend-domain.com/api`.
+- Set `FRONTEND_URL` to the deployed frontend origin.
+- Set frontend `VITE_API_BASE` to the deployed backend API URL.
+- Serve the backend over HTTPS so `secure` cookies work.
 
-Cookie/CORS behavior:
+Cookie and CORS behavior:
 
-- In production, the backend cookie is configured with `secure: true` and `sameSite: "None"`.
-- Your backend must be served over HTTPS for the auth cookie to work in production.
-- The backend CORS origin uses `FRONTEND_URL` when `NODE_ENV=production`.
+- In production, `quizforge_token` uses `httpOnly: true`, `secure: true`, and `sameSite: "None"`.
+- Axios uses `withCredentials: true`.
+- Backend CORS allows credentials and uses `FRONTEND_URL` as the production origin.
+- `FRONTEND_URL` must exactly match the deployed frontend origin.
+
+## Contributing
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for setup, branch, code style, testing, and pull request guidance.
 
 ## License
 
