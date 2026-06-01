@@ -299,7 +299,7 @@ export async function getPrivateQuiz(req, res) {
     }
 
     if (!isMatch) {
-      return res.status(401).json({
+      return res.status(403).json({
         success: false,
         msg: "Invalid access token",
       });

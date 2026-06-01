@@ -1,6 +1,8 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-//Lading page
+// Not Found page
+import NotFoundPage from "@/pages/NotFound";
+//Landing page
 import Landing from "@/pages/Landing";
 // Auth pages
 import Login from "@/pages/Login";
@@ -73,7 +75,7 @@ export default function AppRoutes() {
       </Route>
 
       {/* Catch-all */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 }

@@ -252,28 +252,32 @@ export class StudentService {
       const questionsSnap = await getDocs(collection(quizRef, "questions"));
 
       const questionMap = {};
-      questionsSnap.docs.forEach((doc) => {
-        const q = doc.data();
-        questionMap[q.questionId] = q;
+      questionsSnap.docs.forEach((questionDoc) => {
+        const question = questionDoc.data();
+        const questionId = question.questionId || questionDoc.id;
+        questionMap[questionId] = {
+          questionId,
+          ...question,
+        };
       });
 
       // Build detailed answer breakdown
       const answerBreakdown = result.answers.map((ans) => {
-        const question = questionMap[ans.questionId];
+        const question = questionMap[ans.questionId] || ans.questionSnapshot || {};
 
         return {
           questionId: ans.questionId,
-          question: question?.questionMd || "Unknown",
-          questionType: question?.questionType,
-          options: question?.options || [],
-          correctOptionIndex: question?.correctOptionIndex,
-          correctAnswer: question?.correctAnswer,
+          question: question.questionMd || "Unknown",
+          questionType: question.questionType,
+          options: question.options || [],
+          correctOptionIndex: question.correctOptionIndex,
+          correctAnswer: question.correctAnswer,
           submittedAnswer: ans.submittedAnswer,
           selectedOptionIndex: ans.selectedOptionIndex,
           isCorrect: ans.isCorrect,
           pointsEarned: ans.pointsEarned,
-          maxPoints: question?.points || 0,
-          explanation: question?.explanation || null,
+          maxPoints: ans.maxPoints ?? question.points ?? 0,
+          explanation: question.explanation || null,
         };
       });
 
